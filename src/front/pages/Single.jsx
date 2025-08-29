@@ -20,9 +20,9 @@ export const Single = props => {
       <hr className="my-4" />  {/* A horizontal rule for visual separation. */}
 
       {/* A Link component acts as an anchor tag but is used for client-side routing to prevent page reloads. */}
-      <Link to="/">
+      <Link to="/perfil">
         <span className="btn btn-primary btn-lg" href="#" role="button">
-          Back home
+          Perfil
         </span>
       </Link>
     </div>
