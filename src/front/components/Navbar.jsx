@@ -10,6 +10,7 @@ export const Navbar = () => {
 					<i className="fa-solid fa-clock"></i>
 						ClockIn
 				</a>
+
 			</div>
 		</nav>
 		</div>
