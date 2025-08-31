@@ -1,40 +1,43 @@
-import React, { useEffect } from "react"
+import React, { useEffect } from "react";
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import { Login } from "../components/Login.jsx";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import { UserCard } from "../components/UserCard.jsx";
 
 export const Home = () => {
+  return (
+    <>
+      <div className="container-fluid border rounded shadow-sm my-4 p-3 me-5">
+        <div className="row">
+          <ul className="col-6 ">
+            <h4>WORKING</h4>
+            <UserCard />
+            <UserCard />
+            <UserCard />
+          </ul>
 
-    const { store, dispatch } = useGlobalReducer()
+          <ul className="col-6 ">
+            <h4>NOT WORKING</h4>
+            <UserCard />
+            <UserCard />
+            <UserCard />
+          </ul>
 
-    return (
-        <div className="text-center">
-            <h1>Login</h1>
-    
+          <ul className="col-6 ">
+            <h4>BREAK</h4>
+            <UserCard />
+            <UserCard />
+            <UserCard />
+          </ul>
+
+          <ul className="col-6 ">
+            <h4>HOLIDAYS</h4>
+            <UserCard />
+            <UserCard />
+            <UserCard />
+          </ul>
         </div>
-
-
-			return data
-
-		} catch (error) {
-			if (error.message) throw new Error(
-				`Could not fetch the message from the backend.
-				Please check if the backend is running and the backend port is public.`
-			);
-		}
-
-	}
-
-	useEffect(() => {
-		loadMessage()
-	}, [])
-
-	return (
-		<div className="ml-auto">
-			<Link to="/admin">
-				<button className="btn btn-primary">Check the Context in action</button>
-			</Link>
-		</div>
-	);
-}; 
-
+      </div>
+    </>
+  );
+};
