@@ -9,9 +9,11 @@ export const Home = () => {
 
     return (
         <div className="text-center">
-            <h1>Login</h1>
+            <Login/>
     
         </div>
+    )
+}
 
 
 
