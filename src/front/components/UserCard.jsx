@@ -5,7 +5,7 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 
 export const UserCard = () => {
   return (
-    <li className="list-group-item col-12 d-flex align-items-center py-2 px-3 mb-2 border rounded shadow-sm">
+    <li className="list-group-item col-12 d-flex align-items-center py-2 px-3 mb-2 border rounded shadow-sm bg-light">
       <img
         src={rigoImageUrl}
         className="rounded-circle me-3"
