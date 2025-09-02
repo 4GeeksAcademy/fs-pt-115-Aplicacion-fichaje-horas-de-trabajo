@@ -1,10 +1,11 @@
 import React, { useEffect } from "react"
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
+import { Login } from "../components/Login.jsx";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 export const Home = () => {
 
-	const { store, dispatch } = useGlobalReducer()
+    const { store, dispatch } = useGlobalReducer()
 
 	const loadMessage = async () => {
 		try {
@@ -33,10 +34,20 @@ export const Home = () => {
 	}, [])
 
 	return (
-		<div className="ml-auto">
-			<Link to="/admin">
-				<button className="btn btn-primary">Check the Context in action</button>
-			</Link>
+		<div className="text-center mt-5">
+			<h1 className="display-4">Hello Rigo!!</h1>
+			<p className="lead">
+				<img src={rigoImageUrl} className="img-fluid rounded-circle mb-3" alt="Rigo Baby" />
+			</p>
+			<div className="alert alert-info">
+				{store.message ? (
+					<span>{store.message}</span>
+				) : (
+					<span className="text-danger">
+						Loading message from the backend (make sure your python 🐍 backend is running)...
+					</span>
+				)}
+			</div>
 		</div>
 	);
 }; 
