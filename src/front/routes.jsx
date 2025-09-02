@@ -11,6 +11,11 @@ import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { SingUp } from "./pages/SingUp";
+import { Loginpage } from "./pages/Loginpage";
+import { PerfilNew } from "./pages/PerfilNew";
+
+
+
 
 
 
@@ -31,7 +36,11 @@ export const router = createBrowserRouter(
         <Route path="/demo" element={<Demo />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/singup" element={<SingUp />} />
+        <Route path="/login" element={< Loginpage/>}/>
+        <Route path="/admin/perfilnew" element={< PerfilNew/>} />
         
-      </Route>
+
+        </Route>
+     
     )
 );

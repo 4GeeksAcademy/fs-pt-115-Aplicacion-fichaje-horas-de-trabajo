@@ -50,12 +50,7 @@ export const Login = () => {
                                 </button>
                             </form>
 
-                            <p className="text-center mt-3">
-                                ¿No tienes cuenta?{" "}
-                                <a href="#" style={{ color: "#ff7b00", fontWeight: "bold" }}>
-                                    Regístrate
-                                </a>
-                            </p>
+                          
                         </div>
                     </div>
                 </div>
