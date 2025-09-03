@@ -1,6 +1,6 @@
 
 import click
-from api.models import db, User
+from api.models import db, User, Status
 
 """
 In this file, you can add as many commands as you want using the @app.cli.command decorator
@@ -32,3 +32,22 @@ def setup_commands(app):
     @app.cli.command("insert-test-data")
     def insert_test_data():
         pass
+
+    @app.cli.command("seed-statuses")
+    def seed_statuses():
+        
+        statuses = {
+            1: "Activo",
+            2: "En descanso",
+            3: "De vacaciones",
+            4: "Inactivo"
+        }
+
+        for id_, name in statuses.items():
+            status = db.session.get(Status, id_)
+            if not status:
+                status = Status(id=id_, name=name)
+                db.session.add(status)
+
+        db.session.commit()
+        print("✅ Estados insertados correctamente")
