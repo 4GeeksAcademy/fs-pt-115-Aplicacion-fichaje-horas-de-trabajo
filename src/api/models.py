@@ -6,8 +6,6 @@ from datetime import time
 
 db = SQLAlchemy()
 
-valid_roles = ("admin", "trabajador")
-
 
 
 class User(db.Model):
@@ -22,7 +20,7 @@ class User(db.Model):
     password_hash: Mapped[str] = mapped_column(nullable=False)
     rol: Mapped[str] = mapped_column(String(20), nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
-    status_id: Mapped[int] = mapped_column(ForeignKey("status.id"), nullable=False, default=1)
+    status_id: Mapped[int] = mapped_column(ForeignKey("status.id"), nullable=False)
 
 
     documents: Mapped[list["Document"]] = relationship(back_populates="user")
@@ -55,20 +53,14 @@ class Status(db.Model):
     __tablename__ = "status"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    working: Mapped[str] = mapped_column(String(50))
-    break_: Mapped[str] = mapped_column("break", String(50))
-    holiday: Mapped[str] = mapped_column(String(50))
-    not_working: Mapped[str] = mapped_column(String(50))
+    name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
 
     users: Mapped[list["User"]] = relationship(backref="status")
 
     def serialize(self):
         return {
             "id": self.id,
-            "working": self.working,
-            "break": self.break_,
-            "holiday": self.holiday,
-            "not_working": self.not_working
+            "name": self.name
         }
 
 
