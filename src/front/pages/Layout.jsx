@@ -10,9 +10,9 @@ import { Login } from "../components/Login"
 export const Layout = () => {
     return (
         <ScrollToTop>
-            
+            <Navbar />
                 <Outlet />
-           
+            <Footer />
         </ScrollToTop>
     )
 }
