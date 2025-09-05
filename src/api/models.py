@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from flask_bcrypt import generate_password_hash, check_password_hash
-from datetime import time
+from datetime import time, datetime, timezone
 
 db = SQLAlchemy()
 
@@ -61,6 +61,26 @@ class Status(db.Model):
         return {
             "id": self.id,
             "name": self.name
+        }
+
+class StatusHistory(db.Model):
+    __tablename__ = "status_history"
+
+    id : Mapped[int]= mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=False)
+    status_id: Mapped[int] = mapped_column(Integer, ForeignKey("status.id"), nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+
+
+    user = db.relationship("User", backref="status_history")
+    status = db.relationship("Status", backref="status_history")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "status": self.status.name if self.status else None,
+            "timestamp": self.timestamp.isoformat()
         }
 
 

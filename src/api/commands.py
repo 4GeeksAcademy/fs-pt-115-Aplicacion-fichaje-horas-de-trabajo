@@ -50,4 +50,4 @@ def setup_commands(app):
                 db.session.add(status)
 
         db.session.commit()
-        print("✅ Estados insertados correctamente")
+        print("Estados añadidos correctamente")

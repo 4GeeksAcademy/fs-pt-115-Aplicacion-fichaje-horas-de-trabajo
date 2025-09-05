@@ -2,10 +2,11 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType
+from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import time, datetime
+from api.historial_status import STATUS
 
 api = Blueprint('api', __name__)
 
@@ -209,3 +210,72 @@ def delete_request(request_id):
     db.session.delete(req)
     db.session.commit()
     return jsonify({"message": "Solicitud eliminada"}), 200
+
+
+#Cambio de estado
+
+@api.route('/user/<int:user_id>/status', methods=['PUT'])
+def toggle_status(user_id):
+    data = request.get_json(silent=True) or {}
+    action = data.get("action")
+
+
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    current = user.status.name
+
+
+    transitions = {
+        "toggle_work": {
+            "Inactivo": "Activo",
+            "Activo": "Inactivo"
+        },
+        "toggle_break": {
+            "Activo": "En descanso",
+            "En descanso": "Activo",
+        },
+    }
+
+    if action not in transitions:
+        return jsonify({"msg": "Invalid action (use 'toggle_work' or 'toggle_break')"}), 400
+
+    new_status_name = transitions[action].get(current)
+    if not new_status_name:
+        return jsonify({"msg": f"No puedes usar '{action}' desde '{current}'"}), 400
+
+
+    new_status_id = STATUS[new_status_name]
+    user.status_id = new_status_id
+    db.session.add(user)
+
+
+    history_entry = StatusHistory(user_id=user.id, status_id=new_status_id)
+    db.session.add(history_entry)
+
+    db.session.commit()
+
+    return jsonify({
+        "msg": f"Status updated to {new_status_name}",
+        "user_id": user.id,
+        "status": new_status_name,
+        "history_entry": history_entry.serialize()
+    }), 200
+
+#COnsultar estados
+
+@api.route('/user/<int:user_id>/status/history', methods=['GET'])
+def get_status_history(user_id):
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    history = (
+        db.session.query(StatusHistory)
+        .filter_by(user_id=user.id)
+        .order_by(StatusHistory.timestamp.asc())
+        .all()
+    )
+
+    return jsonify([h.serialize() for h in history]), 200
