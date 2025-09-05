@@ -21,6 +21,7 @@ import { PerfilNew } from "./pages/PerfilNew";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
+
     // CreateRoutesFromElements function allows you to build route elements declaratively.
     // Create your routes here, if you want to keep the Navbar and Footer in all views, add your new routes inside the containing Route.
     // Root, on the contrary, create a sister Route, if you have doubts, try it!

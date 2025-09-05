@@ -32,31 +32,6 @@ export const Home = () => {
             <button className="btn btn-danger rounded-circle m-2" style={{width: "120px",height: "120px"}}>Clock out</button>
           </div>
 
-
-
-          <div className=" input-group input-group-sm mb-3">
-          <span className="input-group-text" id="inputGroup-sizing-sm">Search Worker</span>
-          <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm"/>
-          
-          <div className="col-md-12 table-responsive bg-dark text-white p-2">
-                  <table className="table table-dark align-middle">
-                    <thead className="table-dark">
-                      <tr>
-                        <th>First name</th>
-                        <th>Total hours</th>
-                        <th>Break hours</th>
-                        <th>Regular hours</th>
-                        <th>Overtime</th>
-                        <th>Absence</th>
-                      </tr>
-                    </thead>
-                    <tbody>{/* Agregar aquí el componente UserInfo */}</tbody>
-                  </table>
-                </div>
-          </div>
-
-          <hr className="border border-secondary border-1 opacity-100 my-4"/>
-
               <div className="col-md-6 mb-4">
                 <h4 className="ms-4 text-light">WORKING</h4>
                 <ul className="p-2">
@@ -65,7 +40,6 @@ export const Home = () => {
                   <UserCard />
                 </ul>
               </div>
-
               <div className="col-md-6 mb-4">
                 <h4 className="ms-4 text-light">NOT WORKING</h4>
                 <ul className="p-2">
@@ -98,4 +72,5 @@ export const Home = () => {
       </div>
     </>
   );
+
 };
