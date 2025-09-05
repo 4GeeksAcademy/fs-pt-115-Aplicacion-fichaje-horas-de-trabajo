@@ -13,6 +13,7 @@ import { AdminDashboard } from "./pages/AdminDashboard";
 import { SingUp } from "./pages/SingUp";
 import { Loginpage } from "./pages/Loginpage";
 import { PerfilNew } from "./pages/PerfilNew";
+import { Request } from "./pages/Request";
 
 
 
@@ -40,6 +41,7 @@ export const router = createBrowserRouter(
         <Route path="/singup" element={<SingUp />} />
         <Route path="/login" element={< Loginpage/>}/>
         <Route path="/admin/perfilnew" element={< PerfilNew/>} />
+        <Route path="/request" element={< Request/>}/>
      
      </Route>
     )
