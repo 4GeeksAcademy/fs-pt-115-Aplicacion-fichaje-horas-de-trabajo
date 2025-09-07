@@ -4,7 +4,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 
-export const Home = () => {
+export const Profile = () => {
   return (
     <>
       <div className="container-fluid d-flex justify-content-center">

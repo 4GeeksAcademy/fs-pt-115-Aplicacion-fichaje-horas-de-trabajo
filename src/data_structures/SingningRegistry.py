@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, jsonify
 from datetime import datetime
 import requests
 
@@ -17,7 +17,7 @@ class singningRegisty:
         self._next_id += 1
         return eid
 
-    def _generate_singning(self, type): # Falta ACABAR
+    def _generate_singning(self, type): # Falta Probar
         response = requests.get(os.getenv('VITE_BACKEND_URL'), headers={
             "Authorization": os.getenv('API_KEY'),
         })
@@ -25,13 +25,16 @@ class singningRegisty:
         if response.status_code == 200:
             data = response.json()
 
+
             singning = {
                 "type": type,
                 "datetime": datetime.timestamp(),
                 "lat": data["latitude"],
                 "long": data["longitude"]
-            }
-
+            }     
+        else :
+            return jsonify({"msg": "Error"})
+        
         self._singnings.append(singning)
         return singning
 
