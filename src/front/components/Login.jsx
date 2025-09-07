@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import LogoClockIN from "../assets/img/LogoClockIn.png";
+import { useNavigate } from "react-router-dom";
+import { login } from "../services/APIServices.js";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,7 +15,7 @@ export const Login = () => {
 
     try {
       const data = await login(email, password);
-      localStorage.setItem("token", data.token); // guardar token
+      localStorage.setItem("token", data.token);
       navigate("/dashboard");
     } catch (err) {
       setError("Credenciales incorrectas o error de conexión.");
@@ -43,16 +45,6 @@ export const Login = () => {
               </div>
               <h4 className="text-center mb-4">Iniciar Sesión</h4>
 
-<<<<<<< Updated upstream
-                            <p className="text-center mt-3">
-                                ¿No tienes cuenta?{" "}
-                                <a href="#" style={{ color: "#ff7b00", fontWeight: "bold" }}>
-                                    Regístrate
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-=======
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <input
@@ -63,7 +55,6 @@ export const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
->>>>>>> Stashed changes
                 </div>
 
                 <div className="mb-3">
