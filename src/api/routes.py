@@ -2,11 +2,14 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory
+from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import time, datetime
 from api.historial_status import STATUS
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
 
 api = Blueprint('api', __name__)
 
@@ -32,13 +35,10 @@ def signup():
     if missing:
         return jsonify({"msg": f"Missing fields: {', '.join(missing)}"}), 400
 
-
-    existing_user = db.session.execute(
-        db.select(User).where(User.email == data["email"])
-    ).scalar_one_or_none()
-    if existing_user:
-        return jsonify({"msg": "User with this email already exists"}), 400
-    
+    existing_users = User.query.count()
+    if existing_users > 0:
+        return jsonify({"msg": "El registro inicial ya se realizó. Usa /login"}), 400
+   
     status_name = data.get("status_name", "Activo")
     status = db.session.execute(
         db.select(Status).where(Status.name == status_name)
@@ -55,28 +55,71 @@ def signup():
         last_name=data["last_name"],
         DNI=data["DNI"],
         rol=data["rol"],
-        is_admin=data["is_admin"],
-        status_id=status.id
+        is_admin=True,
+        status_id=status.id if status else None
     )
     new_user.set_password(data["password"])
 
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify({"msg": "User created successfully"}), 201
+    return jsonify({"msg": "User boss created successfully"}), 200
+
+
+@api.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+
+    if not data["email"] or not data["password"]:
+        return jsonify({"msg": "Email and password are required"}), 400
+    
+    user = db.session.execute(db.select(User).where(
+        User.email == data["email"]
+    )).scalar_one_or_none()
+
+    if user is None:
+        return jsonify({"msg": "Invalid email or password"}), 401
+    
+    if user.check_password(data["password"]):
+        access_token = create_access_token(identity=str(user.id))
+        return jsonify ({"msg": "Login succesful", "token": access_token}), 200
+    else:
+        return jsonify({"msg": "Invalid email or password"}), 401
 
 #Usuarios
+@api.route("/users", methods=["GET"])
+def get_users():
+    users = User.query.all() 
+    return jsonify([user.serialize() for user in users]), 200
+
 
 @api.route("/users/<int:id>", methods=["GET"])
 def get_user(id):
-    user = user.query.get(id)
+    user = User.query.get(id)
     if not user:
         return jsonify({"error": "Usuario no encontrado"}), 400
-    return jsonify(user.serialize())
+    return jsonify(user.serialize()), 200
+
 
 @api.route("/users", methods=["POST"])
 def create_user():
+    identity = get_jwt_identity()
+    if not identity.get("is_admin"):
+        return jsonify({"msg": "Solo el admin puede crear usuarios"}), 400
+    
     data = request.json
+    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "is_admin", "status_id"]
+    missing = [f for f in required_fields if f not in data or not data[f]]
+    if missing:
+        return jsonify({"msg": f"Missing fields: {', '.join(missing)}"}), 400
+    
+    existing_user = db.session.execute(
+        db.select(User).where(User.email == data["email"])
+    ).scalar_one_or_none()
+    if existing_user:
+        return jsonify({"msg": "User with this email already exists"}), 400
+
+
     user = User(
         last_name=data["last_name"],
         surname=data["surname"],
@@ -115,8 +158,8 @@ def add_holidays(user_id):
     data = request.json
     holiday = Holidays(
         user_id=user_id,
-        tatal_days= data.get["total_days"],
-        used_days= data.get["used_days"],
+        total_days= data.get("total_days"),
+        used_days= data.get("used_days"),
         remaining_days= data.get("remaining_days", data.get("total_days"))
     )
     db.session.add(holiday)
@@ -143,7 +186,7 @@ def add_schedule(user_id):
     )
     db.session.add(schedule)
     db.session.commit()
-    return jsonify(schedule.serialize()), 201
+    return jsonify(schedule.serialize()), 200
 
 
 #Fichajes
@@ -198,6 +241,15 @@ def add_request(user_id):
         others=data.get("others")
     )
     db.session.add(req_type)
+    db.session.commit()
+
+    req_status = StatusRequest(
+        request_id=req.id,
+        accepted=data.get("accepted"),
+        cancelled=data.get("cancelled"),
+        pending=data.get("pending")
+    )
+    db.session.add(req_status)
     db.session.commit()
 
     return jsonify(req.serialize()), 201
@@ -263,7 +315,7 @@ def toggle_status(user_id):
         "history_entry": history_entry.serialize()
     }), 200
 
-#COnsultar estados
+#Consultar estados
 
 @api.route('/user/<int:user_id>/status/history', methods=['GET'])
 def get_status_history(user_id):
