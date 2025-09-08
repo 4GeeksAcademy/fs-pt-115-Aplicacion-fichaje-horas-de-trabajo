@@ -23,28 +23,20 @@ export const AdminDashboard = () => {
             <h1>Hello Admin, Welcome</h1>
             {FechaActual()}
             <Link to="/admin/perfilnew">
-            <button type="button" class="btn btn-success btn-lg">
-              Add new employee
-            </button>
+              <button type="button" class="btn btn-success btn-lg">
+                Add new employee
+              </button>
             </Link>
           </div>
           <div className="mt-5">
             <h3 className="text-center ">Who's In</h3>
             <h6 className="fw-bold">Working</h6>
             <UserCard />
-            <UserCard />
-            <UserCard />
             <h6 className="fw-bold">Work Remotely</h6>
-            <UserCard />
-            <UserCard />
             <UserCard />
             <h6>Break</h6>
             <UserCard />
-            <UserCard />
-            <UserCard />
             <h6 className="fw-bold">In Hollidays</h6>
-            <UserCard />
-            <UserCard />
             <UserCard />
           </div>
         </div>

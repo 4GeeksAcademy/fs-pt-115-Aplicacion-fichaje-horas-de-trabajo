@@ -1,13 +1,32 @@
+import { ButtonRequest } from "../components/ButtonRequest";
+import { UserCard } from "../components/UserCard";
+
 export const Request = () => {
   return (
     <div className="container">
-        <h1>Request Page</h1>
-        <h2>solicitudes pendientes</h2>
-        <h2>solicitudes aceptadas</h2>
-        <h2>solicitudes rechazadas</h2>
-        <h2>solicitudes canceladas</h2>
-        <h2>solicitudes finalizadas</h2>
-
+      <h1 className="m-2">Request Page</h1>
+      <hr className="text-light" />
+      <h5>solicitudes pendientes</h5>
+      <div>
+        <UserCard />
+        <ButtonRequest />
+      </div>
+      <div>
+        <UserCard />
+        <ButtonRequest />
+      </div>
+      <hr className="text-light" />
+      <h5>solicitudes aceptadas</h5>
+      <UserCard />
+      <hr className="text-light" />
+      <h5>solicitudes rechazadas</h5>
+      <UserCard />
+      <hr className="text-light" />
+      <h5>solicitudes canceladas</h5>
+      <UserCard />
+      <hr className="text-light" />
+      <h5>solicitudes finalizadas</h5>
+      <UserCard />
     </div>
   );
-}
+};
