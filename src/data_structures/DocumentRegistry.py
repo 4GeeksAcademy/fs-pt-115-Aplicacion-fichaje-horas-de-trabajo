@@ -13,25 +13,25 @@ class DocumentRegistry:
         self._next_id += 1
         return eid
 
-    # def add_document(self, document):
-    #     if "id" not in document:
-    #         document["id"] = self._generate_id()
+    def add_document(self, document):
+        if "id" not in document:
+            document["id"] = self._generate_id()
 
-    #     self._documents.append(document)
-    #     return document
+        self._documents.append(document)
+        return document
 
-    # def get_document(self, id):
-    #     for e in self._documents:
-    #         if e["id"] == id:
-    #             return e
-    #     return None
+    def get_document(self, id):
+        for e in self._documents:
+            if e["id"] == id:
+                return e
+        return None
 
-    # def get_all_documents(self):
-    #     return self._documents
+    def get_all_documents(self):
+        return self._documents
 
-    # def delete_document(self, id):
-    #     for e in self._documents:
-    #         if e["id"] == id:
-    #             self._documents.remove(e)
-    #             return True
-    #     return False
+    def delete_document(self, id):
+        for e in self._documents:
+            if e["id"] == id:
+                self._documents.remove(e)
+                return True
+        return False

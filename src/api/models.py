@@ -137,6 +137,7 @@ class Request(db.Model):
     employee: Mapped["User"] = relationship(back_populates="requests", foreign_keys=[user_id])
     admin: Mapped["User"] = relationship(back_populates="admin_request", foreign_keys=[admin_id])
     request_types: Mapped[list["RequestType"]] = relationship(back_populates="request")
+    request_status: Mapped[list["StatusRequest"]] = relationship(back_populates="request")
 
     def serialize(self):
         return {
@@ -173,6 +174,16 @@ class RequestType(db.Model):
             "others": self.others
         }
 
+class StatusRequest(db.Model):
+    __tablename__ = "request_status"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    request_id: Mapped[int] = mapped_column(ForeignKey("request.id"))
+    accepted: Mapped[str] = mapped_column(String(250))
+    cancelled : Mapped[str] = mapped_column(String(250))
+    pending : Mapped[bool] = mapped_column(Boolean, default=True)
+
+    request: Mapped["Request"] = relationship(back_populates="request_status")
 
 class Holidays(db.Model):
     __tablename__ = "holidays"
@@ -210,13 +221,13 @@ class Schedule(db.Model):
 
     def serialize(self):
         return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "shift": self.shift,
-            "start_time": self.start_time,
-            "end_time": self.end_time,
-            "day": self.day
-        }
+        "id": self.id,
+        "user_id": self.user_id,
+        "shift": self.shift,
+        "start_time": str(self.start_time) if self.start_time else None,
+        "end_time": str(self.end_time) if self.end_time else None,
+        "day": self.day
+    }
 
 
 class Signing(db.Model):
@@ -225,7 +236,7 @@ class Signing(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     schedule_id: Mapped[int] = mapped_column(ForeignKey("schedule.id"))
-    type: Mapped[str] = mapped_column(String(50))
+    sign_type: Mapped[str] = mapped_column(String(50))
     datetime: Mapped[DateTime] = mapped_column(DateTime)
     lat: Mapped[float] = mapped_column(Float)
     long: Mapped[float] = mapped_column(Float)
@@ -238,7 +249,7 @@ class Signing(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "schedule_id": self.schedule_id,
-            "type": self.type,
+            "sign_type": self.sign_type,
             "datetime": self.datetime.isoformat() if self.datetime else None,
             "lat": self.lat,
             "long": self.long

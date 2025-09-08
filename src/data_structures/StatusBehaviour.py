@@ -6,7 +6,6 @@ app = Flask(__name__)
 class StatusBehaviour:
     def __init__(self):
         self._next_id = 1
-        self._statuses = []  # Historial de estados
 
     def _generate_id(self):
         eid = self._next_id

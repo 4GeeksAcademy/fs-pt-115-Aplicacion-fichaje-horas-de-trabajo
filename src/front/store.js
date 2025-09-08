@@ -7,21 +7,19 @@ export const initialStore=()=>{
 
 export default function storeReducer(store, action = {}) {
   switch(action.type){
-    case 'set_hello':
+    case 'GET_SIGNINGS':
       return {
         ...store,
-        message: action.payload
+        signings: action.payload
       };
       
-    case 'add_task':
-
-      const { id,  color } = action.payload
-
+    case 'GET_USERS':
       return {
         ...store,
-        todos: store.todos.map((todo) => (todo.id === id ? { ...todo, background: color } : todo))
+        users: action.payload
       };
-    default:
+   
+      default:
       throw Error('Unknown action.');
   }    
 }
