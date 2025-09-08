@@ -1,8 +1,31 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
-export const PerfilNew = () => {
+export const SignUp = () => {
+  const [newUser, setNewUser] = useState({
+    firstName: "",
+    surname: "",
+    lastName: "",
+    address: "",
+    rol: "",
+    email: "",
+    password: "",
+    dni_nie: "",
+    iban: "",
+  });
+
+  const handleInputsChange = (e) => {
+    setNewUser({ ...newUser, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    
+
+  }
+
   return (
     <>
       <div>
@@ -28,6 +51,20 @@ export const PerfilNew = () => {
                       id="inputGroup-sizing-sm"
                     >
                       Name
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      aria-label="Sizing example input"
+                      aria-describedby="inputGroup-sizing-sm"
+                    />
+                  </div>
+                  <div className="input-group input-group-sm mb-3">
+                    <span
+                      className="input-group-text"
+                      id="inputGroup-sizing-sm"
+                    >
+                      Surname
                     </span>
                     <input
                       type="text"
@@ -136,7 +173,9 @@ export const PerfilNew = () => {
                   </div>
                 </div>
 
-                <button className="btn btn-primary w-100 mt-3">Submit</button>
+                <button type="submmit" className="btn btn-primary w-100 mt-3">
+                  Submit
+                </button>
               </form>
             </div>
           </div>

@@ -17,10 +17,14 @@ export const UserCard = () => {
         <h6 className="mb-1">Name</h6>
         <small className="text-muted d-block">ROLE</small>
         <small className="text-muted d-block">LOCATION</small>
-        <small className="text-muted d-block">ESTATE</small>
+        <small className="text-muted d-block">STATE</small>
       </div>
 
       <div>
+        {/* Edit y Delete user*/}
+        <button type="button" className="btn btn-danger btn-sm ms-2">
+          <i className="fa-solid fa-trash"></i>
+        </button>
         <button type="button" className="btn btn-light btn-sm ms-2">
           <i className="fa-solid fa-pencil"></i>
         </button>
