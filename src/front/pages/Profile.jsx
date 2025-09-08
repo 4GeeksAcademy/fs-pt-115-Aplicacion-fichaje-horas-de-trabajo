@@ -5,6 +5,14 @@ import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 
 export const Profile = () => {
+  const { store, dispatch } = useGlobalReducer();
+
+  const UserActivation = store.users.find((user) => user.email === store.user.email);
+
+  useEffect(() => {
+    console.log("UserActivation:", UserActivation);
+  }, [UserActivation]);
+  
   return (
     <>
       <div className="container-fluid d-flex justify-content-center">
@@ -17,32 +25,21 @@ export const Profile = () => {
               alt="User"
             />
             <h4 className="text-light d-flex justify-content-start mt-3">
-              Información adicional o lo que quieras aquí
+              {store.user.firstName + " " + store.user.lastName}
             </h4>
           </div>
 
           <div className="col-md-8 offset-md-1 border rounded shadow-sm my-4 p-3 bg-dark">
             <div className="row">
-              <div className="mb-4 p-3 bg-dark d-flex justify-content-center align-items-center">
-                <button
-                  className="btn btn-success rounded-circle m-2"
-                  style={{ width: "120px", height: "120px" }}
-                >
-                  Add worker
-                </button>
+              <div className="mb-4 p-3 bg-dark d-flex justify-content-end align-items-center">
+                {/* Admin Switch */}
+                {UserActivation && UserActivation.isadmin === true ? (
+                <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="boolSwitch"/>
+              <label class="form-check-label text-light" for="boolSwitch">Is Admin</label>
+                </div>
+              ) : null}
 
-                <button
-                  className="btn btn-primary rounded-circle m-2"
-                  style={{ width: "120px", height: "120px" }}
-                >
-                  Clock in
-                </button>
-                <button
-                  className="btn btn-danger rounded-circle m-2"
-                  style={{ width: "120px", height: "120px" }}
-                >
-                  Clock out
-                </button>
               </div>
 
               <div className=" input-group input-group-sm mb-3">
@@ -107,7 +104,7 @@ export const Profile = () => {
               </div>
 
               <div className="col-md-6 mb-4">
-                <h4 className="ms-4 text-light">WORKING</h4>
+                <h4 className="ms-4 text-light">USERS</h4>
 
                 <ul
                   className="p-2"
@@ -123,39 +120,7 @@ export const Profile = () => {
               </div>
 
               <div className="col-md-6 mb-4">
-                <h4 className="ms-4 text-light">NOT WORKING</h4>
-
-                <ul
-                  className="p-2"
-                  style={{
-                    maxHeight: "340px",
-                    overflowY: "auto",
-                  }}
-                >
-                  <UserCard />
-                  <UserCard />
-                  <UserCard />
-                </ul>
-              </div>
-
-              <div className="col-md-6 mb-4">
-                <h4 className="ms-4 text-light">BREAK</h4>
-
-                <ul
-                  className="p-2"
-                  style={{
-                    maxHeight: "340px",
-                    overflowY: "auto",
-                  }}
-                >
-                  <UserCard />
-                  <UserCard />
-                  <UserCard />
-                </ul>
-              </div>
-
-              <div className="col-md-6 mb-4">
-                <h4 className="ms-4 text-light">HOLIDAYS</h4>
+                <h4 className="ms-4 text-light">ADMINS</h4>
 
                 <ul
                   className="p-2"

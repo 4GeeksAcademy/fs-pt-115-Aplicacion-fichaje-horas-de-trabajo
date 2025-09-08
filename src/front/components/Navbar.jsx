@@ -38,7 +38,7 @@ export const Navbar = () => {
             </li>
             <li className="nav-item">
               {UserActivation && UserActivation.isadmin === true ? (
-                <button className="btn btn-primary m-2">Requests</button>
+                <button className="btn btn-primary m-2">Requests <span class="badge text-bg-secondary">4</span></button>
               ) : null}
             </li>
             <li className="nav-item">
