@@ -9,6 +9,7 @@ export const initialStore=()=>{
       address: "Address",
       dni_nie: "DNI/NIE",
       iban: "IBAN",
+      birthDate: "12/12/2012",
       rol: "ROL",
       isActive: false,
       isAdmin: false
@@ -30,6 +31,12 @@ export default function storeReducer(store, action = {}) {
         users: action.payload
       };
    
+      case 'SET_USER':
+      return {
+        ...store,
+        user: action.payload
+      };
+
       default:
       throw Error('Unknown action.');
   }    

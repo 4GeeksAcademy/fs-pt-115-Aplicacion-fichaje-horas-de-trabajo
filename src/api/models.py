@@ -21,7 +21,9 @@ class User(db.Model):
     rol: Mapped[str] = mapped_column(String(20), nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     status_id: Mapped[int] = mapped_column(ForeignKey("status.id"), nullable=False)
-
+    birth_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
+    address: Mapped[str] = mapped_column(String(255), nullable=False)
+    iban: Mapped[str] = mapped_column(String(34), nullable=False)
 
     documents: Mapped[list["Document"]] = relationship(back_populates="user")
     holidays: Mapped[list["Holidays"]] = relationship(back_populates="user")
@@ -42,6 +44,9 @@ class User(db.Model):
             "surname": self.surname,
             "first_name": self.first_name,
             "email": self.email,
+            "birth_date": self.birth_date.strptime("%d/%m/%Y") if self.birth_date else None,
+            "address": self.address,
+            "iban": self.iban,
             "DNI": self.DNI,
             "rol": self.rol,
             "is_admin": self.is_admin,
