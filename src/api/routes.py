@@ -30,7 +30,7 @@ def handle_hello():
 def signup():
     data = request.get_json()
 
-    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI"]
+    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "address", "iban", "birth_date"]
     missing = [f for f in required_fields if f not in data or not data[f]]
     if missing:
         return jsonify({"msg": f"Missing fields: {', '.join(missing)}"}), 400
@@ -39,25 +39,20 @@ def signup():
     if existing_users > 0:
         return jsonify({"msg": "El registro inicial ya se realizó. Usa /login"}), 400
    
-    status_name = data.get("status_name", "Activo")
-    status = db.session.execute(
-        db.select(Status).where(Status.name == status_name)
-    ).scalar_one_or_none()
-
-    if not status:
-        return jsonify({"msg": f"Status '{status_name}' not found"}), 400
-
 
     new_user = User(
         email=data["email"],
+        address=data.get("address"),
+        birth_date=data.get("birth_date"),
+        iban=data.get("iban"),
         first_name=data["first_name"],
         surname=data["surname"],
         last_name=data["last_name"],
         DNI=data["DNI"],
         rol=data["rol"],
         is_admin=True,
-        status_id=status.id if status else None
-    )
+        status_id=data["status_id"]
+)
     new_user.set_password(data["password"])
 
     db.session.add(new_user)
@@ -108,7 +103,7 @@ def create_user():
         return jsonify({"msg": "Solo el admin puede crear usuarios"}), 400
     
     data = request.json
-    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "is_admin", "status_id"]
+    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "is_admin", "status_id, iban, address, birth_date"]
     missing = [f for f in required_fields if f not in data or not data[f]]
     if missing:
         return jsonify({"msg": f"Missing fields: {', '.join(missing)}"}), 400
@@ -122,6 +117,9 @@ def create_user():
 
     user = User(
         last_name=data["last_name"],
+        address=data["address"],
+        birth_date=data["birth_date"],
+        iban=data["iban"],
         surname=data["surname"],
         first_name=data["first_name"],
         email=data["email"],
