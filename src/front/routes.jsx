@@ -11,7 +11,7 @@ import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { Loginpage } from "./pages/Loginpage";
-import { PerfilNew } from "./pages/PerfilNew";
+import { SignUp } from "./pages/SignUp";
 import { Profile } from "./pages/Profile";
 import PrivateRoute from "./components/PrivateRoute";
 import CheckFirstUserRoute from "./components/CheckFirstUserRoute";
@@ -37,14 +37,13 @@ export const router = createBrowserRouter(
 
         <Route path="/home" element={<PrivateRoute><Home/></PrivateRoute>}/>
         <Route path="/login" element={<CheckFirstUserRoute><Loginpage/></CheckFirstUserRoute>}/>
-        <Route path="/signin" element={<PerfilNew/>}/>
+        <Route path="/signin" element={<SignUp/>}/>
         <Route path="/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
         <Route path="/profile" element={<Profile />} />
         <Route path="/demo" element={<Demo />} />
         <Route path="/admin/request" element={<Request/>} />
         <Route path="/admin" element={<AdminDashboard />} >
-        <Route path="/admin/perfilnew" element={<PerfilNew/>} />
-        
+        <Route path="/admin/signup" element={< SignUp/>} />
         </Route>
      </Route>
     )

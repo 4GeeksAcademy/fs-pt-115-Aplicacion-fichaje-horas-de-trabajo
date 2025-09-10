@@ -2,6 +2,17 @@ export const initialStore=()=>{
   return{
     signings: [],
     users: [],
+    user: {
+      firstName: "FirstName",
+      lastName: "LastName",
+      email: "mail@mail.com",
+      address: "Address",
+      dni_nie: "DNI/NIE",
+      iban: "IBAN",
+      rol: "ROL",
+      isActive: false,
+      isAdmin: false
+    },
   }
 }
 
