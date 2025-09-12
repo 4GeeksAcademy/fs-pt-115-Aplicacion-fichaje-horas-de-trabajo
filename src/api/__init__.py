@@ -13,8 +13,4 @@ def create_app():
     setup_commands(app)
 
     with app.app_context():
-        db.create_all()
-        create_status()
-        load_statuses()
-
-    return app
+        return app
