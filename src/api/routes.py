@@ -393,7 +393,7 @@ def check_users():
     return jsonify({"user_created": userCreated})
 
 @api.route ('/status', methods= ['POST'])
-def log_status():
+def create_status():
     data = request.get_json()
 
     if "name" not in data or not data["name"].strip():

@@ -1,6 +1,7 @@
 //API EXTERNA PARA OBTENER LA UBICACION
 export const getLocation = async () => {
   const response = await fetch(
+
     `https://ipgeolocation.abstractapi.com/v1/?api_key=${os.getenv(
       "EXTERNAL_API"
     )}`
@@ -15,16 +16,15 @@ export const getLocation = async () => {
 //PETICIONES A LA API DESDE EL LOGIN
 //LOGIN
 export const login = async (email, password) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/api/login`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    }
-  );
+
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
 
   if (!response.ok) {
     throw new Error("Error en login");
@@ -78,17 +78,16 @@ export const getUsuarios = async (dispatch) => {
 
 // ACTUALIZAR USUARIO
 export const actualizarUsuario = async (id, data) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/api/usuario/${id}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify(data),
-    }
-  );
+
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(data),
+  });
+
 
   if (!response.ok) {
     throw new Error("Error al actualizar usuario");
@@ -99,15 +98,14 @@ export const actualizarUsuario = async (id, data) => {
 
 // ELIMINAR USUARIO
 export const borrarUsuario = async (id) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }
-  );
+
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
 
   if (!response.ok) {
     throw new Error("Error al borrar usuario");
@@ -117,6 +115,8 @@ export const borrarUsuario = async (id) => {
 };
 
 export const signUp = async (newUser, dispatch) => {
+  console.log(newUser);
+  
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/api/signup`,
     {
@@ -125,14 +125,14 @@ export const signUp = async (newUser, dispatch) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        first_name: newUser.firstName,
+        first_name: newUser.first_name,
         surname: newUser.surname,
-        last_name: newUser.lastName,
+        last_name: newUser.last_name,
         email: newUser.email,
-        DNI: newUser.dni_nie,
+        DNI: newUser.DNI,
         iban: newUser.iban,
         address: newUser.address,
-        birth_date: isoformat(newUser.birthDate),
+        birth_date: new Date(newUser.birth_date).toISOString(),
         rol: newUser.rol,
         is_admin: true,
         password: newUser.password,
