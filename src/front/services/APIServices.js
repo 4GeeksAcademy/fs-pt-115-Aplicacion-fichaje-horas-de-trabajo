@@ -121,10 +121,11 @@ export const signUp = async (newUser, dispatch) => {
         DNI: newUser.dni_nie,
         iban: newUser.iban,
         address: newUser.address,
-        birth_date: newUser.birthDate,
+        birth_date: isoformat(newUser.birthDate),
         rol: newUser.rol,
         is_admin: true,
         password: newUser.password,
+        status: "Inactivo",
       }),
     }
   );
@@ -133,7 +134,7 @@ export const signUp = async (newUser, dispatch) => {
     throw new Error("No se ha podido registrar el usuario");
   }
 
-  data = await response.json();
+  const data = await response.json();
 
   getUsuarios(dispatch);
 
@@ -141,3 +142,4 @@ export const signUp = async (newUser, dispatch) => {
 
   return data;
 };
+

@@ -31,6 +31,7 @@ class User(db.Model):
     signings: Mapped[list["Signing"]] = relationship(back_populates="user")
     requests: Mapped[list["Request"]] = relationship(back_populates="employee", foreign_keys=lambda: Request.user_id)
     admin_request: Mapped[list["Request"]] = relationship(back_populates="admin", foreign_keys=lambda: Request.admin_id)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password).decode("utf-8")
 

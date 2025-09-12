@@ -29,6 +29,7 @@ def handle_hello():
 
 @api.route('/signup', methods=['POST'])
 def signup():
+    
     data = request.get_json()
 
     required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "address", "iban", "birth_date"]
@@ -118,12 +119,15 @@ def login():
 
 #Usuarios
 @api.route("/users", methods=["GET"])
+@jwt_required()
 def get_users():
+
     users = User.query.all() 
     return jsonify([user.serialize() for user in users]), 200
 
 
 @api.route("/users/<int:id>", methods=["GET"])
+@jwt_required()
 def get_user(id):
     user = User.query.get(id)
     if not user:
@@ -132,6 +136,7 @@ def get_user(id):
 
 
 @api.route("/users", methods=["POST"])
+@jwt_required()
 def create_user():
     identity = get_jwt_identity()
     if not identity.get("is_admin"):
@@ -169,6 +174,7 @@ def create_user():
     return jsonify(user.serialize()), 200
 
 @api.route("/users/<int:id>", methods=["DELETE"])
+@jwt_required()
 def delete_user(id):
     user = User.query.get(id)
     if not user: 
@@ -181,12 +187,14 @@ def delete_user(id):
 #Vacaciones
 
 @api.route("/users/<int:user_id>/holidays", methods=["GET"])
+@jwt_required()
 def get_holidays(user_id):
     holidays = Holidays.query.filter_by(user_id=user_id).all()
     return jsonify([h.serialize() for h in holidays])
 
 
 @api.route("/users/<int:user_id>/holidays", methods=["POST"])
+@jwt_required()
 def add_holidays(user_id):
     data = request.json
     holiday = Holidays(
@@ -203,11 +211,13 @@ def add_holidays(user_id):
 #Horarios
 
 @api.route("/users/<int:user_id>/schedules", methods=["GET"])
+@jwt_required()
 def get_schedules(user_id):
     schedules = Schedule.query.filter_by(user_id=user_id).all()
     return jsonify([s.serialize() for s in schedules])
 
 @api.route("/users/<int:user_id>/schedules", methods=["POST"])
+@jwt_required()
 def add_schedule(user_id):
     data = request.json
     schedule = Schedule(
@@ -225,11 +235,13 @@ def add_schedule(user_id):
 #Fichajes
 
 @api.route("/users/<int:user_id>/signings", methods=["GET"])
+@jwt_required()
 def get_signings(user_id):
     signings = Signing.query.filter_by(user_id=user_id).all()
     return jsonify([s.serialize() for s in signings])
 
 @api.route("/users/<int:user_id>/signings", methods=["POST"])
+@jwt_required()
 def add_signing(user_id):
     data = request.json
     signing = Signing(
@@ -248,11 +260,13 @@ def add_signing(user_id):
 #Requests
 
 @api.route("/users/<int:user_id>/requests", methods=["GET"])
+@jwt_required()
 def get_requests(user_id):
     requests = Request.query.filter_by(user_id=user_id).all()
     return jsonify([r.serialize() for r in requests])
 
 @api.route("/users/<int:user_id>/requests", methods=["POST"])
+@jwt_required()
 def add_request(user_id):
     data = request.json
     req = Request(
@@ -288,6 +302,7 @@ def add_request(user_id):
     return jsonify(req.serialize()), 201
 
 @api.route("/requests/<int:request_id>", methods=["DELETE"])
+@jwt_required()
 def delete_request(request_id):
     req = Request.query.get(request_id)
     if not req:
@@ -300,6 +315,7 @@ def delete_request(request_id):
 #Cambio de estado
 
 @api.route('/user/<int:user_id>/status', methods=['PUT'])
+@jwt_required()
 def toggle_status(user_id):
     data = request.get_json(silent=True) or {}
     action = data.get("action")
@@ -351,6 +367,7 @@ def toggle_status(user_id):
 #Consultar estados
 
 @api.route('/user/<int:user_id>/status/history', methods=['GET'])
+@jwt_required()
 def get_status_history(user_id):
     user = db.session.get(User, user_id)
     if not user:
