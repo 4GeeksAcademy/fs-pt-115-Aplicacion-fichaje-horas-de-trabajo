@@ -4,7 +4,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 const CheckFirstUserRoute = ({ children }) => {
   const { store, dispatch } = useGlobalReducer();
 
-  const isFirstUser = store.users.length != 0;
+  const isFirstUser = store.users.length === 0;
 
   return isFirstUser ? children : <Navigate to="/signin" />;
 };

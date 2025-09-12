@@ -383,7 +383,7 @@ def get_status_history(user_id):
     return jsonify([h.serialize() for h in history]), 200
 
 @api.route ('/status', methods= ['POST'])
-def log_status():
+def create_status():
     data = request.get_json()
 
     if "name" not in data or not data["name"].strip():

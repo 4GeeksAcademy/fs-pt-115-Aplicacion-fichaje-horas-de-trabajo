@@ -1,7 +1,7 @@
 //API EXTERNA PARA OBTENER LA UBICACION
 export const getLocation = async () => {
   const response = await fetch(
-    `https://ipgeolocation.abstractapi.com/v1/?api_key=${os.getenv("API_KEY")}`
+    `https://ipgeolocation.abstractapi.com/v1/?api_key=${os.getenv("EXTERNAL_API")}`
   );
 
   const data = await response.json();
@@ -13,7 +13,7 @@ export const getLocation = async () => {
 //PETICIONES A LA API DESDE EL LOGIN
 //LOGIN
 export const login = async (email, password) => {
-  const response = await fetch(`${os.getenv("API_URL")}/login`, {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -31,7 +31,7 @@ export const login = async (email, password) => {
 // CREAR USUARIO
 export const crearUsuario = async (usuario) => {
   const response = await fetch(
-    `https://orange-robot-44wgw96ppgghjjx-3001.app.github.dev/api/users`,
+    `${import.meta.env.VITE_BACKEND_URL}/api/users`,
     {
       method: "POST",
       headers: {
@@ -51,7 +51,7 @@ export const crearUsuario = async (usuario) => {
 // OBTENER USUARIOS
 export const getUsuarios = async (dispatch) => {
   const response = await fetch(
-    `https://orange-robot-44wgw96ppgghjjx-3001.app.github.dev/api/users`,
+    `${import.meta.env.VITE_BACKEND_URL}/api/users`,
     {
       method: "GET",
       headers: {
@@ -73,7 +73,7 @@ export const getUsuarios = async (dispatch) => {
 
 // ACTUALIZAR USUARIO
 export const actualizarUsuario = async (id, data) => {
-  const response = await fetch(`${os.getenv("API_URL")}/usuario/${id}`, {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -91,7 +91,7 @@ export const actualizarUsuario = async (id, data) => {
 
 // ELIMINAR USUARIO
 export const borrarUsuario = async (id) => {
-  const response = await fetch(`${os.getenv("API_URL")}/usuario/${id}`, {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -106,22 +106,24 @@ export const borrarUsuario = async (id) => {
 };
 
 export const signUp = async (newUser, dispatch) => {
+  console.log(newUser);
+  
   const response = await fetch(
-    `https://orange-robot-44wgw96ppgghjjx-3001.app.github.dev/api/signup`,
+    `${import.meta.env.VITE_BACKEND_URL}/api/signup`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        first_name: newUser.firstName,
+        first_name: newUser.first_name,
         surname: newUser.surname,
-        last_name: newUser.lastName,
+        last_name: newUser.last_name,
         email: newUser.email,
-        DNI: newUser.dni_nie,
+        DNI: newUser.DNI,
         iban: newUser.iban,
         address: newUser.address,
-        birth_date: isoformat(newUser.birthDate),
+        birth_date: new Date(newUser.birth_date).toISOString(),
         rol: newUser.rol,
         is_admin: true,
         password: newUser.password,
