@@ -1,7 +1,9 @@
 //API EXTERNA PARA OBTENER LA UBICACION
 export const getLocation = async () => {
   const response = await fetch(
-    `https://ipgeolocation.abstractapi.com/v1/?api_key=${os.getenv("API_KEY")}`
+    `https://ipgeolocation.abstractapi.com/v1/?api_key=${os.getenv(
+      "EXTERNAL_API"
+    )}`
   );
 
   const data = await response.json();
@@ -13,13 +15,16 @@ export const getLocation = async () => {
 //PETICIONES A LA API DESDE EL LOGIN
 //LOGIN
 export const login = async (email, password) => {
-  const response = await fetch(`${os.getenv("API_URL")}/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Error en login");
@@ -31,7 +36,7 @@ export const login = async (email, password) => {
 // CREAR USUARIO
 export const crearUsuario = async (usuario) => {
   const response = await fetch(
-    `https://orange-robot-44wgw96ppgghjjx-3001.app.github.dev/api/users`,
+    `${import.meta.env.VITE_BACKEND_URL}/api/users`,
     {
       method: "POST",
       headers: {
@@ -51,7 +56,7 @@ export const crearUsuario = async (usuario) => {
 // OBTENER USUARIOS
 export const getUsuarios = async (dispatch) => {
   const response = await fetch(
-    `https://orange-robot-44wgw96ppgghjjx-3001.app.github.dev/api/users`,
+    `${import.meta.env.VITE_BACKEND_URL}/api/users`,
     {
       method: "GET",
       headers: {
@@ -73,14 +78,17 @@ export const getUsuarios = async (dispatch) => {
 
 // ACTUALIZAR USUARIO
 export const actualizarUsuario = async (id, data) => {
-  const response = await fetch(`${os.getenv("API_URL")}/usuario/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/usuario/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Error al actualizar usuario");
@@ -91,12 +99,15 @@ export const actualizarUsuario = async (id, data) => {
 
 // ELIMINAR USUARIO
 export const borrarUsuario = async (id) => {
-  const response = await fetch(`${os.getenv("API_URL")}/usuario/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Error al borrar usuario");
@@ -107,7 +118,7 @@ export const borrarUsuario = async (id) => {
 
 export const signUp = async (newUser, dispatch) => {
   const response = await fetch(
-    `https://orange-robot-44wgw96ppgghjjx-3001.app.github.dev/api/signup`,
+    `${import.meta.env.VITE_BACKEND_URL}/api/signup`,
     {
       method: "POST",
       headers: {
@@ -143,3 +154,22 @@ export const signUp = async (newUser, dispatch) => {
   return data;
 };
 
+export const checkUsuarios = async () => {
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/exists`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al comprobar usuarios", 400);
+  }
+  const data = await response.json();
+
+  return data.user_created; // Devuelve true si hay usuarios, false si no los hay
+};

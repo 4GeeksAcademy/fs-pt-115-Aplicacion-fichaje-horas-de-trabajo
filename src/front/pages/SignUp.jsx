@@ -4,12 +4,9 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { crearUsuario, signUp, getUsuarios } from "../services/APIServices.js";
 
 export const SignUp = () => {
-  const {store, dispatch } = useGlobalReducer();
+  const {store, dispatch} = useGlobalReducer();
   const [users, setUsers] = useState([]);
 
-  useEffect(() => {
-    getUsuarios(dispatch);
-  }, []);
 
   const [newUser, setNewUser] = useState({
     firstName: "",
@@ -56,7 +53,7 @@ export const SignUp = () => {
       first_name: newUser.firstName,
       surname: newUser.surname,
       last_name: newUser.lastName,
-      birth_date: newUser.birthDate,
+      birth_date: isoformat(newUser.birthDate),
       address: newUser.address,
       rol: newUser.rol,
       email: newUser.email,
