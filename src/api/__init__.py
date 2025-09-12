@@ -1,7 +1,7 @@
 from flask import Flask
 from .commands import setup_commands
 from .models import db
-from .historial_status import load_statuses , create_status, STATUS
+from .historial_status import load_statuses , seed_status, STATUS
 
 def create_app():
     app = Flask(__name__)
@@ -13,9 +13,4 @@ def create_app():
     setup_commands(app)
 
     with app.app_context():
-        db.create_all()
-        create_status()
-        load_statuses()
-
-
-    return app
+        return app

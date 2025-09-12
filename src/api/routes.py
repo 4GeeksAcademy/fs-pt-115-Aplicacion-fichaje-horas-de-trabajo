@@ -364,3 +364,30 @@ def get_status_history(user_id):
     )
 
     return jsonify([h.serialize() for h in history]), 200
+
+@api.route ('/status', methods= ['POST'])
+def log_status():
+    data = request.get_json()
+
+    if "name" not in data or not data["name"].strip():
+        return jsonify({"msg": "El campo name es obligatorio"}), 400
+    
+    existing = Status.query.filter_by(name=data["name"].strip()).first()
+    if existing:
+        return jsonify({"msg": f"El estado '{data['name']}' ya existe"}), 400
+    
+    new_status = Status(name=data["name"])
+    db.session.add(new_status)
+    db.session.commit()
+
+
+    return jsonify({
+        "msg": f"Estado '{new_status.name}' fue creado correctamente",
+        "status": new_status.serialize()
+    }), 200
+
+
+@api.route('/status', methods=['GET'])
+def get_status():
+    status = Status.query.all()
+    return jsonify([s.serialize() for s in status]), 200

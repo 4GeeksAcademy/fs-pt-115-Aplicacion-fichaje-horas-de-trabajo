@@ -2,7 +2,7 @@ from .models import db, Status
 
 STATUS = {}
 
-def create_status():
+def seed_status():
     
     statuses = {
         1: "Activo",
@@ -20,7 +20,7 @@ def create_status():
     db.session.commit()
 
     all_status = db.session.execute(db.select(Status)).scalars().all()
-    print("Status en la DB después de create_status():", [(s.id, s.name) for s in all_status])
+    print("Status en la DB después de seed_status():", [(s.id, s.name) for s in all_status])
 
 def load_statuses():
     global STATUS
