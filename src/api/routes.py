@@ -119,7 +119,7 @@ def login():
 
 #Usuarios
 @api.route("/users", methods=["GET"])
-@jwt_required()
+# @jwt_required()
 def get_users():
 
     users = User.query.all() 
@@ -381,3 +381,12 @@ def get_status_history(user_id):
     )
 
     return jsonify([h.serialize() for h in history]), 200
+
+@api.route('/users/exists', methods=['GET'])
+def check_users():
+    if User.query.first() is None:
+        userCreated = False
+    else:
+        userCreated = True
+
+    return jsonify({"user_created": userCreated})
