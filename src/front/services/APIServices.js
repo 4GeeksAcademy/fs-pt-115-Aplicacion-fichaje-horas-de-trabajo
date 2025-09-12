@@ -1,7 +1,10 @@
 //API EXTERNA PARA OBTENER LA UBICACION
 export const getLocation = async () => {
   const response = await fetch(
-    `https://ipgeolocation.abstractapi.com/v1/?api_key=${os.getenv("EXTERNAL_API")}`
+
+    `https://ipgeolocation.abstractapi.com/v1/?api_key=${os.getenv(
+      "EXTERNAL_API"
+    )}`
   );
 
   const data = await response.json();
@@ -13,6 +16,7 @@ export const getLocation = async () => {
 //PETICIONES A LA API DESDE EL LOGIN
 //LOGIN
 export const login = async (email, password) => {
+
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/login`, {
     method: "POST",
     headers: {
@@ -20,6 +24,7 @@ export const login = async (email, password) => {
     },
     body: JSON.stringify({ email, password }),
   });
+
 
   if (!response.ok) {
     throw new Error("Error en login");
@@ -73,6 +78,7 @@ export const getUsuarios = async (dispatch) => {
 
 // ACTUALIZAR USUARIO
 export const actualizarUsuario = async (id, data) => {
+
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`, {
     method: "PUT",
     headers: {
@@ -81,6 +87,7 @@ export const actualizarUsuario = async (id, data) => {
     },
     body: JSON.stringify(data),
   });
+
 
   if (!response.ok) {
     throw new Error("Error al actualizar usuario");
@@ -91,12 +98,14 @@ export const actualizarUsuario = async (id, data) => {
 
 // ELIMINAR USUARIO
 export const borrarUsuario = async (id) => {
+
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
+
 
   if (!response.ok) {
     throw new Error("Error al borrar usuario");
@@ -145,3 +154,22 @@ export const signUp = async (newUser, dispatch) => {
   return data;
 };
 
+export const checkUsuarios = async () => {
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/exists`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al comprobar usuarios", 400);
+  }
+  const data = await response.json();
+
+  return data.user_created; // Devuelve true si hay usuarios, false si no los hay
+};
