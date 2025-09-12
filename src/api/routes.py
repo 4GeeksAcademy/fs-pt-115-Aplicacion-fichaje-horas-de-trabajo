@@ -10,6 +10,7 @@ from api.historial_status import STATUS
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
+from .historial_status import STATUS
 
 api = Blueprint('api', __name__)
 
@@ -34,16 +35,50 @@ def signup():
     missing = [f for f in required_fields if f not in data or not data[f]]
     if missing:
         return jsonify({"msg": f"Missing fields: {', '.join(missing)}"}), 400
+    
+    email = data["email"]
+    if "@" not in email or "." not in email.split("@")[-1]:
+        return jsonify({"msg": "Email inválido"}), 400
+    if User.query.filter_by(email=email).first():
+        return jsonify({"msg": "Ese email ya está registrado"}), 400
+    
+
+    if User.query.filter_by(DNI=data["DNI"]).first():
+        return jsonify({"msg": "Ese DNI ya está registrado"}), 400
+
+
+    if len(data["password"]) < 8:
+        return jsonify({"msg": "La contraseña debe tener al menos 8 caracteres"}), 400
+    
+    iban = data.get("iban", "")
+    if len(iban) < 15 or len(iban) > 34:
+        return jsonify({"msg": "IBAN inválido. Debe tener entre 15 y 34 caracteres"}), 400
 
     existing_users = User.query.count()
     if existing_users > 0:
         return jsonify({"msg": "El registro inicial ya se realizó. Usa /login"}), 400
+    
+
+    print("STATUS cargado:", STATUS)
+    print("Status recibido del cliente:", data.get("status"))
+    
+    if "status" not in data:
+        return jsonify({"msg": "El campo 'status' es obligatorio"}), 400
+    
+    status_input = str(data["status"])
+
+    if status_input not in STATUS:
+        return jsonify({"msg": f"Estado inválido. Opciones: {', '.join(STATUS.keys())}"}), 400
+    
+    status_id = STATUS[status_input]
+
+    birth_date = datetime.fromisoformat(data["birth_date"])
    
 
     new_user = User(
         email=data["email"],
         address=data.get("address"),
-        birth_date=data.get("birth_date"),
+        birth_date=birth_date,
         iban=data.get("iban"),
         first_name=data["first_name"],
         surname=data["surname"],
@@ -51,7 +86,7 @@ def signup():
         DNI=data["DNI"],
         rol=data["rol"],
         is_admin=True,
-        status_id=data["status_id"]
+        status_id=status_id
 )
     new_user.set_password(data["password"])
 

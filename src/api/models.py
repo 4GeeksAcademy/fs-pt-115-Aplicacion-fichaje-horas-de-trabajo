@@ -44,7 +44,7 @@ class User(db.Model):
             "surname": self.surname,
             "first_name": self.first_name,
             "email": self.email,
-            "birth_date": self.birth_date.strptime("%d/%m/%Y") if self.birth_date else None,
+            "birth_date": self.birth_date.strftime("%d/%m/%Y") if self.birth_date else None,
             "address": self.address,
             "iban": self.iban,
             "DNI": self.DNI,
