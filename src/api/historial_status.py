@@ -1,14 +1,18 @@
 from .models import db, Status
 
-STATUS = {}
+STATUS = {"Activo": 1,
+          "Inactivo": 2,
+          "En descanso": 3,
+          "De vacaciones": 4}
+
 
 def create_status():
-    
+
     statuses = {
-        1: "Activo",
-        2: "Inactivo",
-        3: "En descanso",
-        4: "De vacaciones",
+        "Activo": 1,
+        "Inactivo": 2,
+        "En descanso": 3,
+        "De vacaciones": 4,
     }
 
     for id_, name in statuses.items():
@@ -20,9 +24,12 @@ def create_status():
     db.session.commit()
 
     all_status = db.session.execute(db.select(Status)).scalars().all()
-    print("Status en la DB después de create_status():", [(s.id, s.name) for s in all_status])
+    print("Status en la DB después de create_status():",
+          [(s.id, s.name) for s in all_status])
+
 
 def load_statuses():
     global STATUS
-    STATUS = {s.name: s.id for s in db.session.execute(db.select(Status)).scalars().all()}
+    STATUS = {s.name: s.id for s in db.session.execute(
+        db.select(Status)).scalars().all()}
     print("STATUS cargado en memoria:", STATUS)
