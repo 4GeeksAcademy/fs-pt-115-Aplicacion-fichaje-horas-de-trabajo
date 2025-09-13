@@ -15,11 +15,13 @@ export const Loginpage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Botón de login clicado");
     setError("");
 
     try {
       const data = await login(email, password);
       localStorage.setItem("token", data.token);
+      dispatch({ type: "SET_USER", payload: data.user });
       navigate("/dashboard");
     } catch (err) {
       setError("Credenciales incorrectas o error de conexión.");
@@ -33,17 +35,18 @@ export const Loginpage = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        overflow: "hidden", 
       }}
     >
       <div className="container">
-        <div className="row justify-content-center align-content-top min-vh-100 mt-5">
+        <div className="row justify-content-center align-content-center h-100">
           <div className="col-md-5">
             <div className="card p-4 shadow rounded-4">
               <div className="d-flex align-items-center justify-content-center mb-3">
                 <img
                   src={LogoClockIN}
                   alt="ClockIn Logo"
-                  style={{ width: "200px", marginRight: "100px" }}
+                  style={{ maxWidth: "150px"}}
                 />
               </div>
               <h4 className="text-center mb-4">Iniciar Sesión</h4>
