@@ -36,12 +36,14 @@ export const login = async (email, password) => {
 
 // CREAR USUARIO
 export const crearUsuario = async (usuario) => {
+  const token = localStorage.getItem("token");
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/api/users`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(usuario),
     }
@@ -115,7 +117,7 @@ export const borrarUsuario = async (id) => {
   return await response.json();
 };
 
-export const signUp = async (newUser, dispatch) => {
+export const signUp = async (newUser) => {
   console.log(newUser);
   
   const response = await fetch(
@@ -130,7 +132,7 @@ export const signUp = async (newUser, dispatch) => {
         surname: newUser.surname,
         last_name: newUser.last_name,
         email: newUser.email,
-        DNI: newUser.DNI,
+        DNI: newUser.dni_nie,
         iban: newUser.iban,
         address: newUser.address,
         birth_date: new Date(newUser.birth_date).toISOString(),
@@ -148,9 +150,6 @@ export const signUp = async (newUser, dispatch) => {
 
   const data = await response.json();
 
-  getUsuarios(dispatch);
-
-  dispatch({ type: "GET_USERS", payload: data });
 
   return data;
 };
