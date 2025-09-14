@@ -7,7 +7,7 @@ from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import time, datetime
 from api.historial_status import STATUS
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token 
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from .historial_status import STATUS
@@ -94,7 +94,9 @@ def signup():
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify({"msg": "User boss created successfully"}), 200
+    access_token = create_access_token(identity=str(new_user.id))
+
+    return jsonify({"msg": "User boss created successfully", "token": access_token, "user": new_user.serialize()}), 200
 
 
 @api.route("/login", methods=["POST"])
@@ -113,7 +115,7 @@ def login():
     
     if user.check_password(data["password"]):
         access_token = create_access_token(identity=str(user.id))
-        return jsonify ({"msg": "Login succesful", "token": access_token}), 200
+        return jsonify ({"msg": "Login succesful", "token": access_token, "user": user.serialize()}), 200
     else:
         return jsonify({"msg": "Invalid email or password"}), 401
 

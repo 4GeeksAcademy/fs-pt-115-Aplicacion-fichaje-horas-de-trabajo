@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { crearUsuario, signUp, getUsuarios } from "../services/APIServices.js";
+import { useNavigate } from "react-router-dom";
 
 export const SignUp = () => {
-  const {store, dispatch} = useGlobalReducer();
+  const { store, dispatch } = useGlobalReducer();
   const [users, setUsers] = useState([]);
 
+  const navigate = useNavigate();
 
   const [newUser, setNewUser] = useState({
     firstName: "",
@@ -27,7 +29,7 @@ export const SignUp = () => {
 
   const [showAlert, setShowAlert] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (
@@ -52,20 +54,27 @@ export const SignUp = () => {
     const birthDateISO = new Date(newUser.birthDate).toISOString();
     console.log(newUser);
 
-
-    signUp({
-      first_name: newUser.firstName,
-      surname: newUser.surname,
-      last_name: newUser.lastName,
-      birth_date: birthDateISO,
-      address: newUser.address,
-      rol: newUser.rol,
-      email: newUser.email,
-      DNI: newUser.dni_nie,
-      iban: newUser.iban,
-      password: newUser.password,
-      is_admin: true
-    }, dispatch);
+    try {
+      const created = await signUp({
+        first_name: newUser.firstName,
+        surname: newUser.surname,
+        last_name: newUser.lastName,
+        birth_date: birthDateISO,
+        address: newUser.address,
+        rol: newUser.rol,
+        email: newUser.email,
+        dni_nie: newUser.dni_nie,
+        iban: newUser.iban,
+        password: newUser.password,
+        is_admin: true,
+        status: "Inactivo",
+      });
+      localStorage.setItem("token", created.token);
+      dispatch({ type: "SET_USER", payload: created.user });
+      navigate("/home");
+    } catch (err) {
+      console.error("Error creando usuario:", err);
+    }
   };
 
   return (
@@ -254,7 +263,6 @@ export const SignUp = () => {
                       aria-describedby="inputGroup-sizing-sm"
                     />
                   </div>
-
                 </div>
 
                 <button className="btn btn-primary w-100 mt-3">Submit</button>
