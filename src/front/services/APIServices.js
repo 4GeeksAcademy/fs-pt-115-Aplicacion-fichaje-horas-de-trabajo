@@ -17,10 +17,11 @@ export const getLocation = async () => {
 //LOGIN
 export const login = async (email, password) => {
 
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/login`, {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
     body: JSON.stringify({ email, password }),
   });
