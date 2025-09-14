@@ -40,7 +40,7 @@ export const SignUp = () => {
       newUser.iban === "" ||
       newUser.address === "" ||
       newUser.lastName === "" ||
-      newUser.birthDate === ""
+      !newUser.birthDate
     ) {
       setShowAlert(true);
       setTimeout(() => {
@@ -49,11 +49,15 @@ export const SignUp = () => {
       return;
     }
 
+    const birthDateISO = new Date(newUser.birthDate).toISOString();
+    console.log(newUser);
+
+
     signUp({
       first_name: newUser.firstName,
       surname: newUser.surname,
       last_name: newUser.lastName,
-      birth_date: isoformat(newUser.birthDate),
+      birth_date: birthDateISO,
       address: newUser.address,
       rol: newUser.rol,
       email: newUser.email,
