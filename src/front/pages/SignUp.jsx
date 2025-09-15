@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import { crearUsuario, signUp, getUsuarios } from "../services/APIServices.js";
+import { crearUsuario, signUp, getUsuarios, checkUsuarios } from "../services/APIServices.js";
 import { useNavigate } from "react-router-dom";
 
 export const SignUp = () => {
-  const { store, dispatch } = useGlobalReducer();
+  const {store, dispatch } = useGlobalReducer();
   const [users, setUsers] = useState([]);
 
   const navigate = useNavigate();
@@ -71,6 +71,7 @@ export const SignUp = () => {
       });
       localStorage.setItem("token", created.token);
       dispatch({ type: "SET_USER", payload: created.user });
+      getUsuarios(dispatch)
       navigate("/home");
     } catch (err) {
       console.error("Error creando usuario:", err);

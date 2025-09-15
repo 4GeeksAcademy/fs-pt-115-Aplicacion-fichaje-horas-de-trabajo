@@ -18,15 +18,6 @@ api = Blueprint('api', __name__)
 CORS(api)
 
 
-@api.route('/hello', methods=['POST', 'GET'])
-def handle_hello():
-
-    response_body = {
-        "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
-    }
-
-    return jsonify(response_body), 200
-
 @api.route('/signup', methods=['POST'])
 def signup():
     
@@ -136,6 +127,16 @@ def get_user(id):
         return jsonify({"error": "Usuario no encontrado"}), 400
     return jsonify(user.serialize()), 200
 
+@api.route('/profile', methods=['GET'])
+@jwt_required()
+def get_profile():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({"msg": "Usuario no encontrado"}), 400
+
+    return jsonify({"user": user.serialize()}), 200
 
 @api.route("/users", methods=["POST"])
 @jwt_required()
