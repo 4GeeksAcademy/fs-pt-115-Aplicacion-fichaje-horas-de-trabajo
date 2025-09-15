@@ -3,6 +3,7 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
+import { Link } from "react-router-dom";
 
 export const Home = () => {
   return (
@@ -90,22 +91,97 @@ export const Home = () => {
                     >
                       <table className="table table-dark align-middle">
                         <tbody>
-          <UserInfo firstName="HOLA" totalHours="10" breakHours="1" regularHours="9" overtime="0" absence="0" />
-          <UserInfo firstName="Juan" totalHours="12" breakHours="1" regularHours="11" overtime="1" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
+                          <UserInfo
+                            firstName="HOLA"
+                            totalHours="10"
+                            breakHours="1"
+                            regularHours="9"
+                            overtime="0"
+                            absence="0"
+                          />
+                          <UserInfo
+                            firstName="Juan"
+                            totalHours="12"
+                            breakHours="1"
+                            regularHours="11"
+                            overtime="1"
+                            absence="0"
+                          />
+                          <UserInfo
+                            firstName="Ana"
+                            totalHours="8"
+                            breakHours="0.5"
+                            regularHours="7.5"
+                            overtime="0"
+                            absence="0"
+                          />
+                          <UserInfo
+                            firstName="Ana"
+                            totalHours="8"
+                            breakHours="0.5"
+                            regularHours="7.5"
+                            overtime="0"
+                            absence="0"
+                          />
+                          <UserInfo
+                            firstName="Ana"
+                            totalHours="8"
+                            breakHours="0.5"
+                            regularHours="7.5"
+                            overtime="0"
+                            absence="0"
+                          />
+                          <UserInfo
+                            firstName="Ana"
+                            totalHours="8"
+                            breakHours="0.5"
+                            regularHours="7.5"
+                            overtime="0"
+                            absence="0"
+                          />
+                          <UserInfo
+                            firstName="Ana"
+                            totalHours="8"
+                            breakHours="0.5"
+                            regularHours="7.5"
+                            overtime="0"
+                            absence="0"
+                          />
+                          <UserInfo
+                            firstName="Ana"
+                            totalHours="8"
+                            breakHours="0.5"
+                            regularHours="7.5"
+                            overtime="0"
+                            absence="0"
+                          />
+                          <UserInfo
+                            firstName="Ana"
+                            totalHours="8"
+                            breakHours="0.5"
+                            regularHours="7.5"
+                            overtime="0"
+                            absence="0"
+                          />
                         </tbody>
                       </table>
                     </div>
                   </div>
                 </div>
               </div>
-
+              <hr className="text-light" />
+              <div className="row text-center mb-4">
+                <h2 className="text-light">Request Pending</h2>
+                <Link to="/admin/request">
+                <button
+                  type="button"
+                  class="btn btn-success w-100 p-2">
+                  Ir a Request
+                </button>
+                </Link>
+              </div>
+              <hr className="text-light" />
+              
               <div className="col-md-6 mb-4">
                 <h4 className="ms-4 text-light">WORKING</h4>
 
