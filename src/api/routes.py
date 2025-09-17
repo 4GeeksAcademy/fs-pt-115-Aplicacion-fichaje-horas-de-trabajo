@@ -211,6 +211,34 @@ def add_holidays(user_id):
     return jsonify(holiday.serialize()), 200
 
 
+@api.route("/users/<int:user_id>/holidays/<int:holiday_id>", methods=["PUT"])
+@jwt_required()
+def update_holiday(user_id, holiday_id):
+    holiday = Holidays.query.filter_by(user_id=user_id, id=holiday_id).first()
+    if not holiday:
+        return jsonify({"message": "Holiday not found"}), 404
+
+    data = request.json
+    holiday.total_days = data.get("total_days", holiday.total_days)
+    holiday.used_days = data.get("used_days", holiday.used_days)
+    holiday.remaining_days = data.get("remaining_days", holiday.remaining_days)
+
+    db.session.commit()
+    return jsonify(holiday.serialize()), 200
+
+
+@api.route("/users/<int:user_id>/holidays/<int:holiday_id>", methods=["DELETE"])
+@jwt_required()
+def delete_holiday(user_id, holiday_id):
+    holiday = Holidays.query.filter_by(user_id=user_id, id=holiday_id).first()
+    if not holiday:
+        return jsonify({"message": "Holiday not found"}), 404
+
+    db.session.delete(holiday)
+    db.session.commit()
+    return jsonify({"message": "Holiday deleted successfully"}), 200
+
+
 #Horarios
 
 @api.route("/users/<int:user_id>/schedules", methods=["GET"])
@@ -233,6 +261,39 @@ def add_schedule(user_id):
     db.session.add(schedule)
     db.session.commit()
     return jsonify(schedule.serialize()), 200
+
+
+@api.route("/users/<int:user_id>/schedules/<int:schedule_id>", methods=["PUT"])
+@jwt_required()
+def update_schedule(user_id, schedule_id):
+    schedule = Schedule.query.filter_by(user_id=user_id, id=schedule_id).first()
+    if not schedule:
+        return jsonify({"message": "Schedule not found"}), 404
+
+    data = request.json
+    if "shift" in data:
+        schedule.shift = data["shift"]
+    if "start_time" in data:
+        schedule.start_time = time.fromisoformat(data["start_time"])
+    if "end_time" in data:
+        schedule.end_time = time.fromisoformat(data["end_time"])
+    if "day" in data:
+        schedule.day = data["day"]
+
+    db.session.commit()
+    return jsonify(schedule.serialize()), 200
+
+
+@api.route("/users/<int:user_id>/schedules/<int:schedule_id>", methods=["DELETE"])
+@jwt_required()
+def delete_schedule(user_id, schedule_id):
+    schedule = Schedule.query.filter_by(user_id=user_id, id=schedule_id).first()
+    if not schedule:
+        return jsonify({"message": "Schedule not found"}), 404
+
+    db.session.delete(schedule)
+    db.session.commit()
+    return jsonify({"message": "Schedule deleted successfully"}), 200
 
 
 #Fichajes
@@ -303,6 +364,46 @@ def add_request(user_id):
     db.session.commit()
 
     return jsonify(req.serialize()), 201
+
+@api.route("/requests/<int:request_id>", methods=["PUT"])
+@jwt_required()
+def update_request(request_id):
+    req = Request.query.get(request_id)
+    if not req:
+        return jsonify({"error": "Solicitud no encontrada"}), 404
+
+    data = request.json
+
+    if "admin_id" in data:
+        req.admin_id = data["admin_id"]
+    if "start_date" in data:
+        req.start_date = datetime.fromisoformat(data["start_date"])
+    if "end_date" in data:
+        req.end_date = datetime.fromisoformat(data["end_date"])
+    if "comment" in data:
+        req.comment = data["comment"]
+
+
+    req_type = RequestType.query.filter_by(request_id=request_id).first()
+    if req_type:
+        for field in ["holidays", "shift_change", "schedule_change", "salary_advance", "others"]:
+            if field in data:
+                setattr(req_type, field, data[field])
+
+    req_status = StatusRequest.query.filter_by(request_id=request_id).first()
+    if req_status:
+        state_fields = {field: data[field] for field in ["accepted", "cancelled", "pending"] if field in data}
+
+        if len([v for v in state_fields.values() if v]) > 1:
+            return jsonify({"error": "Solo puede haber un estado activo a la vez"}), 400
+
+        if state_fields:
+            for field in ["accepted", "cancelled", "pending"]:
+                setattr(req_status, field, state_fields.get(field, False))
+
+    db.session.commit()
+    return jsonify(req.serialize()), 200
+
 
 @api.route("/requests/<int:request_id>", methods=["DELETE"])
 @jwt_required()

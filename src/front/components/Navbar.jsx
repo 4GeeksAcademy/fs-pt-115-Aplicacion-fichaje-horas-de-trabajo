@@ -5,18 +5,23 @@ import { useEffect, useState } from "react";
 export const Navbar = () => {
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getUserByToken();
-        console.log("Usuario obtenido:", userData);
-        setUser(userData);
-      } catch (error) {
-        console.error("Error al cargar el usuario:", error);
-      }
-    };
+   useEffect(() => {
+  const fetchUser = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.log("No hay token, usuario no logueado");
+      return;
+    }
 
-    fetchUser();
+    try {
+      const userData = await getUserByToken(token);
+      console.log("Usuario obtenido:", userData);
+      setUser(userData);
+    } catch (error) {
+      console.error("Error al cargar el usuario:", error);
+    }
+  };
+   fetchUser();
   }, []);
 
   return (
