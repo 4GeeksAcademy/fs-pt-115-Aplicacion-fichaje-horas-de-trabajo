@@ -1,6 +1,7 @@
 from flask import Flask
 from .commands import setup_commands
 from .models import db
+from flask_cors import CORS
 
 
 def create_app():
@@ -11,6 +12,7 @@ def create_app():
 
     db.init_app(app)
     setup_commands(app)
+    CORS(app)
 
     with app.app_context():
         return app

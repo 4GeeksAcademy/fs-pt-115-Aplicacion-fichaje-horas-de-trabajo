@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { login } from "../services/APIServices.js";
 
 export const Loginpage = () => {
-  // Access the global state and dispatch function using the useGlobalReducer hook.
   const { store, dispatch } = useGlobalReducer();
 
   const [email, setEmail] = useState("");

@@ -18,7 +18,7 @@ const CheckFirstUserRoute = () => {
     fetchUsers();
   }, []);
 
-  if (loading) return <div>Cargando...</div>; // o un spinner
+  if (loading) return <div>Cargando...</div>;
 
   return hasUser ? <Navigate to="/login"/> : <Navigate to="/signup" />;
 
