@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 export const Home = () => {
   return (
     <>
-      <div className="container-fluid d-flex justify-content-center">
+      <div className="container-fluid d-flex justify-content-center mt-5">
         <div className="row">
           {/* <div className="col-md-3 ms-1 row border rounded shadow-sm my-4 p-3 bg-dark d-flex flex-column align-items-center justify-self-center h-auto">
             <img

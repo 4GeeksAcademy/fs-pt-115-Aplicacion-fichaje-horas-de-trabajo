@@ -1,13 +1,14 @@
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, redirect, useNavigate } from "react-router-dom";
 import { getUserByToken } from "../services/APIServices";
 import { useEffect, useState } from "react";
 
 export const Navbar = () => {
   const [user, setUser] = useState(null);
 
-   useEffect(() => {
+
+  useEffect(() => {
   const fetchUser = async () => {
-    const token = localStorage.getItem("token");
+    const token = await localStorage.getItem("token");
     if (!token) {
       console.log("No hay token, usuario no logueado");
       return;
@@ -23,6 +24,14 @@ export const Navbar = () => {
   };
    fetchUser();
   }, []);
+
+  const onSubmit = () => {
+    console.log(user?.is_admin)
+    setUser(null)
+    localStorage.clear()
+    window.location.href = '/login';
+    window
+  }
 
   return (
     <nav className="navbar navbar-expand-lg bg-dark">
@@ -71,6 +80,11 @@ export const Navbar = () => {
                 <button className="btn btn-dark m-2">My Profile</button>
               </Link>
             </li>
+            {user && (
+            <li className="nav-item">
+                <button onClick={onSubmit} className="btn btn-danger m-2">Log out</button>
+            </li>
+            )}
           </ul>
         </div>
       </div>

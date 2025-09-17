@@ -10,7 +10,6 @@ export const Loginpage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +20,7 @@ export const Loginpage = () => {
       const data = await login(email, password);
       localStorage.setItem("token", data.token);
       dispatch({ type: "SET_USER", payload: data.user });
-      navigate("/");
+      window.location.href = '/';
     } catch (err) {
       setError("Credenciales incorrectas o error de conexión.");
     }

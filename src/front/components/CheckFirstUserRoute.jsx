@@ -1,28 +1,36 @@
 import { Navigate, Outlet } from "react-router-dom";
-import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { useEffect, useState } from "react";
 import { checkUsuarios } from "../services/APIServices.js";
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
-const CheckFirstUserRoute = () => {
-  const { store, dispatch } = useGlobalReducer();
+const CheckFirstUserRoute = ({ blockIfUsersExist, redirectTo }) => {
   const [loading, setLoading] = useState(true);
   const [hasUser, setHasUser] = useState(false);
+  const { store, dispatch } = useGlobalReducer();
 
   useEffect(() => {
     const fetchUsers = async () => {
-    const usuarios = await checkUsuarios();
-    console.log(usuarios);
-    setHasUser(usuarios);
-    setLoading(false);
+      try {
+        const usuarios = await checkUsuarios(); // Devuelve bool
+        setHasUser(usuarios);
+        
+      } catch (error) {
+        console.error("Error comprobando usuarios:", error);
+        setHasUser(false);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchUsers();
   }, []);
 
   if (loading) return <div>Cargando...</div>;
 
-  return hasUser ? <Navigate to="/login"/> : <Navigate to="/signup" />;
+  if (blockIfUsersExist === hasUser) {
+    return <Navigate to={redirectTo} />;
+  }
 
-
+  return <Outlet />;
 };
 
 export default CheckFirstUserRoute;
