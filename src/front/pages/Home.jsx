@@ -5,8 +5,10 @@ import { UserInfo } from "../components/UserInfo.jsx";
 import { getUsuarios } from "../services/APIServices.js";
 
 export const Home = () => {
+
   const { store, dispatch } = useGlobalReducer();
   const [search, setSearch] = useState("");
+
 
   useEffect(() => {
     getUsuarios(dispatch).catch((err) => console.error(err));
@@ -20,6 +22,7 @@ export const Home = () => {
 
   return (
 <<<<<<< HEAD
+<<<<<<< HEAD
     <>
       <div className="container-fluid d-flex justify-content-center mt-5">
         <div className="row">
@@ -30,6 +33,8 @@ export const Home = () => {
               style={{ width: "180px", height: "180px", objectFit: "cover" }}
               alt="User"
 =======
+=======
+>>>>>>> develop
     <div className="container-fluid d-flex justify-content-center">
       <div className="row">
         <div className="col-md-10 offset-md-1 border rounded shadow-sm my-4 p-3 bg-dark">
@@ -64,6 +69,9 @@ export const Home = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Type a name..."
+<<<<<<< HEAD
+>>>>>>> develop
+=======
 >>>>>>> develop
             />
           </div>
