@@ -5,8 +5,10 @@ import { UserInfo } from "../components/UserInfo.jsx";
 import { getUsuarios } from "../services/APIServices.js";
 
 export const Home = () => {
+
   const { store, dispatch } = useGlobalReducer();
   const [search, setSearch] = useState("");
+
 
   useEffect(() => {
     getUsuarios(dispatch).catch((err) => console.error(err));

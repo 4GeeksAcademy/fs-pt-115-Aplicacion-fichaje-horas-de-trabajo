@@ -14,6 +14,7 @@ export const initialStore=()=>{
       isActive: false,
       isAdmin: false
     },
+    firstUserExist: false
   }
 }
 
@@ -36,6 +37,12 @@ export default function storeReducer(store, action = {}) {
         ...store,
         user: action.payload
       };
+
+      case 'SET_FIRST_USER_EXIST':
+        return {
+          ...store,
+          firstUserExist: action.payload 
+        };
 
       default:
       throw Error('Unknown action.');

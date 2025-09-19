@@ -25,24 +25,26 @@ export const router = createBrowserRouter(
     // Note: keep in mind that errorElement will be the default page when you don't get a route, customize that page to make your project more attractive.
     // Note: The child paths of the Layout element replace the Outlet component with the elements contained in the "element" attribute of these child paths.
 
-      // Root Route: All navigation will start from here.
-      <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
+<Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>}>
+  
+  <Route element={<ProtectedRoutes/>}>
+    <Route path="/" element={<Home/>}/>
+    <Route path="/profile" element={<Profile/>} />
+    <Route path="/admin/request" element={<Request/>} />
+    <Route path="/admin/signup" element={<SignUp/>} />
+    <Route path="/admin" element={<AdminDashboard/>} />
+  </Route>
 
-        {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-        <Route element={<ProtectedRoutes/>}>
-        <Route path="/" element={<Home/>}/>
-        <Route path="/profile" element={<Profile/>} />
-        <Route path="/admin/request" element={<Request/>} />
-        <Route path="/admin/signup" element={< SignUp/>} />
-        <Route path="/admin" element={<AdminDashboard/>} />
-        </Route>
+  {/* Protege la ruta si ya hay usuarios */}
+  <Route element={<CheckFirstUserRoute blockIfUsersExist={true} redirectTo="/login" />}>
+    <Route path="/signup" element={<SignUp/>} />
+  </Route>
 
-        <Route path="/login" element={<Loginpage/>}/>
-
-        <Route element={<CheckFirstUserRoute/>}>
-        <Route path="/signup" element={<SignUp/>}/>
-        </Route>
-        {/* <Route path="/single/:theId" element={ <Single />} />  Dynamic route for single items */}
-      </Route>
+  {/* Protege la ruta si aún NO hay usuarios */}
+  <Route element={<CheckFirstUserRoute blockIfUsersExist={false} redirectTo="/signup" />}>
+    <Route path="/login" element={<Loginpage/>} />
+  </Route>
+  
+</Route>
     )
 );
