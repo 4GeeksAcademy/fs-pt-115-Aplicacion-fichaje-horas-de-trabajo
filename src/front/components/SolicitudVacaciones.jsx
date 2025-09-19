@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { crearSolicitud } from "../services/APIServices";
 
 export default function SolicitudVacaciones() {
+  const { store, dispatch } = useGlobalReducer();
+
   const [formData, setFormData] = useState({
     fechaInicio: "",
     fechaFin: "",
