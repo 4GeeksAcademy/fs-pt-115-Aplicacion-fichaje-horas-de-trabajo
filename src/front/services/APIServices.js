@@ -199,5 +199,5 @@ export const checkUsuarios = async () => {
   }
   const data = await response.json();
 
-  return data.user_created; // Devuelve true si hay usuarios, false si no los hay
+  return data.user_created;
 };
