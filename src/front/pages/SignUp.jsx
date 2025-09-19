@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import {
-  signUp,
-  getUsuarios,
-} from "../services/APIServices.js";
-
+import { signUp, getUsuarios } from "../services/APIServices.js";
 
 export const SignUp = () => {
   const { store, dispatch } = useGlobalReducer();
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [newUser, setNewUser] = useState({
     firstName: "",
@@ -22,7 +18,7 @@ export const SignUp = () => {
     password: "",
     dni_nie: "",
     iban: "",
-    is_admin: false
+    is_admin: false,
   });
 
   const handleInputsChange = (e) => {
@@ -70,7 +66,6 @@ export const SignUp = () => {
         password: newUser.password,
         is_admin: newUser.is_admin,
         status: "Inactivo",
-
       });
       localStorage.setItem("token", created.token);
       dispatch({ type: "SET_USER", payload: created.user });
