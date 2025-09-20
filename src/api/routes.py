@@ -1,11 +1,11 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint
+from flask import Flask, request, jsonify, url_for, Blueprint, current_app
 from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
-from datetime import time, datetime
+from datetime import time, datetime, timezone
 from api.historial_status import STATUS
 from flask_jwt_extended import create_access_token 
 from flask_jwt_extended import get_jwt_identity
@@ -106,7 +106,15 @@ def login():
     
     if user.check_password(data["password"]):
         access_token = create_access_token(identity=str(user.id))
-        return jsonify ({"msg": "Login succesful", "token": access_token, "user": user.serialize()}), 200
+        expires = current_app.config["JWT_ACCESS_TOKEN_EXPIRES"]
+        expire_time = datetime.now(timezone.utc) + expires
+
+        return jsonify({
+            "msg": "Login successful",
+            "token": access_token,
+            "expires_at": expire_time.isoformat(), 
+            "user": user.serialize()
+        }), 200
     else:
         return jsonify({"msg": "Invalid email or password"}), 401
 

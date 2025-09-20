@@ -2,6 +2,7 @@ import React from "react";
 import { UserCard } from "../components/UserCard";
 import { News } from "../components/News";
 import { Link } from "react-router-dom";
+import { useAuthGuard } from "../components/AuthToken";
 
 export default function FechaActual() {
   const fecha = new Date().toLocaleDateString("es-ES", {

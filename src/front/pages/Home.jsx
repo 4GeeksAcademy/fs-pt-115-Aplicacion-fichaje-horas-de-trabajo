@@ -3,12 +3,12 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { getUsuarios } from "../services/APIServices.js";
+import { useAuthGuard } from "../components/AuthToken.jsx";
 
 export const Home = () => {
 
   const { store, dispatch } = useGlobalReducer();
   const [search, setSearch] = useState("");
-
 
   useEffect(() => {
     getUsuarios(dispatch).catch((err) => console.error(err));
