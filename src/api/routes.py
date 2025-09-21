@@ -1,11 +1,11 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest
+from flask import Flask, request, jsonify, url_for, Blueprint, current_app
+from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
-from datetime import time, datetime
+from datetime import time, datetime, timezone
 from api.historial_status import STATUS
 from flask_jwt_extended import create_access_token 
 from flask_jwt_extended import get_jwt_identity
@@ -106,7 +106,15 @@ def login():
     
     if user.check_password(data["password"]):
         access_token = create_access_token(identity=str(user.id))
-        return jsonify ({"msg": "Login succesful", "token": access_token, "user": user.serialize()}), 200
+        expires = current_app.config["JWT_ACCESS_TOKEN_EXPIRES"]
+        expire_time = datetime.now(timezone.utc) + expires
+
+        return jsonify({
+            "msg": "Login successful",
+            "token": access_token,
+            "expires_at": expire_time.isoformat(), 
+            "user": user.serialize()
+        }), 200
     else:
         return jsonify({"msg": "Invalid email or password"}), 401
 
@@ -415,6 +423,87 @@ def delete_request(request_id):
     db.session.commit()
     return jsonify({"message": "Solicitud eliminada"}), 200
 
+
+#Documentos
+
+@api.route("/users/<int:user_id>/documents", methods=["GET"])
+@jwt_required()
+def get_documents(user_id):
+    documents = Document.query.filter_by(user_id=user_id).all()
+    return jsonify([doc.serialize() for doc in documents]), 200
+
+
+@api.route("/users/<int:user_id>/documents", methods=["POST"])
+@jwt_required()
+def add_document(user_id):
+    data = request.json
+    doc = Document(
+        user_id=user_id,
+        file_url=data.get("file_url"),
+        approved=data.get("approved", False)
+    )
+    db.session.add(doc)
+    db.session.commit()
+
+    if "type" in data:
+        doc_type = DocumentType(
+            document_id=doc.id,
+            payroll=data["type"].get("payroll"),
+            contract=data["type"].get("contract"),
+            supporting_documents=data["type"].get("supporting_documents")
+        )
+        db.session.add(doc_type)
+        db.session.commit()
+
+    return jsonify(doc.serialize()), 201
+
+
+@api.route("/users/<int:user_id>/documents/<int:doc_id>", methods=["PUT"])
+@jwt_required()
+def update_document(user_id, doc_id):
+    doc = Document.query.filter_by(user_id=user_id, id=doc_id).first()
+    if not doc:
+        return jsonify({"msg": "Document not found"}), 404
+
+    data = request.json
+    if "file_url" in data:
+        doc.file_url = data["file_url"]
+    if "approved" in data:
+        doc.approved = data["approved"]
+
+
+    if "type" in data:
+        doc_type = doc.types
+        if doc_type:
+            doc_type.payroll = data["type"].get("payroll", doc_type.payroll)
+            doc_type.contract = data["type"].get("contract", doc_type.contract)
+            doc_type.supporting_documents = data["type"].get("supporting_documents", doc_type.supporting_documents)
+        else:
+            doc_type = DocumentType(
+                document_id=doc.id,
+                payroll=data["type"].get("payroll"),
+                contract=data["type"].get("contract"),
+                supporting_documents=data["type"].get("supporting_documents")
+            )
+            db.session.add(doc_type)
+
+    db.session.commit()
+    return jsonify(doc.serialize()), 200
+
+
+@api.route("/users/<int:user_id>/documents/<int:doc_id>", methods=["DELETE"])
+@jwt_required()
+def delete_document(user_id, doc_id):
+    doc = Document.query.filter_by(user_id=user_id, id=doc_id).first()
+    if not doc:
+        return jsonify({"msg": "Document not found"}), 404
+
+    if doc.types:
+        db.session.delete(doc.types)
+
+    db.session.delete(doc)
+    db.session.commit()
+    return jsonify({"msg": "Document deleted"}), 200
 
 #Cambio de estado
 

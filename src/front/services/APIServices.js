@@ -241,3 +241,51 @@ export const deleteSolicitud = async (id) => {
   });
   return response.json();
 };
+
+
+export const getSignings = async (userId, token) => {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/signings`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.json();
+};
+
+
+export const getContracts = async (userId, token) => {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/documents/contracts`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.json();
+};
+
+
+export const getPayrolls = async (userId, token) => {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/payrolls`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.json();
+};
+
+export const toggleBreak = async (userId, token) => {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/${userId}/status`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ action: "toggle_break" }),
+  });
+  return response.json();
+};
