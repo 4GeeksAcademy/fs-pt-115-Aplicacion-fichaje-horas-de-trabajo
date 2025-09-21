@@ -1,143 +1,170 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import { UserCard } from "../components/UserCard.jsx";
-import { UserInfo } from "../components/UserInfo.jsx";
+import {getUserByToken, getSignings, getContracts,} from "../services/APIServices.js";
+import workedHours from "../components/workedHours.jsx";
 
 export const Profile = () => {
   const { store, dispatch } = useGlobalReducer();
 
-  const UserActivation = store.users.find((user) => user.email === store.user.email);
+  const token = localStorage.getItem("token");
+
+  const handleBreak = async () => {
+    try {
+      const updated = await toggleBreak(store.user.id, token);
+      dispatch({ type: "SET_USER", payload: updated.user });
+    } catch (err) {
+      console.error("Error cambiando estado de descanso:", err);
+    }
+  };
 
   useEffect(() => {
-    console.log("UserActivation:", UserActivation);
-  }, [UserActivation]);
-  
+    const fetchData = async () => {
+      try {
+        const user = await getUserByToken();
+        dispatch({ type: "SET_USER", payload: user });
+
+        const signings = await getSignings(user.id);
+        dispatch({ type: "GET_SIGNINGS", payload: signings });
+
+        const contracts = await getContracts(user.id);
+        dispatch({ type: "GET_CONTRACTS", payload: contracts });
+
+        const payrolls = await getPayrolls(user.id, token);
+        dispatch({ type: "GET_PAYROLLS", payload: payrolls });
+      } catch (err) {
+        console.error(" Error cargando datos del perfil:", err);
+      }
+    };
+
+    fetchData();
+  }, [dispatch]);
+
+  const hours = useMemo(
+    () => workedHours(store.signings || []),
+    [store.signings]
+  );
+  const hoursToday = hours.hoursToday;
+  const hoursWeek = hours.hoursWeek;
+
+  if (!store.user || Object.keys(store.user).length === 0) {
+    return (
+      <div
+        className="container-fluid d-flex justify-content-center align-items-center"
+        style={{
+          backgroundColor: "#ff7b00",
+          minHeight: "100vh",
+          color: "white",
+        }}
+      >
+        <h3>Loading...</h3>
+      </div>
+    );
+  }
   return (
-    <>
-      <div className="container-fluid d-flex justify-content-center">
-        <div className="row">
-          <div className="col-md-3 ms-1 row border rounded shadow-sm my-4 p-3 bg-dark d-flex flex-column align-items-center justify-self-center h-auto">
+    <div
+      className="container-fluid"
+      style={{
+        backgroundColor: "#ff7b00",
+        minHeight: "100vh",
+        color: "white",
+        padding: "2rem",
+      }}
+    >
+      <div className="row g-4">
+        <div className="col-lg-4">
+          <div className="card bg-dark text-white shadow-sm p-4 text-center border border-secondary">
             <img
               src={rigoImageUrl}
-              className="rounded-circle ms-auto me-auto mt-2 mb-2 d-flex"
-              style={{ width: "180px", height: "180px", objectFit: "cover" }}
               alt="User"
+              className="rounded-circle mx-auto mb-3"
+              style={{ width: "150px", height: "150px", objectFit: "cover" }}
             />
-            <h4 className="text-light d-flex justify-content-start mt-3">
-              {store.user.firstName + " " + store.user.lastName}
-            </h4>
+            <h5 className="mb-1">
+              {store.user.first_name} {store.user.surname}{" "}
+              {store.user.last_name}
+            </h5>
+
+            <p className="text-muted mb-1">
+              Rol: {store.user.rol || "No definido"}
+            </p>
+            <p className="text-muted mb-1">DNI: {store.user.DNI || "N/A"}</p>
+            <p className="text-muted mb-1">
+              Dirección: {store.user.address || "N/A"}
+            </p>
+            <p className="text-muted mb-3">IBAN: {store.user.IBAN || "N/A"}</p>
+
+            <p className="small text-white">📧 {store.user.email}</p>
           </div>
+        </div>
 
-          <div className="col-md-8 offset-md-1 border rounded shadow-sm my-4 p-3 bg-dark">
-            <div className="row">
-              <div className="mb-4 p-3 bg-dark d-flex justify-content-end align-items-center">
-                {/* Admin Switch */}
-                {UserActivation && UserActivation.isadmin === true ? (
-                <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="boolSwitch"/>
-              <label class="form-check-label text-light" for="boolSwitch">Is Admin</label>
-                </div>
-              ) : null}
-
+        <div className="col-lg-8">
+          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <h6 className="fw-bold">Turn</h6>
+            <p className="fw-semibold" style={{ color: "#ff7b00" }}>
+              Estado: Activo
+            </p>
+            <div className="d-flex justify-content-between my-3">
+              <div>
+                <small className="text-muted">Hours today</small>
+                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>
+                  {hoursToday}
+                </h4>
               </div>
-
-              <div className=" input-group input-group-sm mb-3">
-                <span className="input-group-text" id="inputGroup-sizing-sm">
-                  Search Worker
-                </span>
-                <input
-                  type="text"
-                  className="form-control"
-                  aria-label="Sizing example input"
-                  aria-describedby="inputGroup-sizing-sm"
-                />
-
-                <div className="col-md-12 bg-dark text-white p-2">
-                  <div className="table-responsive">
-                    <table
-                      className="table table-dark align-middle"
-                      style={{ marginBottom: 0 }}
-                    >
-                      <thead
-                        className="table-dark"
-                        style={{
-                          position: "sticky",
-                          top: 0,
-                          zIndex: 2,
-                          backgroundColor: "#212529",
-                        }}
-                      >
-                        <tr>
-                          <th>First name</th>
-                          <th>Total hours</th>
-                          <th>Break hours</th>
-                          <th>Regular hours</th>
-                          <th>Overtime</th>
-                          <th>Absence</th>
-                        </tr>
-                      </thead>
-                    </table>
-
-                    <div
-                      style={{
-                        maxHeight: "250px",
-                        overflowY: "auto",
-                      }}
-                    >
-                      <table className="table table-dark align-middle">
-                        <tbody>
-          <UserInfo firstName="HOLA" totalHours="10" breakHours="1" regularHours="9" overtime="0" absence="0" />
-          <UserInfo firstName="Juan" totalHours="12" breakHours="1" regularHours="11" overtime="1" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-md-6 mb-4">
-                <h4 className="ms-4 text-light">USERS</h4>
-
-                <ul
-                  className="p-2"
-                  style={{
-                    maxHeight: "340px",
-                    overflowY: "auto",
-                  }}
-                >
-                  <UserCard />
-                  <UserCard />
-                  <UserCard />
-                </ul>
-              </div>
-
-              <div className="col-md-6 mb-4">
-                <h4 className="ms-4 text-light">ADMINS</h4>
-
-                <ul
-                  className="p-2"
-                  style={{
-                    maxHeight: "340px",
-                    overflowY: "auto",
-                  }}
-                >
-                  <UserCard />
-                  <UserCard />
-                  <UserCard />
-                </ul>
+              <div>
+                <small className="text-muted">Hours this week</small>
+                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>
+                  {hoursWeek}
+                </h4>
               </div>
             </div>
+            <button
+              className="btn w-100 text-white"
+              style={{ backgroundColor: "#ff7b00" }}
+              onClick={handleBreak}
+            >
+              Start / End Break
+            </button>
+          </div>
+
+          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <h6 className="fw-bold mb-3">Contracts</h6>
+            {store.userContracts.length ? (
+              store.userContracts.map((c) => (
+                <div key={c.id} className="mb-2">
+                  <p className="mb-1">
+                    Contract type:{" "}
+                    <span className="fw-semibold">{c.type || "N/A"}</span>
+                  </p>
+                  <p className="mb-1">
+                    Start date:{" "}
+                    <span className="fw-semibold">{c.start_date || "N/A"}</span>
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p>No contracts</p>
+            )}
+          </div>
+          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <h6 className="fw-bold mb-3">Payrolls</h6>
+            {store.payrolls.length ? (
+              store.payrolls.map((p) => (
+                <div key={p.id} className="mb-2">
+                  <p className="mb-1">
+                    Month: <span className="fw-semibold">{p.month}</span>
+                  </p>
+                  <p className="mb-1">
+                    Amount: <span className="fw-semibold">{p.amount}</span>
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p>No payrolls</p>
+            )}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };

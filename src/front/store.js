@@ -3,18 +3,10 @@ export const initialStore=()=>{
     signings: [],
     users: [],
     user: {
-      firstName: "FirstName",
-      lastName: "LastName",
-      email: "mail@mail.com",
-      address: "Address",
-      dni_nie: "DNI/NIE",
-      iban: "IBAN",
-      birthDate: "12/12/2012",
-      rol: "ROL",
-      isActive: false,
-      isAdmin: false
     },
-    firstUserExist: false
+    firstUserExist: false,
+    userContracts:[],
+    payrolls: []
   }
 }
 
@@ -43,6 +35,18 @@ export default function storeReducer(store, action = {}) {
           ...store,
           firstUserExist: action.payload 
         };
+
+      case 'GET_CONTRACTS':
+      return {
+        ...store,
+        userContracts: action.payload
+      };
+
+      case 'GET_PAYROLLS':
+      return {
+        ...store,
+        payrolls: action.payload
+      };
 
       default:
       throw Error('Unknown action.');
