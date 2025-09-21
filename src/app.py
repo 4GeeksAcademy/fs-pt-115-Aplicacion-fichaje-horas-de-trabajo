@@ -14,7 +14,6 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from datetime import timedelta
 
-
 # from models import Person
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -32,6 +31,7 @@ app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=5)
 jwt = JWTManager(app)
 
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=300)
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
 if db_url is not None:

@@ -3,6 +3,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { getUsuarios } from "../services/APIServices.js";
+import { ClockInButton } from "../components/ClockInButton.jsx";
 import { comproveAuth } from "../components/ExpTokenFunction.jsx";
 
 export const Home = () => {
@@ -14,6 +15,7 @@ export const Home = () => {
 
   useEffect(() => {
     getUsuarios(dispatch).catch((err) => console.error(err));
+    
   }, [dispatch]);
 
   const workers = store.users || [];
@@ -23,17 +25,12 @@ export const Home = () => {
   );
 
   return (
-    <div className="container-fluid d-flex justify-content-center">
-      <div className="row">
-        <div className="col-md-10 offset-md-1 border rounded shadow-sm my-4 p-3 bg-dark">
-          {/* Botones */}
+
+    <>
+      <div className="container-fluid d-flex justify-content-center mt-5">
+        <div className="row">
           <div className="mb-4 p-3 bg-dark d-flex justify-content-center align-items-center">
-            <button
-              className="btn btn-success rounded-circle m-2"
-              style={{ width: "120px", height: "120px" }}
-            >
-              Add worker
-            </button>
+          <ClockInButton/>
             <button
               className="btn btn-primary rounded-circle m-2"
               style={{ width: "120px", height: "120px" }}
@@ -57,6 +54,7 @@ export const Home = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Type a name..."
+
             />
           </div>
 
@@ -126,6 +124,6 @@ export const Home = () => {
           </div>
         </div>
       </div>
-    </div>
+      </>
   );
 };

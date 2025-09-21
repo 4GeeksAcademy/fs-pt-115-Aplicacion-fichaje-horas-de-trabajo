@@ -14,6 +14,7 @@ import { Profile } from "./pages/Profile";
 import CheckFirstUserRoute from "./components/CheckFirstUserRoute";
 import { Request } from "./pages/Request";
 import ProtectedRoutes from "./components/ProtectedRoutes";
+import PrivateRoute from "./components/PrivateRoute";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -29,7 +30,7 @@ export const router = createBrowserRouter(
   
   <Route element={<ProtectedRoutes/>}>
     <Route path="/" element={<Home/>}/>
-    <Route path="/profile" element={<Profile/>} />
+    <Route path="/profile/:id" element={<Profile/>} />
     <Route path="/admin/request" element={<Request/>} />
     <Route path="/admin/signup" element={<SignUp/>} />
     <Route path="/admin" element={<AdminDashboard/>} />

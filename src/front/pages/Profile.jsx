@@ -1,6 +1,9 @@
 import { useEffect, useMemo } from "react";
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import { UserCard } from "../components/UserCard.jsx";
+import { UserInfo } from "../components/UserInfo.jsx";
+import { Calendar } from "../components/Calendar.jsx";
 import {getUserByToken, getSignings, getContracts,} from "../services/APIServices.js";
 import workedHours from "../components/workedHours.jsx";
 
@@ -19,6 +22,7 @@ export const Profile = () => {
   };
 
   useEffect(() => {
+
     const fetchData = async () => {
       try {
         const user = await getUserByToken();
@@ -97,7 +101,6 @@ export const Profile = () => {
             <p className="small text-white">📧 {store.user.email}</p>
           </div>
         </div>
-
         <div className="col-lg-8">
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h6 className="fw-bold">Turn</h6>
