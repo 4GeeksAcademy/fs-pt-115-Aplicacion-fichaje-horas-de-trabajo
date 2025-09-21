@@ -3,6 +3,7 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
+import { Calendar } from "../components/Calendar.jsx";
 
 export const Profile = () => {
   const { store, dispatch } = useGlobalReducer();
@@ -12,7 +13,7 @@ export const Profile = () => {
   useEffect(() => {
     console.log("UserActivation:", UserActivation);
   }, [UserActivation]);
-  
+
   return (
     <>
       <div className="container-fluid d-flex justify-content-center">
@@ -34,15 +35,16 @@ export const Profile = () => {
               <div className="mb-4 p-3 bg-dark d-flex justify-content-end align-items-center">
                 {/* Admin Switch */}
                 {UserActivation && UserActivation.isadmin === true ? (
-                <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="boolSwitch"/>
-              <label class="form-check-label text-light" for="boolSwitch">Is Admin</label>
-                </div>
-              ) : null}
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="boolSwitch" />
+                    <label class="form-check-label text-light" for="boolSwitch">Is Admin</label>
+                  </div>
+                ) : null}
 
               </div>
 
               <div className=" input-group input-group-sm mb-3">
+                <Calendar/>
                 <span className="input-group-text" id="inputGroup-sizing-sm">
                   Search Worker
                 </span>
@@ -87,15 +89,15 @@ export const Profile = () => {
                     >
                       <table className="table table-dark align-middle">
                         <tbody>
-          <UserInfo firstName="HOLA" totalHours="10" breakHours="1" regularHours="9" overtime="0" absence="0" />
-          <UserInfo firstName="Juan" totalHours="12" breakHours="1" regularHours="11" overtime="1" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
-          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
+                          <UserInfo firstName="HOLA" totalHours="10" breakHours="1" regularHours="9" overtime="0" absence="0" />
+                          <UserInfo firstName="Juan" totalHours="12" breakHours="1" regularHours="11" overtime="1" absence="0" />
+                          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
+                          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
+                          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
+                          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
+                          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
+                          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
+                          <UserInfo firstName="Ana" totalHours="8" breakHours="0.5" regularHours="7.5" overtime="0" absence="0" />
                         </tbody>
                       </table>
                     </div>

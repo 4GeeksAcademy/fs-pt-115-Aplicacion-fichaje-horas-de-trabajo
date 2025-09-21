@@ -12,7 +12,7 @@ from api.admin import setup_admin
 from api.commands import setup_commands
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-
+from datetime import timedelta
 
 # from models import Person
 
@@ -30,6 +30,7 @@ CORS(app, origins=[FRONTEND_URL], supports_credentials=True)
 app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')  # Change this!
 jwt = JWTManager(app)
 
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=300)
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
 if db_url is not None:

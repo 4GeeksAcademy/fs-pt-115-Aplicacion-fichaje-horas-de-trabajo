@@ -33,7 +33,7 @@ export const login = async (email, password) => {
 };
 
 // CREAR USUARIO
-export const crearUsuario = async (usuario) => {
+export const crearUsuario = async (newUser) => {
   const token = localStorage.getItem("token");
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/api/users`,
@@ -43,7 +43,20 @@ export const crearUsuario = async (usuario) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(usuario),
+      body: JSON.stringify({
+        first_name: newUser.first_name,
+        surname: newUser.surname,
+        last_name: newUser.last_name,
+        email: newUser.email,
+        DNI: newUser.dni_nie,
+        iban: newUser.iban,
+        address: newUser.address,
+        birth_date: new Date(newUser.birth_date).toISOString(),
+        rol: newUser.rol,
+        is_admin: newUser.is_admin,
+        password: newUser.password,
+        status: "Inactivo",
+      }),
     }
   );
 
@@ -201,43 +214,158 @@ export const checkUsuarios = async () => {
   return data.user_created;
 };
 
-
 // Crear solicitud vacaciones
 export const createSolicitud = async (solicitudData) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/solicitudes`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(solicitudData),
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/solicitudes`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(solicitudData),
+    }
+  );
   return response.json();
 };
 
 // Obtener todas las solicitudes
 export const getSolicitudes = async () => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/solicitudes`);
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/solicitudes`
+  );
   return response.json();
 };
 
 // Obtener una solicitud por ID
 export const getSolicitudById = async (id) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`);
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`
+  );
   return response.json();
 };
 
 // Actualizar solicitud (PUT)
 export const updateSolicitud = async (id, solicitudData) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(solicitudData),
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(solicitudData),
+    }
+  );
   return response.json();
 };
 
 // Eliminar solicitud (DELETE)
 export const deleteSolicitud = async (id) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`, {
-    method: "DELETE",
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`,
+    {
+      method: "DELETE",
+    }
+  );
   return response.json();
+};
+
+//FICHAJES
+
+export const addsigning = async (id, newSigning, scheduleId) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/signings/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        user_id: id,
+        schedule_id: scheduleId,
+        sign_type: newSigning.sign_type,
+        datetime: toISOString(newSigning.datetime),
+        lat: newSigning.lat,
+        long: newSigning.long,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("No se ha podido registrar el fichaje");
+  }
+
+  return await response.json();
+};
+
+export const getsignings = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/signings`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al obtener fichajes", 400);
+  }
+  const data = await response.json();
+
+  return data.signing;
+};
+
+//HORARIOS
+
+export const addschedule = async (id, start_datetime, end_datetime) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/schedules/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        user_id: id,
+        start_datetime: start_datetime,
+        end_datetime: end_datetime,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("No se ha podido registrar el fichaje");
+  }
+
+  return await response.json();
+};
+
+export const getschedule = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/schedules`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al obtener fichajes", 400);
+  }
+  const data = await response.json();
+
+  return data.schedules;
 };

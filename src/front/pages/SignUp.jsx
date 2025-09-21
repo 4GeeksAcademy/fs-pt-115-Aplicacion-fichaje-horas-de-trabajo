@@ -5,7 +5,6 @@ import { signUp, getUsuarios } from "../services/APIServices.js";
 
 export const SignUp = () => {
   const { store, dispatch } = useGlobalReducer();
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const [newUser, setNewUser] = useState({
     firstName: "",
@@ -18,7 +17,6 @@ export const SignUp = () => {
     password: "",
     dni_nie: "",
     iban: "",
-    is_admin: false,
   });
 
   const handleInputsChange = (e) => {
@@ -64,7 +62,7 @@ export const SignUp = () => {
         dni_nie: newUser.dni_nie,
         iban: newUser.iban,
         password: newUser.password,
-        is_admin: newUser.is_admin,
+        is_admin: true,
         status: "Inactivo",
       });
       localStorage.setItem("token", created.token);
@@ -262,18 +260,6 @@ export const SignUp = () => {
                       aria-describedby="inputGroup-sizing-sm"
                     />
                   </div>
-                </div>
-                <div className="form-check ms-3 mb-1">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="isAdmin"
-                    checked={newUser.is_admin}
-                    onChange={(e) => setIsAdmin(e.target.checked)}
-                  />
-                  <label className="form-check-label" htmlFor="isAdmin">
-                    Es admin
-                  </label>
                 </div>
                 <button className="btn btn-primary w-100 mt-3">Submit</button>
               </form>

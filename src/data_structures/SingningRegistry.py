@@ -18,7 +18,7 @@ class singningRegisty:
         return eid
 
     def _generate_singning(self, type): # Falta Probar
-        response = requests.get(os.getenv('VITE_BACKEND_URL'), headers={
+        response = requests.get(os.getenv('EXTERNAL_API'), headers={
             "Authorization": os.getenv('API_KEY'),
         })
 
