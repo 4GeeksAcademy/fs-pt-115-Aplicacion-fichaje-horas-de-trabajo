@@ -4,12 +4,14 @@ import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { getUsuarios } from "../services/APIServices.js";
 import { ClockInButton } from "../components/ClockInButton.jsx";
+import { comproveAuth } from "../components/ExpTokenFunction.jsx";
 
 export const Home = () => {
 
   const { store, dispatch } = useGlobalReducer();
   const [search, setSearch] = useState("");
 
+  comproveAuth();
 
   useEffect(() => {
     getUsuarios(dispatch).catch((err) => console.error(err));

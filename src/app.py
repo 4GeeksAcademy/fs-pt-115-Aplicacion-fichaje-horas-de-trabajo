@@ -22,12 +22,13 @@ static_file_dir = os.path.join(os.path.dirname(
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
-FRONTEND_URL = os.getenv("VITE_BACKEND_URL", "http://localhost:3000")
+FRONTEND_URL = os.getenv("VITE_FRONTEND_URL", "http://localhost:3000")
 
 CORS(app, origins=[FRONTEND_URL], supports_credentials=True)
 
 # Setup the Flask-JWT-Extended extension
-app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')  # Change this!
+app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=5)
 jwt = JWTManager(app)
 
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=300)

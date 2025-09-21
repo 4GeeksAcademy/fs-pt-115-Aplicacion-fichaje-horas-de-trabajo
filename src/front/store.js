@@ -2,11 +2,21 @@ export const initialStore = () => {
   return {
     signings: [],
     users: [],
+<<<<<<< HEAD
     user: {},
     firstUserExist: false,
     userSchedule: [],
   };
 };
+=======
+    user: {
+    },
+    firstUserExist: false,
+    userContracts:[],
+    payrolls: []
+  }
+}
+>>>>>>> develop
 
 export default function storeReducer(store, action = {}) {
   switch (action.type) {
@@ -27,6 +37,7 @@ export default function storeReducer(store, action = {}) {
         user: action.payload,
       };
 
+<<<<<<< HEAD
     case "SET_FIRST_USER_EXIST":
       return {
         ...store,
@@ -41,4 +52,21 @@ export default function storeReducer(store, action = {}) {
     default:
       throw Error("Unknown action.");
   }
+=======
+      case 'GET_CONTRACTS':
+      return {
+        ...store,
+        userContracts: action.payload
+      };
+
+      case 'GET_PAYROLLS':
+      return {
+        ...store,
+        payrolls: action.payload
+      };
+
+      default:
+      throw Error('Unknown action.');
+  }    
+>>>>>>> develop
 }
