@@ -39,7 +39,7 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg bg-dark">
+    <nav className="navbar navbar-expand-lg bg-dark text-white">
       <div className="container-fluid">
         {/* <Link
           to={localStorage.getItem("token") ? "/home" : "/login"}
