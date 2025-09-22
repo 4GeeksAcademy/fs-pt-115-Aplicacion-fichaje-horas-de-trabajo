@@ -1,28 +1,42 @@
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, redirect, useNavigate } from "react-router-dom";
 import { getUserByToken } from "../services/APIServices";
 import { useEffect, useState } from "react";
+import { RegisterMemberModal } from "./RegisterMemberModal";
+import useGlobalReducer from "../hooks/useGlobalReducer";
 
 export const Navbar = () => {
   const [user, setUser] = useState(null);
+  const { store, dispatch } = useGlobalReducer();
+  const userId = store.user?.id;
 
-   useEffect(() => {
-  const fetchUser = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.log("No hay token, usuario no logueado");
-      return;
-    }
 
-    try {
-      const userData = await getUserByToken(token);
-      console.log("Usuario obtenido:", userData);
-      setUser(userData);
-    } catch (error) {
-      console.error("Error al cargar el usuario:", error);
-    }
-  };
-   fetchUser();
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = await localStorage.getItem("token");
+      if (!token /* ||  Añadir aqui condicion isTokenExpired*/) {
+        console.log("No hay token, usuario no logueado");
+        return;
+      }
+
+      try {
+        const userData = await getUserByToken(token);
+        console.log("Usuario obtenido:", userData);
+        setUser(userData);
+        dispatch({ type: "SET_USER", payload: userData });
+        // Log user after state update (optional: useEffect can be used for more accurate logging)
+      } catch (error) {
+        console.error("Error al cargar el usuario:", error);
+      }
+    };
+    fetchUser();
   }, []);
+
+  const onSubmit = () => {
+    console.log(user?.is_admin);
+    setUser(null);
+    localStorage.clear();
+    window.location.href = "/";
+  };
 
   return (
     <nav className="navbar navbar-expand-lg bg-dark">
@@ -52,10 +66,16 @@ export const Navbar = () => {
             {user?.is_admin && (
               <>
                 <li className="nav-item">
-                  <Link to="/admin/signup">
-                    <button className="btn btn-success m-2">Add worker</button>
-                  </Link>
+                  <button
+                    type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#registerModal"
+                    className="btn btn-success m-2"
+                  >
+                    Add worker
+                  </button>{" "}
                 </li>
+                <RegisterMemberModal />
                 <li className="nav-item">
                   <Link to="/admin/request">
                     <button className="btn btn-primary m-2">
@@ -66,11 +86,20 @@ export const Navbar = () => {
                 </li>
               </>
             )}
-            <li className="nav-item">
-              <Link to="/profile">
-                <button className="btn btn-dark m-2">My Profile</button>
-              </Link>
-            </li>
+            {user && (
+              <>
+                <li className="nav-item">
+                  <Link to={`/profile/${userId}`}>
+                    <button className="btn btn-dark m-2">My Profile</button>
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <button onClick={onSubmit} className="btn btn-danger m-2">
+                    Log out
+                  </button>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

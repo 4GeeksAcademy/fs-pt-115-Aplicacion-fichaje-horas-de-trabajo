@@ -211,29 +211,24 @@ class Holidays(db.Model):
             "remaining_days": self.remaining_days
         }
 
-
 class Schedule(db.Model):
     __tablename__ = "schedule"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    shift: Mapped[str] = mapped_column(String(50))
-    start_time: Mapped[time] = mapped_column(Time)
-    end_time: Mapped[time] = mapped_column(Time)
-    day: Mapped[str] = mapped_column(String(20))
+    start_time: Mapped[datetime] = mapped_column(DateTime)
+    end_time: Mapped[datetime] = mapped_column(DateTime)
 
     user: Mapped["User"] = relationship(back_populates="schedules")
     signings: Mapped[list["Signing"]] = relationship(back_populates="schedule")
 
     def serialize(self):
         return {
-        "id": self.id,
-        "user_id": self.user_id,
-        "shift": self.shift,
-        "start_time": str(self.start_time) if self.start_time else None,
-        "end_time": str(self.end_time) if self.end_time else None,
-        "day": self.day
-    }
+            "id": self.id,
+            "user_id": self.user_id,
+            "start_time": str(self.start_time) if self.start_time else None,
+            "end_time": str(self.end_time) if self.end_time else None,
+        }
 
 
 class Signing(db.Model):

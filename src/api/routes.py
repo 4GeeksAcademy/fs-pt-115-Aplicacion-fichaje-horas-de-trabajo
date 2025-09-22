@@ -1,21 +1,22 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest
+from flask import Flask, request, jsonify, url_for, Blueprint, current_app
+from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
-from datetime import time, datetime
+from datetime import time, datetime, timezone
 from api.historial_status import STATUS
 from flask_jwt_extended import create_access_token 
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from .historial_status import STATUS
 
-api = Blueprint('api', __name__)
+api = Blueprint("api", __name__)
 
-# Allow CORS requests to this API
-CORS(api)
+CORS(api, resources={r"/api/*": {"origins": "*"}})
+
+
 
 
 @api.route('/signup', methods=['POST'])
@@ -106,7 +107,15 @@ def login():
     
     if user.check_password(data["password"]):
         access_token = create_access_token(identity=str(user.id))
-        return jsonify ({"msg": "Login succesful", "token": access_token, "user": user.serialize()}), 200
+        expires = current_app.config["JWT_ACCESS_TOKEN_EXPIRES"]
+        expire_time = datetime.now(timezone.utc) + expires
+
+        return jsonify({
+            "msg": "Login successful",
+            "token": access_token,
+            "expires_at": expire_time.isoformat(), 
+            "user": user.serialize()
+        }), 200
     else:
         return jsonify({"msg": "Invalid email or password"}), 401
 
@@ -145,36 +154,73 @@ def create_user():
     if not identity.get("is_admin"):
         return jsonify({"msg": "Solo el admin puede crear usuarios"}), 400
     
-    data = request.json
-    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "is_admin", "status_id, iban, address, birth_date"]
+    data = request.get_json()
+
+    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "address", "iban", "birth_date", "is_admin"]
     missing = [f for f in required_fields if f not in data or not data[f]]
     if missing:
         return jsonify({"msg": f"Missing fields: {', '.join(missing)}"}), 400
     
-    existing_user = db.session.execute(
-        db.select(User).where(User.email == data["email"])
-    ).scalar_one_or_none()
-    if existing_user:
-        return jsonify({"msg": "User with this email already exists"}), 400
+    email = data["email"]
+    if "@" not in email or "." not in email.split("@")[-1]:
+        return jsonify({"msg": "Email inválido"}), 400
+    if User.query.filter_by(email=email).first():
+        return jsonify({"msg": "Ese email ya está registrado"}), 400
+    
+
+    if User.query.filter_by(DNI=data["DNI"]).first():
+        return jsonify({"msg": "Ese DNI ya está registrado"}), 400
 
 
-    user = User(
-        last_name=data["last_name"],
-        address=data["address"],
-        birth_date=data["birth_date"],
-        iban=data["iban"],
-        surname=data["surname"],
-        first_name=data["first_name"],
+    if len(data["password"]) < 8:
+        return jsonify({"msg": "La contraseña debe tener al menos 8 caracteres"}), 400
+    
+    iban = data.get("iban", "")
+    if len(iban) < 15 or len(iban) > 34:
+        return jsonify({"msg": "IBAN inválido. Debe tener entre 15 y 34 caracteres"}), 400
+
+    existing_users = User.query.count()
+    if existing_users > 0:
+        return jsonify({"msg": "El registro inicial ya se realizó. Usa /login"}), 400
+    
+
+    print("STATUS cargado:", STATUS)
+    print("Status recibido del cliente:", data.get("status"))
+    
+    if "status" not in data:
+        return jsonify({"msg": "El campo 'status' es obligatorio"}), 400
+    
+    status_input = str(data["status"])
+
+    if status_input not in STATUS:
+        return jsonify({"msg": f"Estado inválido. Opciones: {', '.join(STATUS.keys())}"}), 400
+    
+    status_id = STATUS[status_input]
+
+    birth_date = datetime.fromisoformat(data["birth_date"])
+   
+
+    new_user = User(
         email=data["email"],
+        address=data.get("address"),
+        birth_date=birth_date,
+        iban=data.get("iban"),
+        first_name=data["first_name"],
+        surname=data["surname"],
+        last_name=data["last_name"],
         DNI=data["DNI"],
         rol=data["rol"],
-        is_admin=data["is_admin"],
-        status_id=data["status_id"]
-    )
-    user.set_password(data["password"])
-    db.session.add(user)
+        is_admin=["is_admin"],
+        status_id=status_id
+)
+    new_user.set_password(data["password"])
+
+    db.session.add(new_user)
     db.session.commit()
-    return jsonify(user.serialize()), 200
+
+    access_token = create_access_token(identity=str(new_user.id))
+
+    return jsonify({"msg": "User boss created successfully", "token": access_token, "user": new_user.serialize()}), 200
 
 @api.route("/users/<int:id>", methods=["DELETE"])
 @jwt_required()
@@ -253,10 +299,8 @@ def add_schedule(user_id):
     data = request.json
     schedule = Schedule(
         user_id=user_id,
-        shift=data["shift"],
-        start_time=time.fromisoformat(data["start_time"]),
-        end_time=time.fromisoformat(data["end_time"]),
-        day=data["day"]
+        start_time=datetime.fromisoformat(data["start_datetime"]),
+        end_time=datetime.fromisoformat(data["end_datetime"]),
     )
     db.session.add(schedule)
     db.session.commit()
@@ -415,6 +459,87 @@ def delete_request(request_id):
     db.session.commit()
     return jsonify({"message": "Solicitud eliminada"}), 200
 
+
+#Documentos
+
+@api.route("/users/<int:user_id>/documents", methods=["GET"])
+@jwt_required()
+def get_documents(user_id):
+    documents = Document.query.filter_by(user_id=user_id).all()
+    return jsonify([doc.serialize() for doc in documents]), 200
+
+
+@api.route("/users/<int:user_id>/documents", methods=["POST"])
+@jwt_required()
+def add_document(user_id):
+    data = request.json
+    doc = Document(
+        user_id=user_id,
+        file_url=data.get("file_url"),
+        approved=data.get("approved", False)
+    )
+    db.session.add(doc)
+    db.session.commit()
+
+    if "type" in data:
+        doc_type = DocumentType(
+            document_id=doc.id,
+            payroll=data["type"].get("payroll"),
+            contract=data["type"].get("contract"),
+            supporting_documents=data["type"].get("supporting_documents")
+        )
+        db.session.add(doc_type)
+        db.session.commit()
+
+    return jsonify(doc.serialize()), 201
+
+
+@api.route("/users/<int:user_id>/documents/<int:doc_id>", methods=["PUT"])
+@jwt_required()
+def update_document(user_id, doc_id):
+    doc = Document.query.filter_by(user_id=user_id, id=doc_id).first()
+    if not doc:
+        return jsonify({"msg": "Document not found"}), 404
+
+    data = request.json
+    if "file_url" in data:
+        doc.file_url = data["file_url"]
+    if "approved" in data:
+        doc.approved = data["approved"]
+
+
+    if "type" in data:
+        doc_type = doc.types
+        if doc_type:
+            doc_type.payroll = data["type"].get("payroll", doc_type.payroll)
+            doc_type.contract = data["type"].get("contract", doc_type.contract)
+            doc_type.supporting_documents = data["type"].get("supporting_documents", doc_type.supporting_documents)
+        else:
+            doc_type = DocumentType(
+                document_id=doc.id,
+                payroll=data["type"].get("payroll"),
+                contract=data["type"].get("contract"),
+                supporting_documents=data["type"].get("supporting_documents")
+            )
+            db.session.add(doc_type)
+
+    db.session.commit()
+    return jsonify(doc.serialize()), 200
+
+
+@api.route("/users/<int:user_id>/documents/<int:doc_id>", methods=["DELETE"])
+@jwt_required()
+def delete_document(user_id, doc_id):
+    doc = Document.query.filter_by(user_id=user_id, id=doc_id).first()
+    if not doc:
+        return jsonify({"msg": "Document not found"}), 404
+
+    if doc.types:
+        db.session.delete(doc.types)
+
+    db.session.delete(doc)
+    db.session.commit()
+    return jsonify({"msg": "Document deleted"}), 200
 
 #Cambio de estado
 
