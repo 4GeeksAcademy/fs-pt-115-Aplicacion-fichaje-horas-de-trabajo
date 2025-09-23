@@ -215,56 +215,55 @@ export const checkUsuarios = async () => {
 };
 
 // Crear solicitud vacaciones
-export const createVacaciones = async (solicitudData) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/users/${userid}/holidays`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(solicitudData),
-    }
-  );
-  return response.json();
+export const createHoliday = async (data) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getToken()}`
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error("Error al crear la solicitud");
+  return res.json();
 };
 
 // Obtener todas las solicitudes de vacaciones
-export const getVacaciones = async () => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/users/${userid}/holidays`
-  );
-  return response.json();
+export const getHolidays = async () => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays`, {
+    headers: {
+      "Authorization": `Bearer ${getToken()}`
+    }
+  });
+  if (!res.ok) throw new Error("Error al obtener las solicitudes");
+  return res.json();
 };
 
-// Obtener una solicitud de vacaciones por ID
-export const getVacacionesById = async (id) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/users/${userid}/holidays`
-  );
-  return response.json();
-};
 
 // Actualizar solicitud de Vacaciones (PUT)
-export const updateVacaciones = async (id, solicitudData) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/users/${userid}/holidays/${holidayid}`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(solicitudData),
-    }
-  );
-  return response.json();
+export const updateHoliday = async (id, data) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getToken()}`
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error("Error al actualizar la solicitud");
+  return res.json();
 };
 
 // Eliminar solicitud de Vacaciones (DELETE)
-export const deleteVacaciones = async (id) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/users/${userid}/holidays/${holidayid}`,
-    {
-      method: "DELETE",
+export const deleteHoliday = async (id) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${getToken()}`
     }
-  );
-  return response.json();
+  });
+  if (!res.ok) throw new Error("Error al eliminar la solicitud");
+  return res.json();
 };
 
 //FICHAJES
