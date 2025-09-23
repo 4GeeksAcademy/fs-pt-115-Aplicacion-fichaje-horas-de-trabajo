@@ -26,7 +26,7 @@ export default function SolicitudVacaciones() {
     setErrorMsg("");
 
     try {
-      const data = await crearSolicitud(formData);
+      const data = await createVacaciones(formData);
       console.log("Solicitud enviada con éxito:", data);
       alert(" Solicitud creada con éxito");
     } catch (error) {

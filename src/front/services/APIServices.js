@@ -215,9 +215,9 @@ export const checkUsuarios = async () => {
 };
 
 // Crear solicitud vacaciones
-export const createSolicitud = async (solicitudData) => {
+export const createVacaciones = async (solicitudData) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/solicitudes`,
+    `${import.meta.env.VITE_BACKEND_URL}/users/${userid}/holidays`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -227,26 +227,26 @@ export const createSolicitud = async (solicitudData) => {
   return response.json();
 };
 
-// Obtener todas las solicitudes
-export const getSolicitudes = async () => {
+// Obtener todas las solicitudes de vacaciones
+export const getVacaciones = async () => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/solicitudes`
+    `${import.meta.env.VITE_BACKEND_URL}/users/${userid}/holidays`
   );
   return response.json();
 };
 
-// Obtener una solicitud por ID
-export const getSolicitudById = async (id) => {
+// Obtener una solicitud de vacaciones por ID
+export const getVacacionesById = async (id) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`
+    `${import.meta.env.VITE_BACKEND_URL}/users/${userid}/holidays`
   );
   return response.json();
 };
 
-// Actualizar solicitud (PUT)
-export const updateSolicitud = async (id, solicitudData) => {
+// Actualizar solicitud de Vacaciones (PUT)
+export const updateVacaciones = async (id, solicitudData) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`,
+    `${import.meta.env.VITE_BACKEND_URL}/users/${userid}/holidays/${holidayid}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -256,10 +256,10 @@ export const updateSolicitud = async (id, solicitudData) => {
   return response.json();
 };
 
-// Eliminar solicitud (DELETE)
-export const deleteSolicitud = async (id) => {
+// Eliminar solicitud de Vacaciones (DELETE)
+export const deleteVacaciones = async (id) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`,
+    `${import.meta.env.VITE_BACKEND_URL}/users/${userid}/holidays/${holidayid}`,
     {
       method: "DELETE",
     }
