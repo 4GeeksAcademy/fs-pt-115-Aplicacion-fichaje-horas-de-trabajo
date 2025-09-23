@@ -191,19 +191,23 @@ class StatusRequest(db.Model):
 
     request: Mapped["Request"] = relationship(back_populates="request_status")
 
+
+
 class Holidays(db.Model):
     __tablename__ = "holidays"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
 
     fecha_inicio: Mapped[date] = mapped_column(Date, nullable=False)
     fecha_fin: Mapped[date] = mapped_column(Date, nullable=False)
-    horas: Mapped[str | None] = mapped_column(String(10))      
+    horas: Mapped[str | None] = mapped_column(String(10))
     tipo: Mapped[str] = mapped_column(String(50), nullable=False)
-    descripcion: Mapped[str | None] = mapped_column(Text)    
+    descripcion: Mapped[str | None] = mapped_column(String(500))
 
-    def serialize(self) -> dict:
+    user: Mapped["User"] = relationship(back_populates="holidays")
+
+    def serialize(self):
         return {
             "id": self.id,
             "fechaInicio": str(self.fecha_inicio),
