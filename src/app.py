@@ -10,6 +10,9 @@ from api.models import db
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
+from flask_jwt_extended import JWTManager
+from flask_cors import CORS
+from datetime import timedelta
 
 # from models import Person
 
@@ -19,6 +22,16 @@ static_file_dir = os.path.join(os.path.dirname(
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
+FRONTEND_URL = os.getenv("VITE_FRONTEND_URL", "http://localhost:3000")
+
+CORS(app, origins=[FRONTEND_URL], supports_credentials=True)
+
+# Setup the Flask-JWT-Extended extension
+app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=5)
+jwt = JWTManager(app)
+
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=300)
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
 if db_url is not None:

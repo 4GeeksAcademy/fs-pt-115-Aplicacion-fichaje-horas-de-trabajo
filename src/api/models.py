@@ -1,8 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, text
+from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, text, Date, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from flask_bcrypt import generate_password_hash, check_password_hash
-from datetime import time, datetime, timezone
+from datetime import time, datetime, timezone, date
 
 db = SQLAlchemy()
 
@@ -21,7 +21,9 @@ class User(db.Model):
     rol: Mapped[str] = mapped_column(String(20), nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     status_id: Mapped[int] = mapped_column(ForeignKey("status.id"), nullable=False)
-
+    birth_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
+    address: Mapped[str] = mapped_column(String(255), nullable=False)
+    iban: Mapped[str] = mapped_column(String(34), nullable=False)
 
     documents: Mapped[list["Document"]] = relationship(back_populates="user")
     holidays: Mapped[list["Holidays"]] = relationship(back_populates="user")
@@ -29,6 +31,7 @@ class User(db.Model):
     signings: Mapped[list["Signing"]] = relationship(back_populates="user")
     requests: Mapped[list["Request"]] = relationship(back_populates="employee", foreign_keys=lambda: Request.user_id)
     admin_request: Mapped[list["Request"]] = relationship(back_populates="admin", foreign_keys=lambda: Request.admin_id)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password).decode("utf-8")
 
@@ -42,6 +45,9 @@ class User(db.Model):
             "surname": self.surname,
             "first_name": self.first_name,
             "email": self.email,
+            "birth_date": self.birth_date.strftime("%d/%m/%Y") if self.birth_date else None,
+            "address": self.address,
+            "iban": self.iban,
             "DNI": self.DNI,
             "rol": self.rol,
             "is_admin": self.is_admin,
@@ -137,6 +143,7 @@ class Request(db.Model):
     employee: Mapped["User"] = relationship(back_populates="requests", foreign_keys=[user_id])
     admin: Mapped["User"] = relationship(back_populates="admin_request", foreign_keys=[admin_id])
     request_types: Mapped[list["RequestType"]] = relationship(back_populates="request")
+    request_status: Mapped[list["StatusRequest"]] = relationship(back_populates="request")
 
     def serialize(self):
         return {
@@ -173,37 +180,50 @@ class RequestType(db.Model):
             "others": self.others
         }
 
+class StatusRequest(db.Model):
+    __tablename__ = "request_status"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    request_id: Mapped[int] = mapped_column(ForeignKey("request.id"))
+    accepted: Mapped[str] = mapped_column(String(250))
+    cancelled : Mapped[str] = mapped_column(String(250))
+    pending : Mapped[bool] = mapped_column(Boolean, default=True)
+
+    request: Mapped["Request"] = relationship(back_populates="request_status")
+
+
 
 class Holidays(db.Model):
     __tablename__ = "holidays"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    total_days: Mapped[int] = mapped_column(Integer)
-    used_days: Mapped[int] = mapped_column(Integer)
-    remaining_days: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+
+    fecha_inicio: Mapped[date] = mapped_column(Date, nullable=False)
+    fecha_fin: Mapped[date] = mapped_column(Date, nullable=False)
+    horas: Mapped[str | None] = mapped_column(String(10))
+    tipo: Mapped[str] = mapped_column(String(50), nullable=False)
+    descripcion: Mapped[str | None] = mapped_column(String(500))
 
     user: Mapped["User"] = relationship(back_populates="holidays")
 
     def serialize(self):
         return {
             "id": self.id,
-            "user_id": self.user_id,
-            "total_days": self.total_days,
-            "used_days": self.used_days,
-            "remaining_days": self.remaining_days
+            "fechaInicio": str(self.fecha_inicio),
+            "fechaFin": str(self.fecha_fin),
+            "horas": self.horas,
+            "tipo": self.tipo,
+            "descripcion": self.descripcion,
         }
-
 
 class Schedule(db.Model):
     __tablename__ = "schedule"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    shift: Mapped[str] = mapped_column(String(50))
-    start_time: Mapped[time] = mapped_column(Time)
-    end_time: Mapped[time] = mapped_column(Time)
-    day: Mapped[str] = mapped_column(String(20))
+    start_time: Mapped[datetime] = mapped_column(DateTime)
+    end_time: Mapped[datetime] = mapped_column(DateTime)
 
     user: Mapped["User"] = relationship(back_populates="schedules")
     signings: Mapped[list["Signing"]] = relationship(back_populates="schedule")
@@ -212,10 +232,8 @@ class Schedule(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "shift": self.shift,
-            "start_time": self.start_time,
-            "end_time": self.end_time,
-            "day": self.day
+            "start_time": str(self.start_time) if self.start_time else None,
+            "end_time": str(self.end_time) if self.end_time else None,
         }
 
 
@@ -225,7 +243,7 @@ class Signing(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     schedule_id: Mapped[int] = mapped_column(ForeignKey("schedule.id"))
-    type: Mapped[str] = mapped_column(String(50))
+    sign_type: Mapped[str] = mapped_column(String(50))
     datetime: Mapped[DateTime] = mapped_column(DateTime)
     lat: Mapped[float] = mapped_column(Float)
     long: Mapped[float] = mapped_column(Float)
@@ -238,7 +256,7 @@ class Signing(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "schedule_id": self.schedule_id,
-            "type": self.type,
+            "sign_type": self.sign_type,
             "datetime": self.datetime.isoformat() if self.datetime else None,
             "lat": self.lat,
             "long": self.long
