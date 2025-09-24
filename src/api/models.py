@@ -1,8 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, text
+from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, text, Date, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from flask_bcrypt import generate_password_hash, check_password_hash
-from datetime import time, datetime, timezone
+from datetime import time, datetime, timezone, date
 
 db = SQLAlchemy()
 
@@ -191,24 +191,30 @@ class StatusRequest(db.Model):
 
     request: Mapped["Request"] = relationship(back_populates="request_status")
 
+
+
 class Holidays(db.Model):
     __tablename__ = "holidays"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    total_days: Mapped[int] = mapped_column(Integer)
-    used_days: Mapped[int] = mapped_column(Integer)
-    remaining_days: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+
+    fecha_inicio: Mapped[date] = mapped_column(Date, nullable=False)
+    fecha_fin: Mapped[date] = mapped_column(Date, nullable=False)
+    horas: Mapped[str | None] = mapped_column(String(10))
+    tipo: Mapped[str] = mapped_column(String(50), nullable=False)
+    descripcion: Mapped[str | None] = mapped_column(String(500))
 
     user: Mapped["User"] = relationship(back_populates="holidays")
 
     def serialize(self):
         return {
             "id": self.id,
-            "user_id": self.user_id,
-            "total_days": self.total_days,
-            "used_days": self.used_days,
-            "remaining_days": self.remaining_days
+            "fechaInicio": str(self.fecha_inicio),
+            "fechaFin": str(self.fecha_fin),
+            "horas": self.horas,
+            "tipo": self.tipo,
+            "descripcion": self.descripcion,
         }
 
 class Schedule(db.Model):

@@ -232,48 +232,68 @@ def delete_user(id):
 
 # Vacaciones
 
-@api.route("/users/<int:user_id>/holidays", methods=["GET"])
+@api.route("/holidays", methods=["GET"])
 @jwt_required()
-def get_holidays(user_id):
+def get_holidays():
+    user_id = get_jwt_identity()
     holidays = Holidays.query.filter_by(user_id=user_id).all()
-    return jsonify([h.serialize() for h in holidays])
+    return jsonify([h.serialize() for h in holidays]), 200
 
-
-@api.route("/users/<int:user_id>/holidays", methods=["POST"])
+@api.route("/holidays", methods=["POST"])
 @jwt_required()
-def add_holidays(user_id):
-    data = request.json
+def create_holiday():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    fecha_inicio = datetime.strptime(data.get("fechaInicio"), "%Y-%m-%d").date()
+    fecha_fin = datetime.strptime(data.get("fechaFin"), "%Y-%m-%d").date()
+
     holiday = Holidays(
         user_id=user_id,
-        total_days=data.get("total_days"),
-        used_days=data.get("used_days"),
-        remaining_days=data.get("remaining_days", data.get("total_days"))
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        horas=data.get("horas"),
+        tipo=data.get("tipo"),
+        descripcion=data.get("descripcion"),
     )
+
     db.session.add(holiday)
     db.session.commit()
-    return jsonify(holiday.serialize()), 200
+
+    return jsonify(holiday.serialize()), 201
 
 
-@api.route("/users/<int:user_id>/holidays/<int:holiday_id>", methods=["PUT"])
+@api.route("/holidays/<int:holiday_id>", methods=["PUT"])
 @jwt_required()
-def update_holiday(user_id, holiday_id):
-    holiday = Holidays.query.filter_by(user_id=user_id, id=holiday_id).first()
+def update_holiday(holiday_id):
+    user_id = get_jwt_identity()
+    holiday = Holidays.query.filter_by(id=holiday_id, user_id=user_id).first()
     if not holiday:
         return jsonify({"message": "Holiday not found"}), 404
 
-    data = request.json
-    holiday.total_days = data.get("total_days", holiday.total_days)
-    holiday.used_days = data.get("used_days", holiday.used_days)
-    holiday.remaining_days = data.get("remaining_days", holiday.remaining_days)
+    data = request.get_json()
+
+    
+    if "fechaInicio" in data:
+        holiday.fecha_inicio = datetime.strptime(data["fechaInicio"], "%Y-%m-%d").date()
+    if "fechaFin" in data:
+        holiday.fecha_fin = datetime.strptime(data["fechaFin"], "%Y-%m-%d").date()
+    if "horas" in data:
+        holiday.horas = data["horas"]
+    if "tipo" in data:
+        holiday.tipo = data["tipo"]
+    if "descripcion" in data:
+        holiday.descripcion = data["descripcion"]
 
     db.session.commit()
     return jsonify(holiday.serialize()), 200
 
 
-@api.route("/users/<int:user_id>/holidays/<int:holiday_id>", methods=["DELETE"])
+@api.route("/holidays/<int:holiday_id>", methods=["DELETE"])
 @jwt_required()
-def delete_holiday(user_id, holiday_id):
-    holiday = Holidays.query.filter_by(user_id=user_id, id=holiday_id).first()
+def delete_holiday(holiday_id):
+    user_id = get_jwt_identity()
+    holiday = Holidays.query.filter_by(id=holiday_id, user_id=user_id).first()
     if not holiday:
         return jsonify({"message": "Holiday not found"}), 404
 
