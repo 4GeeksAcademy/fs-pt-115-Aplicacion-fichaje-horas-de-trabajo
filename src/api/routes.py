@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from flask import Flask, request, jsonify, url_for, Blueprint, current_app
 from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType
-from api.utils import generate_sitemap, APIException
+from api.utils import generate_sitemap, APIException, UPLOAD_FOLDER, allowed_file, secure_filename, os
 from flask_cors import CORS
 from datetime import time, datetime, timezone
 from api.historial_status import STATUS
@@ -11,6 +11,7 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from .historial_status import STATUS
+import base64
 
 api = Blueprint('api', __name__)
 
@@ -120,7 +121,7 @@ def login():
 
 #Usuarios
 @api.route("/users", methods=["GET"])
-# @jwt_required()
+@jwt_required()
 def get_users():
 
     users = User.query.all() 
@@ -149,13 +150,17 @@ def get_profile():
 @api.route("/users", methods=["POST"])
 @jwt_required()
 def create_user():
+    print("Hola")
     identity = get_jwt_identity()
-    if not identity.get("is_admin"):
+    user = User.query.get(identity)
+    print(type(identity))
+    if not user.is_admin:
         return jsonify({"msg": "Solo el admin puede crear usuarios"}), 400
     
     data = request.json
-    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "is_admin", "status_id, iban, address, birth_date"]
-    missing = [f for f in required_fields if f not in data or not data[f]]
+    print(data)
+    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "is_admin", "status_id", "iban", "address", "birth_date"]
+    missing = [f for f in required_fields if f not in data or data[f] is None]
     if missing:
         return jsonify({"msg": f"Missing fields: {', '.join(missing)}"}), 400
     
@@ -432,28 +437,35 @@ def get_documents(user_id):
     documents = Document.query.filter_by(user_id=user_id).all()
     return jsonify([doc.serialize() for doc in documents]), 200
 
-
 @api.route("/users/<int:user_id>/documents", methods=["POST"])
 @jwt_required()
-def add_document(user_id):
-    data = request.json
+def add_document_file(user_id):
+    print("Hola")
+    if "file" not in request.files:
+        return jsonify({"msg": "Archivo es requerido"}), 400
+    
+    file = request.files["file"]
+    type_id = request.form.get("type_id")
+
+    if not type_id:
+        return jsonify({"msg": "type_id es requerido"}), 400
+
+    if file.filename == "":
+        return jsonify({"msg": "Archivo no seleccionado"}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({"msg": "Tipo de archivo no permitido"}), 400
+
+
+    file_data = base64.b64encode(file.read()).decode('utf-8')
+
     doc = Document(
         user_id=user_id,
-        file_url=data.get("file_url"),
-        approved=data.get("approved", False)
+        type_id=int(type_id),
+        file_url=file_data,
     )
     db.session.add(doc)
     db.session.commit()
-
-    if "type" in data:
-        doc_type = DocumentType(
-            document_id=doc.id,
-            payroll=data["type"].get("payroll"),
-            contract=data["type"].get("contract"),
-            supporting_documents=data["type"].get("supporting_documents")
-        )
-        db.session.add(doc_type)
-        db.session.commit()
 
     return jsonify(doc.serialize()), 201
 
@@ -470,22 +482,8 @@ def update_document(user_id, doc_id):
         doc.file_url = data["file_url"]
     if "approved" in data:
         doc.approved = data["approved"]
-
-
-    if "type" in data:
-        doc_type = doc.types
-        if doc_type:
-            doc_type.payroll = data["type"].get("payroll", doc_type.payroll)
-            doc_type.contract = data["type"].get("contract", doc_type.contract)
-            doc_type.supporting_documents = data["type"].get("supporting_documents", doc_type.supporting_documents)
-        else:
-            doc_type = DocumentType(
-                document_id=doc.id,
-                payroll=data["type"].get("payroll"),
-                contract=data["type"].get("contract"),
-                supporting_documents=data["type"].get("supporting_documents")
-            )
-            db.session.add(doc_type)
+    if "type_id" in data:
+        doc.type_id = data["type_id"]
 
     db.session.commit()
     return jsonify(doc.serialize()), 200
@@ -498,12 +496,151 @@ def delete_document(user_id, doc_id):
     if not doc:
         return jsonify({"msg": "Document not found"}), 404
 
-    if doc.types:
-        db.session.delete(doc.types)
-
     db.session.delete(doc)
     db.session.commit()
     return jsonify({"msg": "Document deleted"}), 200
+
+#Contracts
+
+@api.route("/users/<int:user_id>/documents/contracts", methods=["GET"])
+@jwt_required()
+def get_contracts(user_id):
+    contracts = Document.query.filter_by(user_id=user_id, type_id=1).all()
+    return jsonify([doc.serialize() for doc in contracts]), 200
+
+@api.route("/users/<int:user_id>/documents/contracts", methods=["POST"])
+@jwt_required()
+def add_contract(user_id):
+    if "file" not in request.files:
+        return jsonify({"msg": "Archivo es requerido"}), 400
+
+    file = request.files["file"]
+
+    if file.filename == "":
+        return jsonify({"msg": "Archivo no seleccionado"}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({"msg": "Tipo de archivo no permitido"}), 400
+
+    user_folder = os.path.join(UPLOAD_FOLDER, str(user_id))
+    os.makedirs(user_folder, exist_ok=True)
+
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(user_folder, filename)
+    counter = 1
+    base, ext = os.path.splitext(filename)
+    while os.path.exists(file_path):
+        filename = f"{base}_{counter}{ext}"
+        file_path = os.path.join(user_folder, filename)
+        counter += 1
+
+    file.save(file_path)
+
+    doc = Document(
+        user_id=user_id,
+        type_id=1,
+        file_url=file_path,
+        approved=False
+    )
+    db.session.add(doc)
+    db.session.commit()
+
+    return jsonify(doc.serialize()), 201
+
+#Payrolls
+
+@api.route("/users/<int:user_id>/documents/payrolls", methods=["GET"])
+@jwt_required()
+def get_payrolls(user_id):
+    payrolls = Document.query.filter_by(user_id=user_id, type_id=2).all()
+    return jsonify([doc.serialize() for doc in payrolls]), 200
+
+@api.route("/users/<int:user_id>/documents/payrolls", methods=["POST"])
+@jwt_required()
+def add_payroll(user_id):
+    if "file" not in request.files:
+        return jsonify({"msg": "Archivo es requerido"}), 400
+
+    file = request.files["file"]
+
+    if file.filename == "":
+        return jsonify({"msg": "Archivo no seleccionado"}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({"msg": "Tipo de archivo no permitido"}), 400
+
+    user_folder = os.path.join(UPLOAD_FOLDER, str(user_id))
+    os.makedirs(user_folder, exist_ok=True)
+
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(user_folder, filename)
+    counter = 1
+    base, ext = os.path.splitext(filename)
+    while os.path.exists(file_path):
+        filename = f"{base}_{counter}{ext}"
+        file_path = os.path.join(user_folder, filename)
+        counter += 1
+
+    file.save(file_path)
+
+    doc = Document(
+        user_id=user_id,
+        type_id=2,
+        file_url=file_path,
+        approved=False
+    )
+    db.session.add(doc)
+    db.session.commit()
+
+    return jsonify(doc.serialize()), 201
+
+#Tipos de documentos
+
+@api.route("/document_types", methods=["POST"])
+@jwt_required()
+def create_document_type():
+    data = request.json
+    name = data.get("name")
+
+    if not name:
+        return jsonify({"msg": "El nombre es requerido"}), 400
+ 
+    if DocumentType.query.filter_by(name=name).first():
+        return jsonify({"msg": "Ese tipo ya existe"}), 400
+
+    doc_type = DocumentType(name=name)
+    db.session.add(doc_type)
+    db.session.commit()
+
+    return jsonify(doc_type.serialize()), 201
+
+
+@api.route("/document_types", methods=["GET"])
+@jwt_required()
+def get_document_types():
+    types = DocumentType.query.all()
+    return jsonify([t.serialize() for t in types]), 200
+
+
+@api.route("/document-types/<int:type_id>", methods=["GET"])
+@jwt_required()
+def get_document_type(type_id):
+    doc_type = DocumentType.query.get(type_id)
+    if not doc_type:
+        return jsonify({"msg": "Tipo no encontrado"}), 404
+    return jsonify(doc_type.serialize()), 200
+
+
+@api.route("/document_types/<int:type_id>", methods=["DELETE"])
+@jwt_required()
+def delete_document_type(type_id):
+    doc_type = DocumentType.query.get(type_id)
+    if not doc_type:
+        return jsonify({"msg": "Tipo no encontrado"}), 404
+
+    db.session.delete(doc_type)
+    db.session.commit()
+    return jsonify({"msg": "Tipo eliminado"}), 200
 
 #Cambio de estado
 
@@ -611,3 +748,5 @@ def create_status():
 def get_status():
     status = Status.query.all()
     return jsonify([s.serialize() for s in status]), 200
+
+

@@ -1,6 +1,8 @@
 
 
-const workedHours = (signings = []) => {
+const workedHours = (signings) => {
+  if (!Array.isArray(signings)) signings = [];
+
   let hoursToday = 0;
   let hoursWeek = 0;
 

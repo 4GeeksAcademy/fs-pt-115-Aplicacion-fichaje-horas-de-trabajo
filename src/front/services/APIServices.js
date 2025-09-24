@@ -244,42 +244,54 @@ export const deleteSolicitud = async (id) => {
 
 
 export const getSignings = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/signings`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/signings`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.json();
 };
-
 
 export const getContracts = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/documents/contracts`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/documents/contracts`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.json();
 };
 
-
 export const getPayrolls = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/payrolls`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/documents/payrolls`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
+  return response.json();
+};
+
+export const getDocumentTypes = async (token) => {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/document_types`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.json();
+};
+
+export const uploadDocument = async (userId, token, file, typeId) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("type_id", typeId);
+
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/documents`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.msg || "Error subiendo documento");
+  }
+
   return response.json();
 };
 
 export const toggleBreak = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/${userId}/status`, {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/${userId}/status`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

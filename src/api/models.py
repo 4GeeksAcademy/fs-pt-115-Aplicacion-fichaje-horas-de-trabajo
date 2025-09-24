@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, text
+from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from flask_bcrypt import generate_password_hash, check_password_hash
 from datetime import time, datetime, timezone
@@ -89,46 +89,40 @@ class StatusHistory(db.Model):
             "timestamp": self.timestamp.isoformat()
         }
 
+class DocumentType(db.Model):
+    __tablename__ = "document_type"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    documents: Mapped[list["Document"]] = relationship(back_populates="type")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
 
 class Document(db.Model):
     __tablename__ = "document"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    file: Mapped[str] = mapped_column(String(255))
+    user_id: Mapped[int] = mapped_column (ForeignKey("user.id"), nullable=False)
+    type_id: Mapped[int] = mapped_column(ForeignKey("document_type.id"), nullable=False)
+    file_url: Mapped[str] = mapped_column(Text, nullable=False)
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+    type: Mapped["DocumentType"] = relationship(back_populates="documents")
     user: Mapped["User"] = relationship(back_populates="documents")
-    types: Mapped[list["DocumentType"]] = relationship(back_populates="document")
 
     def serialize(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "file": self.file
+            "type": self.type.name if self.type else None,
+            "file_url": self.file_url,
+            "uploaded_at": self.uploaded_at.strftime("%Y-%m-%d %H:%M:%S") if self.uploaded_at else None,
         }
-
-
-
-class DocumentType(db.Model):
-    __tablename__ = "document_type"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    document_id: Mapped[int] = mapped_column(ForeignKey("document.id"))
-    payroll: Mapped[str] = mapped_column(String(100))
-    contract: Mapped[str] = mapped_column(String(100))
-    supporting_documents: Mapped[str] = mapped_column(String(100))
-
-    document: Mapped["Document"] = relationship(back_populates="types")
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "document_id": self.document_id,
-            "payroll": self.payroll,
-            "contract": self.contract,
-            "supporting_documents": self.supporting_documents
-        }
-
 
 class Request(db.Model):
     __tablename__ = "request"
