@@ -28,14 +28,14 @@ export const Home = () => {
 
     <>
       <div className="container-fluid d-flex justify-content-center mt-5">
-        <div className="row">
+        <div className="row col-9">
           <div className="mb-4 p-3 bg-dark d-flex justify-content-center align-items-center">
           <ClockInButton/>
             <button
               className="btn btn-primary rounded-circle m-2"
               style={{ width: "120px", height: "120px" }}
             >
-              Clock in
+              Add worker
             </button>
             <button
               className="btn btn-danger rounded-circle m-2"

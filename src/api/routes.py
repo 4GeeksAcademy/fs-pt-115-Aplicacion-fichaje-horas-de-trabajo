@@ -2,12 +2,12 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint, current_app
-from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType
+from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType, SignType
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import time, datetime, timezone
 from api.historial_status import STATUS
-from flask_jwt_extended import create_access_token 
+from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from .historial_status import STATUS
@@ -17,32 +17,29 @@ api = Blueprint("api", __name__)
 CORS(api, resources={r"/api/*": {"origins": "*"}})
 
 
-
-
 @api.route('/signup', methods=['POST'])
 def signup():
-    
+
     data = request.get_json()
 
-    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "address", "iban", "birth_date"]
+    required_fields = ["email", "password", "first_name", "surname",
+                       "last_name", "DNI", "rol", "address", "iban", "birth_date"]
     missing = [f for f in required_fields if f not in data or not data[f]]
     if missing:
         return jsonify({"msg": f"Missing fields: {', '.join(missing)}"}), 400
-    
+
     email = data["email"]
     if "@" not in email or "." not in email.split("@")[-1]:
         return jsonify({"msg": "Email inválido"}), 400
     if User.query.filter_by(email=email).first():
         return jsonify({"msg": "Ese email ya está registrado"}), 400
-    
 
     if User.query.filter_by(DNI=data["DNI"]).first():
         return jsonify({"msg": "Ese DNI ya está registrado"}), 400
 
-
     if len(data["password"]) < 8:
         return jsonify({"msg": "La contraseña debe tener al menos 8 caracteres"}), 400
-    
+
     iban = data.get("iban", "")
     if len(iban) < 15 or len(iban) > 34:
         return jsonify({"msg": "IBAN inválido. Debe tener entre 15 y 34 caracteres"}), 400
@@ -50,23 +47,21 @@ def signup():
     existing_users = User.query.count()
     if existing_users > 0:
         return jsonify({"msg": "El registro inicial ya se realizó. Usa /login"}), 400
-    
 
     print("STATUS cargado:", STATUS)
     print("Status recibido del cliente:", data.get("status"))
-    
+
     if "status" not in data:
         return jsonify({"msg": "El campo 'status' es obligatorio"}), 400
-    
+
     status_input = str(data["status"])
 
     if status_input not in STATUS:
         return jsonify({"msg": f"Estado inválido. Opciones: {', '.join(STATUS.keys())}"}), 400
-    
+
     status_id = STATUS[status_input]
 
     birth_date = datetime.fromisoformat(data["birth_date"])
-   
 
     new_user = User(
         email=data["email"],
@@ -80,7 +75,7 @@ def signup():
         rol=data["rol"],
         is_admin=True,
         status_id=status_id
-)
+    )
     new_user.set_password(data["password"])
 
     db.session.add(new_user)
@@ -97,14 +92,14 @@ def login():
 
     if not data["email"] or not data["password"]:
         return jsonify({"msg": "Email and password are required"}), 400
-    
+
     user = db.session.execute(db.select(User).where(
         User.email == data["email"]
     )).scalar_one_or_none()
 
     if user is None:
         return jsonify({"msg": "Invalid email or password"}), 401
-    
+
     if user.check_password(data["password"]):
         access_token = create_access_token(identity=str(user.id))
         expires = current_app.config["JWT_ACCESS_TOKEN_EXPIRES"]
@@ -113,18 +108,20 @@ def login():
         return jsonify({
             "msg": "Login successful",
             "token": access_token,
-            "expires_at": expire_time.isoformat(), 
+            "expires_at": expire_time.isoformat(),
             "user": user.serialize()
         }), 200
     else:
         return jsonify({"msg": "Invalid email or password"}), 401
 
-#Usuarios
+# Usuarios
+
+
 @api.route("/users", methods=["GET"])
 # @jwt_required()
 def get_users():
 
-    users = User.query.all() 
+    users = User.query.all()
     return jsonify([user.serialize() for user in users]), 200
 
 
@@ -135,6 +132,7 @@ def get_user(id):
     if not user:
         return jsonify({"error": "Usuario no encontrado"}), 400
     return jsonify(user.serialize()), 200
+
 
 @api.route('/profile', methods=['GET'])
 @jwt_required()
@@ -147,34 +145,34 @@ def get_profile():
 
     return jsonify({"user": user.serialize()}), 200
 
+
 @api.route("/users", methods=["POST"])
 @jwt_required()
 def create_user():
     identity = get_jwt_identity()
     if not identity.get("is_admin"):
         return jsonify({"msg": "Solo el admin puede crear usuarios"}), 400
-    
+
     data = request.get_json()
 
-    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "address", "iban", "birth_date", "is_admin"]
+    required_fields = ["email", "password", "first_name", "surname",
+                       "last_name", "DNI", "rol", "address", "iban", "birth_date", "is_admin"]
     missing = [f for f in required_fields if f not in data or not data[f]]
     if missing:
         return jsonify({"msg": f"Missing fields: {', '.join(missing)}"}), 400
-    
+
     email = data["email"]
     if "@" not in email or "." not in email.split("@")[-1]:
         return jsonify({"msg": "Email inválido"}), 400
     if User.query.filter_by(email=email).first():
         return jsonify({"msg": "Ese email ya está registrado"}), 400
-    
 
     if User.query.filter_by(DNI=data["DNI"]).first():
         return jsonify({"msg": "Ese DNI ya está registrado"}), 400
 
-
     if len(data["password"]) < 8:
         return jsonify({"msg": "La contraseña debe tener al menos 8 caracteres"}), 400
-    
+
     iban = data.get("iban", "")
     if len(iban) < 15 or len(iban) > 34:
         return jsonify({"msg": "IBAN inválido. Debe tener entre 15 y 34 caracteres"}), 400
@@ -182,23 +180,21 @@ def create_user():
     existing_users = User.query.count()
     if existing_users > 0:
         return jsonify({"msg": "El registro inicial ya se realizó. Usa /login"}), 400
-    
 
     print("STATUS cargado:", STATUS)
     print("Status recibido del cliente:", data.get("status"))
-    
+
     if "status" not in data:
         return jsonify({"msg": "El campo 'status' es obligatorio"}), 400
-    
+
     status_input = str(data["status"])
 
     if status_input not in STATUS:
         return jsonify({"msg": f"Estado inválido. Opciones: {', '.join(STATUS.keys())}"}), 400
-    
+
     status_id = STATUS[status_input]
 
     birth_date = datetime.fromisoformat(data["birth_date"])
-   
 
     new_user = User(
         email=data["email"],
@@ -212,7 +208,7 @@ def create_user():
         rol=data["rol"],
         is_admin=["is_admin"],
         status_id=status_id
-)
+    )
     new_user.set_password(data["password"])
 
     db.session.add(new_user)
@@ -222,18 +218,19 @@ def create_user():
 
     return jsonify({"msg": "User boss created successfully", "token": access_token, "user": new_user.serialize()}), 200
 
+
 @api.route("/users/<int:id>", methods=["DELETE"])
 @jwt_required()
 def delete_user(id):
     user = User.query.get(id)
-    if not user: 
+    if not user:
         return jsonify({"error": "Usuario no encontrado"}), 400
     db.session.delete(user)
     db.session.commit()
     return jsonify({"message": "Usuario eliminado"}), 200
 
 
-#Vacaciones
+# Vacaciones
 
 @api.route("/users/<int:user_id>/holidays", methods=["GET"])
 @jwt_required()
@@ -248,9 +245,9 @@ def add_holidays(user_id):
     data = request.json
     holiday = Holidays(
         user_id=user_id,
-        total_days= data.get("total_days"),
-        used_days= data.get("used_days"),
-        remaining_days= data.get("remaining_days", data.get("total_days"))
+        total_days=data.get("total_days"),
+        used_days=data.get("used_days"),
+        remaining_days=data.get("remaining_days", data.get("total_days"))
     )
     db.session.add(holiday)
     db.session.commit()
@@ -285,13 +282,14 @@ def delete_holiday(user_id, holiday_id):
     return jsonify({"message": "Holiday deleted successfully"}), 200
 
 
-#Horarios
+# Horarios
 
 @api.route("/users/<int:user_id>/schedules", methods=["GET"])
 @jwt_required()
 def get_schedules(user_id):
     schedules = Schedule.query.filter_by(user_id=user_id).all()
     return jsonify([s.serialize() for s in schedules])
+
 
 @api.route("/users/<int:user_id>/schedules", methods=["POST"])
 @jwt_required()
@@ -310,7 +308,8 @@ def add_schedule(user_id):
 @api.route("/users/<int:user_id>/schedules/<int:schedule_id>", methods=["PUT"])
 @jwt_required()
 def update_schedule(user_id, schedule_id):
-    schedule = Schedule.query.filter_by(user_id=user_id, id=schedule_id).first()
+    schedule = Schedule.query.filter_by(
+        user_id=user_id, id=schedule_id).first()
     if not schedule:
         return jsonify({"message": "Schedule not found"}), 404
 
@@ -331,7 +330,8 @@ def update_schedule(user_id, schedule_id):
 @api.route("/users/<int:user_id>/schedules/<int:schedule_id>", methods=["DELETE"])
 @jwt_required()
 def delete_schedule(user_id, schedule_id):
-    schedule = Schedule.query.filter_by(user_id=user_id, id=schedule_id).first()
+    schedule = Schedule.query.filter_by(
+        user_id=user_id, id=schedule_id).first()
     if not schedule:
         return jsonify({"message": "Schedule not found"}), 404
 
@@ -340,7 +340,7 @@ def delete_schedule(user_id, schedule_id):
     return jsonify({"message": "Schedule deleted successfully"}), 200
 
 
-#Fichajes
+# Fichajes
 
 @api.route("/users/<int:user_id>/signings", methods=["GET"])
 @jwt_required()
@@ -348,30 +348,34 @@ def get_signings(user_id):
     signings = Signing.query.filter_by(user_id=user_id).all()
     return jsonify([s.serialize() for s in signings])
 
+
 @api.route("/users/<int:user_id>/signings", methods=["POST"])
 @jwt_required()
 def add_signing(user_id):
     data = request.json
+
     signing = Signing(
         user_id=user_id,
-        schedule_id=data.get("schedule_id"),
-        type=data.get("type", "in"),
-        datetime=datetime.fromisoformat(data["datetime"]),
+        sign_type_id=data.get("sign_type_id"),
+        datetime=datetime.fromisoformat(data["datetime"].replace("Z", "+00:00")),
         lat=data.get("lat"),
         long=data.get("long")
     )
+
     db.session.add(signing)
     db.session.commit()
+
     return jsonify(signing.serialize()), 201
 
 
-#Requests
+# Requests
 
 @api.route("/users/<int:user_id>/requests", methods=["GET"])
 @jwt_required()
 def get_requests(user_id):
     requests = Request.query.filter_by(user_id=user_id).all()
     return jsonify([r.serialize() for r in requests])
+
 
 @api.route("/users/<int:user_id>/requests", methods=["POST"])
 @jwt_required()
@@ -409,6 +413,7 @@ def add_request(user_id):
 
     return jsonify(req.serialize()), 201
 
+
 @api.route("/requests/<int:request_id>", methods=["PUT"])
 @jwt_required()
 def update_request(request_id):
@@ -427,7 +432,6 @@ def update_request(request_id):
     if "comment" in data:
         req.comment = data["comment"]
 
-
     req_type = RequestType.query.filter_by(request_id=request_id).first()
     if req_type:
         for field in ["holidays", "shift_change", "schedule_change", "salary_advance", "others"]:
@@ -436,7 +440,8 @@ def update_request(request_id):
 
     req_status = StatusRequest.query.filter_by(request_id=request_id).first()
     if req_status:
-        state_fields = {field: data[field] for field in ["accepted", "cancelled", "pending"] if field in data}
+        state_fields = {field: data[field] for field in [
+            "accepted", "cancelled", "pending"] if field in data}
 
         if len([v for v in state_fields.values() if v]) > 1:
             return jsonify({"error": "Solo puede haber un estado activo a la vez"}), 400
@@ -460,7 +465,7 @@ def delete_request(request_id):
     return jsonify({"message": "Solicitud eliminada"}), 200
 
 
-#Documentos
+# Documentos
 
 @api.route("/users/<int:user_id>/documents", methods=["GET"])
 @jwt_required()
@@ -507,13 +512,13 @@ def update_document(user_id, doc_id):
     if "approved" in data:
         doc.approved = data["approved"]
 
-
     if "type" in data:
         doc_type = doc.types
         if doc_type:
             doc_type.payroll = data["type"].get("payroll", doc_type.payroll)
             doc_type.contract = data["type"].get("contract", doc_type.contract)
-            doc_type.supporting_documents = data["type"].get("supporting_documents", doc_type.supporting_documents)
+            doc_type.supporting_documents = data["type"].get(
+                "supporting_documents", doc_type.supporting_documents)
         else:
             doc_type = DocumentType(
                 document_id=doc.id,
@@ -541,7 +546,8 @@ def delete_document(user_id, doc_id):
     db.session.commit()
     return jsonify({"msg": "Document deleted"}), 200
 
-#Cambio de estado
+# Cambio de estado
+
 
 @api.route('/user/<int:user_id>/status', methods=['PUT'])
 @jwt_required()
@@ -549,13 +555,11 @@ def toggle_status(user_id):
     data = request.get_json(silent=True) or {}
     action = data.get("action")
 
-
     user = db.session.get(User, user_id)
     if not user:
         return jsonify({"msg": "User not found"}), 404
 
     current = user.status.name
-
 
     transitions = {
         "toggle_work": {
@@ -575,11 +579,9 @@ def toggle_status(user_id):
     if not new_status_name:
         return jsonify({"msg": f"No puedes usar '{action}' desde '{current}'"}), 400
 
-
     new_status_id = STATUS[new_status_name]
     user.status_id = new_status_id
     db.session.add(user)
-
 
     history_entry = StatusHistory(user_id=user.id, status_id=new_status_id)
     db.session.add(history_entry)
@@ -593,7 +595,8 @@ def toggle_status(user_id):
         "history_entry": history_entry.serialize()
     }), 200
 
-#Consultar estados
+# Consultar estados
+
 
 @api.route('/user/<int:user_id>/status/history', methods=['GET'])
 @jwt_required()
@@ -621,29 +624,56 @@ def check_users():
 
     return jsonify({"user_created": userCreated})
 
-@api.route ('/status', methods= ['POST'])
+
+@api.route('/status', methods=['POST'])
 def create_status():
     data = request.get_json()
 
     if "name" not in data or not data["name"].strip():
         return jsonify({"msg": "El campo name es obligatorio"}), 400
-    
+
     existing = Status.query.filter_by(name=data["name"].strip()).first()
     if existing:
         return jsonify({"msg": f"El estado '{data['name']}' ya existe"}), 400
-    
+
     new_status = Status(name=data["name"])
     db.session.add(new_status)
     db.session.commit()
-
 
     return jsonify({
         "msg": f"Estado '{new_status.name}' fue creado correctamente",
         "status": new_status.serialize()
     }), 200
 
-
 @api.route('/status', methods=['GET'])
 def get_status():
     status = Status.query.all()
     return jsonify([s.serialize() for s in status]), 200
+
+@api.route('/users/<int:user_id>/signtypes', methods=['GET'])
+@jwt_required()
+def get_sign_types(user_id):
+    
+    # Devuelve el tipo de fichaje que debería usar el usuario según su último fichaje.
+    
+    last_signing = Signing.query.filter_by(user_id=user_id)\
+        .order_by(Signing.datetime.desc())\
+        .first()
+
+    if not last_signing:
+        first_sign_type = SignType.query.filter_by(name="In").first()
+        return jsonify(first_sign_type.serialize()), 200
+
+    current_type = last_signing.sign_type
+
+    if current_type.name.lower() == "in":
+        next_sign_type = SignType.query.filter_by(name="Out").first()
+    else:
+        next_sign_type = SignType.query.filter_by(name="In").first()
+
+    
+
+    if not next_sign_type:
+        return jsonify({"message": "No se encontró el siguiente tipo de fichaje"}), 404
+
+    return jsonify(next_sign_type.serialize()), 200

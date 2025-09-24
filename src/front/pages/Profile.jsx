@@ -4,7 +4,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { Calendar } from "../components/Calendar.jsx";
-import {getUserByToken, getSignings, getContracts,} from "../services/APIServices.js";
+import { getUserByToken, getSignings, getContracts, } from "../services/APIServices.js";
 import workedHours from "../components/workedHours.jsx";
 
 export const Profile = () => {
@@ -131,6 +131,11 @@ export const Profile = () => {
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <h2 className="m-2">Calendario de Horarios</h2>
+            <Calendar/>
+          </div>
+
+          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h6 className="fw-bold mb-3">Contracts</h6>
             {store.userContracts.length ? (
               store.userContracts.map((c) => (
@@ -149,6 +154,7 @@ export const Profile = () => {
               <p>No contracts</p>
             )}
           </div>
+
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h6 className="fw-bold mb-3">Payrolls</h6>
             {store.payrolls.length ? (
