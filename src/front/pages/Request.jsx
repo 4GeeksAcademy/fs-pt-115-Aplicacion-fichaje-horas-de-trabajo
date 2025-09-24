@@ -1,9 +1,23 @@
 import { ButtonRequest } from "../components/ButtonRequest";
-import { UserCard } from "../components/UserCard";
+import { UserRequest } from "../components/UserRequest";
+
 
 export const Request = () => {
+  const handleAccept = (id) => {
+    console.log(`Solicitud ${id} aceptada ✅`);
+  };
+
+  const handleReject = (id) => {
+    console.log(`Solicitud ${id} rechazada ❌`);
+  };
+
+  const handleMessage = (id, mensaje) => {
+    console.log(`Mensaje para solicitud ${id}: ${mensaje}`);
+  };
+
   return (
     <div className="container-fluid">
+      {/* Botón para abrir sidebar */}
       <button
         className="btn btn-primary my-3"
         type="button"
@@ -14,6 +28,7 @@ export const Request = () => {
         Index
       </button>
 
+      {/* Sidebar */}
       <div
         className="offcanvas offcanvas-start"
         tabIndex="-1"
@@ -59,66 +74,73 @@ export const Request = () => {
           </ul>
         </div>
       </div>
+
+      {/* Contenido */}
       <div className="container d-flex flex-column align-items-center">
         <h1 className="m-2">Request Page</h1>
         <hr className="text-light" />
+
+        {/* Pending */}
         <div
           className="p-2 overflow-y-auto"
           style={{ width: "50%", height: "200px" }}
         >
-          <h5 id="pending">Pending Request</h5>
-          <div>
-            <UserCard />
-            <ButtonRequest />
-          </div>
-          <div>
-            <UserCard />
-            <ButtonRequest />
-          </div>
-          <div>
-            <UserCard />
-            <ButtonRequest />
-          </div>
-          <div>
-            <UserCard />
-            <ButtonRequest />
-          </div>
-          <div>
-            <UserCard />
-            <ButtonRequest />
-          </div>
+          <h5 id="pending">Pending Requests</h5>
+          {[1, 2, 3, 4, 5].map((id) => (
+            <div key={id}>
+              <UserRequest  />
+              <ButtonRequest
+                modalId={`modal-pending-${id}`}
+                onAccept={() => handleAccept(id)}
+                onReject={() => handleReject(id)}
+                onMessage={(msg) => handleMessage(id, msg)}
+              />
+            </div>
+          ))}
         </div>
+
         <hr className="text-light" />
+
+        {/* Accepted */}
         <div
           className="p-2 overflow-y-auto"
           style={{ width: "50%", height: "200px" }}
         >
-          <h5 id="accept">Accept Requests</h5>
-          <UserCard />
+          <h5 id="accept">Accepted Requests</h5>
+          <UserRequest />
         </div>
+
         <hr className="text-light" />
+
+        {/* Denied */}
         <div
           className="p-2 overflow-y-auto"
           style={{ width: "50%", height: "200px" }}
         >
           <h5 id="denied">Denied Requests</h5>
-          <UserCard />
+          <UserRequest />
         </div>
+
         <hr className="text-light" />
+
+        {/* Canceled */}
         <div
           className="p-2 overflow-y-auto"
           style={{ width: "50%", height: "200px" }}
         >
-          <h5 id="canceled">Cancel Requests</h5>
-          <UserCard />
+          <h5 id="canceled">Canceled Requests</h5>
+          <UserRequest />
         </div>
+
         <hr className="text-light" />
+
+        {/* Completed */}
         <div
           className="p-2 overflow-y-auto"
           style={{ width: "50%", height: "200px" }}
         >
           <h5 id="completed">Completed Requests</h5>
-          <UserCard />
+          <UserRequest />
         </div>
       </div>
     </div>
