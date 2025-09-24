@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { ButtonRequest } from "../components/ButtonRequest";
+import  {BotonSolicitud}  from "../components/BotonSolicitud";
 import { UserRequest } from "../components/UserRequest";
 
 export const Request = () => {
   const [requests, setRequests] = useState({
-    pending: [],
+    pending: [1, 2, 3],
     accepted: [],
     rejected: [],
     canceled: [],
     completed: [],
   });
 
-  //Cargar datos desde la API al montar el componente
+  // Cargar datos desde la API al montar el componente
   useEffect(() => {
     const fetchRequests = async () => {
       try {
@@ -24,7 +24,8 @@ export const Request = () => {
           pending: data.filter((r) => r.status === "pending"),
           accepted: data.filter((r) => r.status === "accepted"),
           rejected: data.filter((r) => r.status === "rejected"),
-
+          canceled: data.filter((r) => r.status === "canceled"),
+          completed: data.filter((r) => r.status === "completed"),
         });
       } catch (err) {
         console.error(err);
@@ -34,11 +35,11 @@ export const Request = () => {
     fetchRequests();
   }, []);
 
-  //Actualizar estado de una solicitud en la API + mover en la UI
+  // Actualizar estado de una solicitud en la API + mover en la UI
   const updateRequestStatus = async (id, newStatus) => {
     try {
       const res = await fetch(`/api/requests/${id}`, {
-        method: "PUT",
+        method: "PATCH", // PATCH para actualizar parcialmente
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
@@ -49,9 +50,9 @@ export const Request = () => {
         const updated = { ...prev };
         let request;
 
-        // sacar la solicitud de la lista donde esté
+        // Sacar la solicitud de la lista donde esté
         for (const key of Object.keys(updated)) {
-          const index = updated[key].findIndex((r) => r.id === id);
+          const index = updated[key].findIndex((r) => r.id == id); // == para cubrir string/number
           if (index !== -1) {
             request = updated[key][index];
             updated[key].splice(index, 1);
@@ -59,10 +60,12 @@ export const Request = () => {
           }
         }
 
-        // meterla en la nueva lista
+        // Meterla en la nueva lista
         if (request) {
           request.status = newStatus;
-          updated[newStatus] = [...updated[newStatus], request];
+          updated[newStatus] = updated[newStatus]
+            ? [...updated[newStatus], request]
+            : [request];
         }
 
         return updated;
@@ -94,7 +97,7 @@ export const Request = () => {
   // Función auxiliar para renderizar una sección
   const renderSection = (title, idSection, list) => (
     <div
-      className="p-2 overflow-y-auto"
+      className="p-2 overflow-y-auto mb-4"
       style={{ width: "50%", height: "200px" }}
     >
       <h5 id={idSection}>{title}</h5>
@@ -102,10 +105,10 @@ export const Request = () => {
         <p className="text-muted">No hay solicitudes</p>
       ) : (
         list.map((req) => (
-          <div key={req.id}>
+          <div key={req.id} className="mb-2">
             <UserRequest user={req} />
             {(req.status === "pending" || req.status === "rejected") && (
-              <ButtonRequest
+              <BotonSolicitud 
                 modalId={`modal-${idSection}-${req.id}`}
                 onAccept={() => handleAccept(req.id)}
                 onReject={() => handleReject(req.id)}
@@ -181,15 +184,11 @@ export const Request = () => {
         <hr className="text-light" />
 
         {renderSection("Pending Requests", "pending", requests.pending)}
-        <hr className="text-light" />
-
+        <BotonSolicitud />
         {renderSection("Accepted Requests", "accepted", requests.accepted)}
-        <hr className="text-light" />
-
         {renderSection("Rejected Requests", "rejected", requests.rejected)}
-        <hr className="text-light" />
-
-
+        {renderSection("Canceled Requests", "canceled", requests.canceled)}
+        {renderSection("Completed Requests", "completed", requests.completed)}
       </div>
     </div>
   );
