@@ -1,5 +1,4 @@
 
-
 const workedHours = (signings = []) => {
   let hoursToday = 0;
   let hoursWeek = 0;

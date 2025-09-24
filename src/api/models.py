@@ -40,7 +40,7 @@ class User(db.Model):
 
     def serialize(self):
         return {
-          "id": self.id,
+            "id": self.id,
             "last_name": self.last_name,
             "surname": self.surname,
             "first_name": self.first_name,
@@ -226,7 +226,6 @@ class Schedule(db.Model):
     end_time: Mapped[datetime] = mapped_column(DateTime)
 
     user: Mapped["User"] = relationship(back_populates="schedules")
-    signings: Mapped[list["Signing"]] = relationship(back_populates="schedule")
 
     def serialize(self):
         return {
@@ -237,27 +236,41 @@ class Schedule(db.Model):
         }
 
 
+
 class Signing(db.Model):
     __tablename__ = "signing"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    schedule_id: Mapped[int] = mapped_column(ForeignKey("schedule.id"))
-    sign_type: Mapped[str] = mapped_column(String(50))
-    datetime: Mapped[DateTime] = mapped_column(DateTime)
+    sign_type_id: Mapped[int] = mapped_column(ForeignKey("signtype.id"))
+    datetime: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc)) # type: ignore
     lat: Mapped[float] = mapped_column(Float)
     long: Mapped[float] = mapped_column(Float)
 
     user: Mapped["User"] = relationship(back_populates="signings")
-    schedule: Mapped["Schedule"] = relationship(back_populates="signings")
+    sign_type: Mapped["SignType"] = relationship(back_populates="signings")
 
     def serialize(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "schedule_id": self.schedule_id,
-            "sign_type": self.sign_type,
+            "sign_type_id": self.sign_type_id,
             "datetime": self.datetime.isoformat() if self.datetime else None,
             "lat": self.lat,
-            "long": self.long
+            "long": self.long,
+        }
+
+
+class SignType(db.Model):
+    __tablename__ = "signtype"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+
+    signings: Mapped[list["Signing"]] = relationship(back_populates="sign_type")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
         }

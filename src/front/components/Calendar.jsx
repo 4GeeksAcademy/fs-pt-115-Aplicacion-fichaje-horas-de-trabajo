@@ -43,11 +43,22 @@ export const Calendar = () => {
         console.error('Error al cargar los schedules:', error);
       }
     };
+
     loadSchedules();
   }, []);
 
+  const addSchedule = async (start, end) => {
+    try {
+      const data = await addschedule(store.user.id, start, end)
 
-  // Agregar horario
+      dispatch({ type: "ADD_SCHEDULES", payload: data })
+    } catch (error) {
+      console.error('Error al añadir los schedules:', error);
+    }
+
+  }
+
+  // Agregar schedules
   const handleDateClick = async (info) => {
     const date = info.dateStr
     setNewEvent({
@@ -71,8 +82,8 @@ export const Calendar = () => {
       end: newEvent.end
     }
     console.log("data enviado", store.user.id, evento.start, evento.end)
-    const data = await addschedule(store.user.id, evento.start, evento.end)
-    
+    addSchedule()
+
 
     setEvents([
       ...events,
@@ -91,9 +102,8 @@ export const Calendar = () => {
 
 
   return (
-    <div className='col-12 d-flex justify-content-center'>
+    <div className='col-12 d-flex justify-content-center text-dark'>
       <div className="container mt-4 text-dark m-4 bg-light border rounded shadow-sm my-4">
-        <h2 className="mb-4">Calendario de Horarios</h2>
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
@@ -101,7 +111,6 @@ export const Calendar = () => {
           editable={false}
           events={events}
           dateClick={handleDateClick}
-          height="auto"
         />
       </div>
 

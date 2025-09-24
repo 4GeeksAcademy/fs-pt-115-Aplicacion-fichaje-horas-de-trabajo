@@ -40,6 +40,11 @@ export default function storeReducer(store, action = {}) {
         ...store,
         firstUserExist: action.payload,
       };
+    case "ADD_SCHEDULES":
+      return {
+        ...store,
+        userSchedule: [...store.userSchedule, ...action.payload],
+      };
     case "GET_CONTRACTS":
       return {
         ...store,

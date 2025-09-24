@@ -1,8 +1,12 @@
 //API EXTERNA PARA OBTENER LA UBICACION
 export const getLocation = async () => {
-  const response = await fetch(`${import.meta.env.EXTERNAL_API}`);
+  const response = await fetch(
+    `${import.meta.env.VITE_EXTERNAL_API}?api_key=${
+      import.meta.env.VITE_API_KEY
+    }`
+  );
 
-  const data = await response.json();
+  const data = response.json();
 
   console.log(data);
 
@@ -268,11 +272,11 @@ export const deleteHoliday = async (id) => {
 
 //FICHAJES
 
-export const addsigning = async (id, newSigning, scheduleId) => {
+export const addsigning = async (id, newSigning) => {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/signings/`,
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}/signings`,
     {
       method: "POST",
       headers: {
@@ -281,9 +285,8 @@ export const addsigning = async (id, newSigning, scheduleId) => {
       },
       body: JSON.stringify({
         user_id: id,
-        schedule_id: scheduleId,
-        sign_type: newSigning.sign_type,
-        datetime: toISOString(newSigning.datetime),
+        sign_type_id: newSigning.sign_type_id,
+        datetime: new Date(newSigning.datetime).toISOString(),
         lat: newSigning.lat,
         long: newSigning.long,
       }),
@@ -341,7 +344,7 @@ export const addschedule = async (id, start_datetime, end_datetime) => {
   );
 
   if (!response.ok) {
-    throw new Error("No se ha podido registrar el fichaje");
+    throw new Error("No se ha podido registrar el horario");
   }
 
   return await response.json();
@@ -370,48 +373,83 @@ export const getschedule = async (id) => {
 };
 
 export const getSignings = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/signings`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/users/${userId}/signings`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
   return response.json();
 };
-
 
 export const getContracts = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/documents/contracts`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/users/${userId}/documents/contracts`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
   return response.json();
 };
-
 
 export const getPayrolls = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/payrolls`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/users/${userId}/payrolls`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
   return response.json();
 };
 
-export const toggleBreak = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/${userId}/status`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ action: "toggle_break" }),
-  });
+export const toggleStatus = async (userId) => {
+  const token = localStorage.getItem("token")
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/user/${userId}/status`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ action: "toggle_work"}),
+    }
+  );
   return response.json();
 };
+
+export const getSignType = async (userId) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/signtypes`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al comprobar usuarios", 400);
+  }
+  const data = await response.json();
+
+  return data;
+};
+

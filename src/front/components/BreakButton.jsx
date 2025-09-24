@@ -2,7 +2,7 @@ import { useState } from "react";
 import { addsigning, getLocation, getSignType, toggleStatus } from "../services/APIServices";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 
-export const ClockInButton = () => {
+export const BreakButton = () => {
   const { store } = useGlobalReducer();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -28,7 +28,7 @@ export const ClockInButton = () => {
       };
 
       const created = await addsigning(store.user.id, signingData);
-      console.log("Fichaje Creado:", created)
+      console.log("Fichaje Creado:", created);
 
       await toggleStatus(store.user.id);
 
