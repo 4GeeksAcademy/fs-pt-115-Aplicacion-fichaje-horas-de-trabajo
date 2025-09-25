@@ -5,7 +5,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { Calendar } from "../components/Calendar.jsx";
-import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus, getDocumentTypes, uploadDocument } from "../services/APIServices.js";
+import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus, getDocumentTypes, uploadDocument, getAllSignTypes } from "../services/APIServices.js";
 import workedHours from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 
@@ -80,6 +80,7 @@ export const Profile = () => {
 
         const payrolls = await getPayrolls(user.id, token);
         dispatch({ type: "GET_PAYROLLS", payload: Array.isArray(payrolls) ? payrolls : [] });
+
       } catch (err) {
         console.error("Error cargando datos:", err);
 
@@ -148,15 +149,17 @@ export const Profile = () => {
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-            <h4 className="ms-4 text-light">WORKING</h4>
+            <h4 className="ms-4 text-light">SIGNINGS</h4>
             <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
               {store.signings.length ? (
                 store.signings.map((c) => (
                   <UserCard
-                    latitude={c.long}
-                    longitude={c.lat}
-                    date={new Date().toLocaleString()}
-                    type={"AQUI"}
+                    sign_id = {c.id}
+                    key = {c.id}
+                    latitude={c.lat}
+                    longitude={c["long"]}
+                    date={c.datetime}
+                    type={c.sign_type_name}
                   />
                 ))
               ) : (

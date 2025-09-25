@@ -4,6 +4,7 @@ import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { getUsuarios } from "../services/APIServices.js";
 import { comproveAuth } from "../components/ExpTokenFunction.jsx";
+import { ClockInButton } from "../components/ClockInButton.jsx";
 
 export const Home = () => {
 
@@ -33,12 +34,7 @@ export const Home = () => {
             >
               Add worker
             </button>
-            <button
-              className="btn btn-primary rounded-circle m-2"
-              style={{ width: "120px", height: "120px" }}
-            >
-              Clock in
-            </button>
+            <ClockInButton/>
             <button
               className="btn btn-danger rounded-circle m-2"
               style={{ width: "120px", height: "120px" }}

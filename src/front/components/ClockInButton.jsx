@@ -18,10 +18,12 @@ export const ClockInButton = () => {
       const long = locationData["longitude"];
 
       const lastSigningData = await getSignType(store.user.id);
+      console.log("lastsigningdata:", lastSigningData)
 
       const signingData = {
         user_id: store.user.id,
         sign_type_id: lastSigningData?.id,
+        sign_type_name: lastSigningData?.name,
         datetime: new Date().toISOString(),
         lat,
         long,
