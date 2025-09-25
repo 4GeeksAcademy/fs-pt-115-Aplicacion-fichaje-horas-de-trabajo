@@ -223,18 +223,19 @@ export const checkUsuarios = async () => {
 //SOLICITUDES DE VACACIONES
 export const createHoliday = async (data) => {
   const token = getToken();
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays`, {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Error al crear la solicitud");
-  return res.json();
+  const respuesta = await res.json();
+  console.log(respuesta);
+  return respuesta
 };
 
 export const getHolidays = async () => {
   const token = getToken();
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays`, {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("Error al obtener las solicitudes");
@@ -243,7 +244,7 @@ export const getHolidays = async () => {
 
 export const updateHoliday = async (id, data) => {
   const token = getToken();
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays/${id}`, {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(data),
@@ -254,7 +255,7 @@ export const updateHoliday = async (id, data) => {
 
 export const deleteHoliday = async (id) => {
   const token = getToken();
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays/${id}`, {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });

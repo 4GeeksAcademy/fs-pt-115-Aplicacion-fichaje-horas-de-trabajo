@@ -55,7 +55,7 @@ export default function SolicitudVacaciones({ show, onClose }) {
         descripcion: "",
       });
 
-      // Cerrar modal
+      
       onClose();
     } catch (err) {
       console.error("Error al enviar la solicitud:", err);
