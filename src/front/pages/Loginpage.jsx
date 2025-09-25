@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import LogoClockIN from "../assets/img/LogoClockIn.png";
 import { useNavigate } from "react-router-dom";
-import { login } from "../services/APIServices.js";
+import { getUsuarios, login } from "../services/APIServices.js";
 
 export const Loginpage = () => {
   const { store, dispatch } = useGlobalReducer();
@@ -13,13 +13,18 @@ export const Loginpage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Botón de login clicado");
     setError("");
 
     try {
       const data = await login(email, password);
       localStorage.setItem("token", data.token);
       dispatch({ type: "SET_USER", payload: data.user });
+      if (data.user.is_admin){
+        const allUsers = await getUsuarios(dispatch);
+        console.log("Usuarios obtenidos:", allUsers);
+        
+      }
+    
       window.location.href = '/';
     } catch (err) {
       setError("Credenciales incorrectas o error de conexión.");
