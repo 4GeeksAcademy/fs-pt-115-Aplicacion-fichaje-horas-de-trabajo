@@ -6,7 +6,7 @@ from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
-    
+    app.config["UPLOAD_FOLDER"] = "uploads/contracts"
     app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://gitpod:postgres@localhost:5432/example"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
