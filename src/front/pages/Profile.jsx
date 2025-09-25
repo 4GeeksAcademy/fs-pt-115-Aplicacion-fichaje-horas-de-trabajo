@@ -131,8 +131,26 @@ export const Profile = () => {
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <h4 className="ms-4 text-light">WORKING</h4>
+            <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
+              {store.signings.length ? (
+                store.signings.map((c) => (
+                  <UserCard
+                    latitude={c.long}
+                    longitude={c.lat}
+                    date={new Date().toLocaleString()}
+                    type={"AQUI"}
+                  />
+                ))
+              ) : (
+                <p>No signings</p>
+              )}
+            </ul>
+          </div>
+
+          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h2 className="m-2">Calendario de Horarios</h2>
-            <Calendar/>
+            <Calendar />
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">

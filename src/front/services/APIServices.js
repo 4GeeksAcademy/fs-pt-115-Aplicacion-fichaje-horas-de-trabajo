@@ -147,7 +147,7 @@ export const actualizarUsuario = async (id, data) => {
 // ELIMINAR USUARIO
 export const borrarUsuario = async (id) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`,
+    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}`,
     {
       method: "DELETE",
       headers: {
@@ -453,3 +453,26 @@ export const getSignType = async (userId) => {
   return data;
 };
 
+export const getAllSignTypes = async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/signtypes`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al comprobar fichajes", 400);
+  }
+  const data = await response.json();
+
+  dispatch({ type: "SET_SIGNTYPES", payload: data })
+
+  return data;
+};
