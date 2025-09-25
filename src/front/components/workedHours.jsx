@@ -1,5 +1,4 @@
 
-
 const workedHours = (signings) => {
   if (!Array.isArray(signings)) signings = [];
 

@@ -1,8 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, Text
+from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, text, Date, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from flask_bcrypt import generate_password_hash, check_password_hash
-from datetime import time, datetime, timezone
+from datetime import time, datetime, timezone, date
 
 db = SQLAlchemy()
 
@@ -40,7 +40,7 @@ class User(db.Model):
 
     def serialize(self):
         return {
-          "id": self.id,
+            "id": self.id,
             "last_name": self.last_name,
             "surname": self.surname,
             "first_name": self.first_name,
@@ -185,49 +185,50 @@ class StatusRequest(db.Model):
 
     request: Mapped["Request"] = relationship(back_populates="request_status")
 
+
+
 class Holidays(db.Model):
     __tablename__ = "holidays"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    total_days: Mapped[int] = mapped_column(Integer)
-    used_days: Mapped[int] = mapped_column(Integer)
-    remaining_days: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+
+    fecha_inicio: Mapped[date] = mapped_column(Date, nullable=False)
+    fecha_fin: Mapped[date] = mapped_column(Date, nullable=False)
+    horas: Mapped[str | None] = mapped_column(String(10))
+    tipo: Mapped[str] = mapped_column(String(50), nullable=False)
+    descripcion: Mapped[str | None] = mapped_column(String(500))
 
     user: Mapped["User"] = relationship(back_populates="holidays")
 
     def serialize(self):
         return {
             "id": self.id,
-            "user_id": self.user_id,
-            "total_days": self.total_days,
-            "used_days": self.used_days,
-            "remaining_days": self.remaining_days
+            "fechaInicio": str(self.fecha_inicio),
+            "fechaFin": str(self.fecha_fin),
+            "horas": self.horas,
+            "tipo": self.tipo,
+            "descripcion": self.descripcion,
         }
-
 
 class Schedule(db.Model):
     __tablename__ = "schedule"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    shift: Mapped[str] = mapped_column(String(50))
-    start_time: Mapped[time] = mapped_column(Time)
-    end_time: Mapped[time] = mapped_column(Time)
-    day: Mapped[str] = mapped_column(String(20))
+    start_time: Mapped[datetime] = mapped_column(DateTime)
+    end_time: Mapped[datetime] = mapped_column(DateTime)
 
     user: Mapped["User"] = relationship(back_populates="schedules")
-    signings: Mapped[list["Signing"]] = relationship(back_populates="schedule")
 
     def serialize(self):
         return {
-        "id": self.id,
-        "user_id": self.user_id,
-        "shift": self.shift,
-        "start_time": str(self.start_time) if self.start_time else None,
-        "end_time": str(self.end_time) if self.end_time else None,
-        "day": self.day
-    }
+            "id": self.id,
+            "user_id": self.user_id,
+            "start_time": str(self.start_time) if self.start_time else None,
+            "end_time": str(self.end_time) if self.end_time else None,
+        }
+
 
 
 class Signing(db.Model):
@@ -235,22 +236,35 @@ class Signing(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    schedule_id: Mapped[int] = mapped_column(ForeignKey("schedule.id"))
-    sign_type: Mapped[str] = mapped_column(String(50))
-    datetime: Mapped[DateTime] = mapped_column(DateTime)
+    sign_type_id: Mapped[int] = mapped_column(ForeignKey("signtype.id"))
+    datetime: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc)) # type: ignore
     lat: Mapped[float] = mapped_column(Float)
     long: Mapped[float] = mapped_column(Float)
 
     user: Mapped["User"] = relationship(back_populates="signings")
-    schedule: Mapped["Schedule"] = relationship(back_populates="signings")
+    sign_type: Mapped["SignType"] = relationship(back_populates="signings")
 
     def serialize(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "schedule_id": self.schedule_id,
-            "sign_type": self.sign_type,
+            "sign_type_id": self.sign_type_id,
             "datetime": self.datetime.isoformat() if self.datetime else None,
             "lat": self.lat,
-            "long": self.long
+            "long": self.long,
+        }
+
+
+class SignType(db.Model):
+    __tablename__ = "signtype"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+
+    signings: Mapped[list["Signing"]] = relationship(back_populates="sign_type")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
         }

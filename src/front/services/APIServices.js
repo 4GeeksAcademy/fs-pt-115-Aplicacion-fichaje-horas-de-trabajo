@@ -1,8 +1,12 @@
 //API EXTERNA PARA OBTENER LA UBICACION
 export const getLocation = async () => {
-  const response = await fetch(`${import.meta.env.EXTERNAL_API}`);
+  const response = await fetch(
+    `${import.meta.env.VITE_EXTERNAL_API}?api_key=${
+      import.meta.env.VITE_API_KEY
+    }`
+  );
 
-  const data = await response.json();
+  const data = response.json();
 
   console.log(data);
 
@@ -33,7 +37,7 @@ export const login = async (email, password) => {
 };
 
 // CREAR USUARIO
-export const crearUsuario = async (usuario) => {
+export const crearUsuario = async (newUser) => {
   const token = localStorage.getItem("token");
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/api/users`,
@@ -43,7 +47,20 @@ export const crearUsuario = async (usuario) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(usuario),
+      body: JSON.stringify({
+        first_name: newUser.first_name,
+        surname: newUser.surname,
+        last_name: newUser.last_name,
+        email: newUser.email,
+        DNI: newUser.dni_nie,
+        iban: newUser.iban,
+        address: newUser.address,
+        birth_date: new Date(newUser.birth_date).toISOString(),
+        rol: newUser.rol,
+        is_admin: newUser.is_admin,
+        password: newUser.password,
+        status: "Inactivo",
+      }),
     }
   );
 
@@ -201,59 +218,175 @@ export const checkUsuarios = async () => {
   return data.user_created;
 };
 
-
 // Crear solicitud vacaciones
-export const createSolicitud = async (solicitudData) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/solicitudes`, {
+export const createHoliday = async (data) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(solicitudData),
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getToken()}`
+    },
+    body: JSON.stringify(data)
   });
-  return response.json();
+  if (!res.ok) throw new Error("Error al crear la solicitud");
+  return res.json();
 };
 
-// Obtener todas las solicitudes
-export const getSolicitudes = async () => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/solicitudes`);
-  return response.json();
+// Obtener todas las solicitudes de vacaciones
+export const getHolidays = async () => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays`, {
+    headers: {
+      "Authorization": `Bearer ${getToken()}`
+    }
+  });
+  if (!res.ok) throw new Error("Error al obtener las solicitudes");
+  return res.json();
 };
 
-// Obtener una solicitud por ID
-export const getSolicitudById = async (id) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`);
-  return response.json();
-};
 
-// Actualizar solicitud (PUT)
-export const updateSolicitud = async (id, solicitudData) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`, {
+
+// Actualizar solicitud de Vacaciones (PUT)
+export const updateHoliday = async (id, data) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(solicitudData),
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getToken()}`
+    },
+    body: JSON.stringify(data)
   });
-  return response.json();
+  if (!res.ok) throw new Error("Error al actualizar la solicitud");
+  return res.json();
 };
 
-// Eliminar solicitud (DELETE)
-export const deleteSolicitud = async (id) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/solicitudes/${id}`, {
+// Eliminar solicitud de Vacaciones (DELETE)
+export const deleteHoliday = async (id) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays/${id}`, {
     method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${getToken()}`
+    }
   });
-  return response.json();
+  if (!res.ok) throw new Error("Error al eliminar la solicitud");
+  return res.json();
 };
 
+//FICHAJES
+
+export const addsigning = async (id, newSigning) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}/signings`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        user_id: id,
+        sign_type_id: newSigning.sign_type_id,
+        datetime: new Date(newSigning.datetime).toISOString(),
+        lat: newSigning.lat,
+        long: newSigning.long,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("No se ha podido registrar el fichaje");
+  }
+
+  return await response.json();
+};
+
+export const getsignings = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/signings`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al obtener fichajes", 400);
+  }
+  const data = await response.json();
+
+  return data.signing;
+};
+
+//HORARIOS
+
+export const addschedule = async (id, start_datetime, end_datetime) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/schedules/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        user_id: id,
+        start_datetime: start_datetime,
+        end_datetime: end_datetime,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("No se ha podido registrar el horario");
+  }
+
+  return await response.json();
+};
+
+export const getschedule = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/schedules`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al obtener fichajes", 400);
+  }
+  const data = await response.json();
+
+  return data.schedules;
+};
 
 export const getSignings = async (userId, token) => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/signings`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
   return response.json();
 };
 
 export const getContracts = async (userId, token) => {
+
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/documents/contracts`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
   return response.json();
 };
 
@@ -290,14 +423,41 @@ export const uploadDocument = async (userId, token, file, typeId) => {
   return response.json();
 };
 
-export const toggleBreak = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/${userId}/status`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ action: "toggle_break" }),
-  });
+export const toggleStatus = async (userId) => {
+  const token = localStorage.getItem("token")
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/user/${userId}/status`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ action: "toggle_work"}),
+    }
+  );
   return response.json();
 };
+
+export const getSignType = async (userId) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/signtypes`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al comprobar usuarios", 400);
+  }
+  const data = await response.json();
+
+  return data;
+};
+

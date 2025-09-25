@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import {getUserByToken, getSignings, getContracts, getPayrolls, getDocumentTypes, uploadDocument, toggleBreak,} from "../services/APIServices.js";
+
+import { UserCard } from "../components/UserCard.jsx";
+import { UserInfo } from "../components/UserInfo.jsx";
+import { Calendar } from "../components/Calendar.jsx";
+import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus, getDocumentTypes, uploadDocument } from "../services/APIServices.js";
 import workedHours from "../components/workedHours.jsx";
+import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 
 export const Profile = () => {
   const { store, dispatch } = useGlobalReducer();
+  const [showHolidayForm, setShowHolidayForm] = useState(false);
   const token = localStorage.getItem("token");
 
   const [contractFile, setContractFile] = useState(null);
@@ -51,6 +57,7 @@ export const Profile = () => {
         setPayrollFile(null);
         setPayrollType("");
       }
+
     } catch (err) {
       console.error("Error subiendo documento:", err);
       alert(err.message);
@@ -75,6 +82,7 @@ export const Profile = () => {
         dispatch({ type: "GET_PAYROLLS", payload: Array.isArray(payrolls) ? payrolls : [] });
       } catch (err) {
         console.error("Error cargando datos:", err);
+
       }
     };
     fetchData();
@@ -98,6 +106,7 @@ export const Profile = () => {
   if (!store.user || Object.keys(store.user).length === 0) {
     return (
       <div className="container-fluid d-flex justify-content-center align-items-center" style={{ backgroundColor: "#ff7b00", minHeight: "100vh", color: "white" }}>
+
         <h3>Loading...</h3>
       </div>
     );
@@ -138,8 +147,9 @@ export const Profile = () => {
             <button className="btn w-100 text-white" style={{ backgroundColor: "#ff7b00" }} onClick={handleBreakClick}>Start / End Break</button>
           </div>
 
-
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <h2 className="m-2">Calendario de Horarios</h2>
+            <Calendar/>
             <h6 className="fw-bold mb-3">Contracts</h6>
             {store.userContracts.length ? store.userContracts.map(c => (
               <div key={c.id} className="mb-2">
@@ -161,7 +171,6 @@ export const Profile = () => {
               <button className="btn btn-warning ms-2" onClick={() => handleUpload(contractFile, contractType, true)}>Subir contrato</button>
             </div>
           </div>
-
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h6 className="fw-bold mb-3">Payrolls</h6>
@@ -185,6 +194,24 @@ export const Profile = () => {
               <button className="btn btn-warning ms-2" onClick={() => handleUpload(payrollFile, payrollType, false)}>Subir nómina</button>
             </div>
           </div>
+
+          {/* Vacations */}
+          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <h6 className="fw-bold mb-3">Vacation Requests</h6>
+            <button
+              className="btn w-100 text-white"
+              style={{ backgroundColor: "#ff7b00" }}
+              onClick={() => setShowHolidayForm(true)}
+            >
+              Nueva Solicitud
+            </button>
+          </div>
+
+          {/* Modal controlado por React */}
+          <SolicitudVacaciones
+            show={showHolidayForm}
+            onClose={() => setShowHolidayForm(false)}
+          />
         </div>
       </div>
     </div>

@@ -1,35 +1,53 @@
+import React, { useState } from "react";
 
+export function ButtonRequest({ modalId, onAccept, onReject, onMessage }) {
+  const [message, setMessage] = useState("");
 
+  const handleSend = () => {
+    if (message.trim()) {
+      onMessage(message);
+      setMessage("");
+    }
+  };
 
-export const ButtonRequest = ({ onAccept, onReject }) => {
   return (
-    <div className="d-flex gap-2 mb-5">
-      <button type="button" className="btn btn-success" onClick={onAccept}>
-        ✅ Aceptar
-      </button>
-      <button type="button" className="btn btn-danger" onClick={onReject}>
-        ❌ Rechazar
-      </button>
-      <button
-        type="button"
-        className="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#mensajeModal"
-      >
-        💬 Comment
-      </button>
+    <>
+      {/* Botones Aceptar / Rechazar / Mensaje */}
+      <div className="d-flex gap-2">
+        <button
+          className="btn btn-success"
+          onClick={onAccept}
+        >
+          ✅ Aceptar
+        </button>
+        <button
+          className="btn btn-danger"
+          onClick={onReject}
+        >
+          ❌ Rechazar
+        </button>
+        <button
+          className="btn btn-info"
+          data-bs-toggle="modal"
+          data-bs-target={`#${modalId}`}
+        >
+          💬 Mensaje
+        </button>
+      </div>
+
+      {/* Modal para enviar mensaje */}
       <div
         className="modal fade"
-        id="mensajeModal"
-        tabindex="-1"
-        aria-labelledby="mensajeModalLabel"
+        id={modalId}
+        tabIndex="-1"
+        aria-labelledby={`${modalId}-label`}
         aria-hidden="true"
       >
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="mensajeModalLabel">
-                Mensaje
+              <h5 className="modal-title" id={`${modalId}-label`}>
+                Enviar Mensaje
               </h5>
               <button
                 type="button"
@@ -38,42 +56,35 @@ export const ButtonRequest = ({ onAccept, onReject }) => {
                 aria-label="Cerrar"
               ></button>
             </div>
-
             <div className="modal-body">
-              <form id="formMensaje">
-                <div className="mb-3">
-                  <label for="mensaje" className="form-label">
-                    Escribe tu mensaje:
-                  </label>
-                  <textarea
-                    className="form-control"
-                    id="mensaje"
-                    rows="4"
-                    required
-                  ></textarea>
-                </div>
-              </form>
+              <textarea
+                className="form-control"
+                rows="3"
+                placeholder="Escribe tu mensaje..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              ></textarea>
             </div>
-
             <div className="modal-footer">
               <button
                 type="button"
-                className="btn btn-danger"
+                className="btn btn-secondary"
                 data-bs-dismiss="modal"
               >
-                Cancelar
+                Cerrar
               </button>
-              <button
-                type="submit"
-                form="formMensaje"
-                className="btn btn-primary"
-              >
-                Enviar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+                            <button
+                              type="button"
+                              className="btn btn-primary"
+                              onClick={handleSend}
+                              data-bs-dismiss="modal"
+                            >
+                              Enviar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                );
+              }
