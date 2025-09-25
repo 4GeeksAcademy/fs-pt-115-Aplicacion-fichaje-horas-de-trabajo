@@ -25,10 +25,11 @@ export const Home = () => {
   );
 
   return (
-
     <>
-      <div className="container-fluid d-flex justify-content-center mt-5">
-        <div className="row col-9">
+
+    <div className="container-fluid d-flex justify-content-center">
+      <div className="row col-9">
+        <div className="col-md-10 offset-md-1 border rounded shadow-sm my-4 p-3 bg-dark">
           <div className="mb-4 p-3 bg-dark d-flex justify-content-center align-items-center">
           <ClockInButton/>
             <button

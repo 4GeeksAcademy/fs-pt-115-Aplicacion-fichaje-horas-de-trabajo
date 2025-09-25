@@ -1,6 +1,6 @@
 
 import click
-from api.models import db, User, Status
+from api.models import db, User, DocumentType
 
 """
 In this file, you can add as many commands as you want using the @app.cli.command decorator
@@ -28,6 +28,20 @@ def setup_commands(app):
             print("User: ", user.email, " created.")
 
         print("All test users created")
+
+    @app.cli.command("insert-document-types")
+    def insert_document_types():
+        document_types = ["contract", "payroll", "justificante"]
+        created_count = 0
+
+        for name in document_types:
+            if not DocumentType.query.filter_by(name=name).first():
+                doc_type = DocumentType(name=name)
+                db.session.add(doc_type)
+                created_count += 1
+
+        db.session.commit()
+        print(f"{created_count} document types inserted successfully.")
 
     @app.cli.command("insert-test-data")
     def insert_test_data():

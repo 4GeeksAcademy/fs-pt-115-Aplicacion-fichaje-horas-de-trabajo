@@ -1,4 +1,16 @@
 from flask import jsonify, url_for
+import os
+from werkzeug.utils import secure_filename
+
+
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {"pdf", "docx", "jpg", "png"}
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 class APIException(Exception):
     status_code = 400
