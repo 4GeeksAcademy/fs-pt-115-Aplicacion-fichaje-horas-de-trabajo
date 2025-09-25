@@ -54,10 +54,10 @@ export const crearUsuario = async (newUser) => {
         surname: newUser.surname,
         last_name: newUser.last_name,
         email: newUser.email,
-        DNI: newUser.dni_nie,
+        DNI: newUser.DNI,
         iban: newUser.iban,
         address: newUser.address,
-        birth_date: new Date(newUser.birth_date).toISOString(),
+        birth_date:newUser.birth_date,
         rol: newUser.rol,
         is_admin: newUser.is_admin,
         password: newUser.password,
@@ -121,8 +121,30 @@ export const getUserByToken = async () => {
     throw new Error(data.msg || "Error al obtener el perfil del usuario");
   }
 
-  console.log("✅ Usuario logueado:", data.user);
+  console.log("Usuario logueado:", data.user);
   return data.user;
+};
+
+export const getUsuarioById = async (id, token) => {
+  try {
+    const resp = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Error obteniendo usuario ${id}: ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    return data;
+  } catch (err) {
+    console.error("Error en getUsuarioById:", err);
+    throw err;
+  }
 };
 
 // ACTUALIZAR USUARIO
@@ -490,12 +512,21 @@ export const uploadDocument = async (userId, token, file, typeId) => {
     }
   );
 
+  const text = await response.text(); 
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.msg || "Error subiendo documento");
+    try {
+      const err = JSON.parse(text);
+      throw new Error(err.msg || "Error subiendo documento");
+    } catch {
+      throw new Error(`Error subiendo documento: ${text}`);
+    }
   }
 
-  return response.json();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error("Respuesta no es JSON válido");
+  }
 };
 
 export const toggleStatus = async (userId) => {
