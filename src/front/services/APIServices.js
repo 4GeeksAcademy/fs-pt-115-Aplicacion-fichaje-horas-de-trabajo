@@ -12,7 +12,9 @@ export const getLocation = async () => {
 
   return data;
 };
-//PETICIONES A LA API DESDE EL LOGIN
+
+export const getToken = () => localStorage.getItem("token");
+
 //LOGIN
 export const login = async (email, password) => {
   const response = await fetch(
@@ -169,7 +171,7 @@ export const actualizarUsuario = async (id, data) => {
 // ELIMINAR USUARIO
 export const borrarUsuario = async (id) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`,
+    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}`,
     {
       method: "DELETE",
       headers: {
@@ -240,55 +242,48 @@ export const checkUsuarios = async () => {
   return data.user_created;
 };
 
-// Crear solicitud vacaciones
+//SOLICITUDES DE VACACIONES
 export const createHoliday = async (data) => {
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays`, {
+  const token = localStorage.getItem("token")
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
-    },
-    body: JSON.stringify(data)
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Error al crear la solicitud");
-  return res.json();
+  const respuesta = await res.json();
+  console.log(respuesta);
+  return respuesta
 };
 
-// Obtener todas las solicitudes de vacaciones
 export const getHolidays = async () => {
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays`, {
-    headers: {
-      "Authorization": `Bearer ${getToken()}`
-    }
+  const token = getToken();
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("Error al obtener las solicitudes");
   return res.json();
 };
 
-
-
-// Actualizar solicitud de Vacaciones (PUT)
 export const updateHoliday = async (id, data) => {
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays/${id}`, {
+  const token = getToken();
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${getToken()}`
-    },
-    body: JSON.stringify(data)
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
   });
+
   if (!res.ok) throw new Error("Error al actualizar la solicitud");
   return res.json();
 };
 
-// Eliminar solicitud de Vacaciones (DELETE)
 export const deleteHoliday = async (id) => {
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays/${id}`, {
+
+  const token = getToken();
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays/${id}`, {
     method: "DELETE",
-    headers: {
-      "Authorization": `Bearer ${getToken()}`
-    }
+    headers: { Authorization: `Bearer ${token}` },
   });
+
   if (!res.ok) throw new Error("Error al eliminar la solicitud");
   return res.json();
 };
@@ -323,6 +318,24 @@ export const addsigning = async (id, newSigning) => {
   return await response.json();
 };
 
+export const deleteSigning = async (signing_id, user_id) => {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(
+    `${
+      import.meta.env.VITE_BACKEND_URL
+    }/api/users/${user_id}/signings/${signing_id}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) throw new Error("Error al eliminar el fichaje");
+  return res.json();
+};
+
 export const getsignings = async (id) => {
   const token = localStorage.getItem("token");
 
@@ -351,7 +364,7 @@ export const addschedule = async (id, start_datetime, end_datetime) => {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/schedules/`,
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}/schedules/`,
     {
       method: "POST",
       headers: {
@@ -373,11 +386,29 @@ export const addschedule = async (id, start_datetime, end_datetime) => {
   return await response.json();
 };
 
+export const deleteSchedule = async (signing_id, user_id) => {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(
+    `${
+      import.meta.env.VITE_BACKEND_URL
+    }/api/users/${user_id}/schedules/${signing_id}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) throw new Error("Error al eliminar el horario");
+  return res.json();
+};
+
 export const getschedule = async (id) => {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/schedules`,
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}/schedules`,
     {
       method: "GET",
       headers: {
@@ -387,42 +418,83 @@ export const getschedule = async (id) => {
     }
   );
 
-  if (!response.ok) {
-    throw new Error("Error al obtener fichajes", 400);
-  }
   const data = await response.json();
+  console.log("Respuesta cruda del backend:", data);
 
-  return data.schedules;
+  if (!response.ok) {
+    throw new Error("Error al obtener fichajes");
+  }
+
+  // si tu backend devuelve { schedules: [...] }
+  // return data.schedules;
+
+  // si tu backend devuelve directamente un array [...]
+  return data;
+}
+export const updateSchedule = async (userId, scheduleId, updates) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${
+      import.meta.env.VITE_BACKEND_URL
+    }/api/users/${userId}/schedules/${scheduleId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updates),
+    }
+  );
+
+  if (!response.ok) throw new Error("Error al actualizar el fichaje");
+  return response.json();
 };
 
 export const getSignings = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/signings`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/signings`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
 
   return response.json();
 };
 
 export const getContracts = async (userId, token) => {
-
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/documents/contracts`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await fetch(
+    `${
+      import.meta.env.VITE_BACKEND_URL
+    }/api/users/${userId}/documents/contracts`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
 
   return response.json();
 };
 
 export const getPayrolls = async (userId, token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/documents/payrolls`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await fetch(
+    `${
+      import.meta.env.VITE_BACKEND_URL
+    }/api/users/${userId}/documents/payrolls`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   return response.json();
 };
 
 export const getDocumentTypes = async (token) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/document_types`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/document_types`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   return response.json();
 };
 
@@ -431,11 +503,14 @@ export const uploadDocument = async (userId, token, file, typeId) => {
   formData.append("file", file);
   formData.append("type_id", typeId);
 
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/documents`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/documents`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    }
+  );
 
   const text = await response.text(); 
   if (!response.ok) {
@@ -455,7 +530,7 @@ export const uploadDocument = async (userId, token, file, typeId) => {
 };
 
 export const toggleStatus = async (userId) => {
-  const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token");
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/api/user/${userId}/status`,
     {
@@ -464,7 +539,7 @@ export const toggleStatus = async (userId) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ action: "toggle_work"}),
+      body: JSON.stringify({ action: "toggle_work" }),
     }
   );
   return response.json();
@@ -492,3 +567,47 @@ export const getSignType = async (userId) => {
   return data;
 };
 
+export const getAllSignTypes = async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/signtypes`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al comprobar fichajes", 400);
+  }
+  const data = await response.json();
+
+  dispatch({ type: "SET_SIGNTYPES", payload: data });
+
+  return data;
+};
+
+export const updateSigning = async (userId, signId, updates) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${
+      import.meta.env.VITE_BACKEND_URL
+    }/api/users/${userId}/signings/${signId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updates),
+    }
+  );
+
+  if (!response.ok) throw new Error("Error al actualizar el fichaje");
+  return response.json();
+};

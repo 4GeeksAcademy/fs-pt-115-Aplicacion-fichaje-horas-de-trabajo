@@ -5,7 +5,11 @@ import { useParams } from "react-router-dom";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { Calendar } from "../components/Calendar.jsx";
+<<<<<<< HEAD
 import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus, getDocumentTypes, uploadDocument, getUsuarioById } from "../services/APIServices.js";
+=======
+import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus, getDocumentTypes, uploadDocument, getAllSignTypes } from "../services/APIServices.js";
+>>>>>>> develop
 import workedHours from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 
@@ -170,11 +174,32 @@ export const Profile = () => {
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <h4 className="ms-4 text-light">SIGNINGS</h4>
+            <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
+              {store.signings.length ? (
+                store.signings.map((c) => (
+                  <UserCard
+                    sign_id = {c.id}
+                    key = {c.id}
+                    latitude={c.lat}
+                    longitude={c["long"]}
+                    date={c.datetime}
+                    type={c.sign_type_name}
+                  />
+                ))
+              ) : (
+                <p>No signings</p>
+              )}
+            </ul>
+          </div>
+
+          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h2 className="m-2">Calendario de Horarios</h2>
             <Calendar />
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+
             <h6 className="fw-bold mb-3">Contracts</h6>
 
             {store.userContracts.length ? (

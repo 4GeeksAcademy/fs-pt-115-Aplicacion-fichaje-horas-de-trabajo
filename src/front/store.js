@@ -7,6 +7,7 @@ export const initialStore = () => {
     userSchedule: [],
     userContracts: [],
     payrolls: [],
+    signtypes: [],
   };
 };
 
@@ -38,12 +39,17 @@ export default function storeReducer(store, action = {}) {
     case "SET_SCHEDULES":
       return {
         ...store,
-        firstUserExist: action.payload,
+        userSchedule: action.payload,
+      };
+    case "SET_SIGNTYPE":
+      return {
+        ...store,
+        signtypes: action.payload,
       };
     case "ADD_SCHEDULES":
       return {
         ...store,
-        userSchedule: [...store.userSchedule, ...action.payload],
+        userSchedule: [...store.userSchedule, action.payload],
       };
     case "GET_CONTRACTS":
       return {
@@ -56,7 +62,30 @@ export default function storeReducer(store, action = {}) {
         ...store,
         payrolls: action.payload,
       };
-
+    case "DELETE_SIGNING":
+      return {
+        ...store,
+        signings: store.signings.filter((sign) => sign.id !== action.payload),
+      };
+    case "EDIT_SIGNING":
+      return {
+        ...store,
+        signings: store.signings.map((sign) =>
+          sign.id === action.payload.id ? { ...sign, ...action.payload } : sign
+        ),
+      };
+    case "DELETE_SCHEDULE":
+      return {
+        ...store,
+        userSchedule: store.userSchedule.filter((e) => e.id !== action.payload),
+      };
+    case "UPDATE_SCHEDULE":
+      return {
+        ...store,
+        userSchedule: store.userSchedule.map((e) =>
+          e.id === action.payload.id ? { ...e, ...action.payload } : e
+        ),
+      };
     default:
       throw Error("Unknown action.");
   }

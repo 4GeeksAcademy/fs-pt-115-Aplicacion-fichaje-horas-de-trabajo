@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint, current_app
-from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType
+from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType, SignType
 from api.utils import generate_sitemap, APIException, UPLOAD_FOLDER, allowed_file, secure_filename, os
 from flask_cors import CORS
 from datetime import time, datetime, timezone
@@ -159,6 +159,7 @@ def create_user():
     data = request.json
     print(data)
     required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "is_admin", "status", "iban", "address", "birth_date"]
+
     missing = [f for f in required_fields if f not in data or data[f] is None]
 
     if missing:
@@ -239,13 +240,15 @@ def get_holidays():
     holidays = Holidays.query.filter_by(user_id=user_id).all()
     return jsonify([h.serialize() for h in holidays]), 200
 
+
 @api.route("/holidays", methods=["POST"])
 @jwt_required()
 def create_holiday():
     user_id = get_jwt_identity()
     data = request.get_json()
 
-    fecha_inicio = datetime.strptime(data.get("fechaInicio"), "%Y-%m-%d").date()
+    fecha_inicio = datetime.strptime(
+        data.get("fechaInicio"), "%Y-%m-%d").date()
     fecha_fin = datetime.strptime(data.get("fechaFin"), "%Y-%m-%d").date()
 
     holiday = Holidays(
@@ -262,6 +265,7 @@ def create_holiday():
 
     return jsonify(holiday.serialize()), 201
 
+
 @api.route("/holidays/<int:holiday_id>", methods=["PUT"])
 @jwt_required()
 def update_holiday(holiday_id):
@@ -273,9 +277,11 @@ def update_holiday(holiday_id):
     data = request.get_json()
 
     if "fechaInicio" in data:
-        holiday.fecha_inicio = datetime.strptime(data["fechaInicio"], "%Y-%m-%d").date()
+        holiday.fecha_inicio = datetime.strptime(
+            data["fechaInicio"], "%Y-%m-%d").date()
     if "fechaFin" in data:
-        holiday.fecha_fin = datetime.strptime(data["fechaFin"], "%Y-%m-%d").date()
+        holiday.fecha_fin = datetime.strptime(
+            data["fechaFin"], "%Y-%m-%d").date()
     if "horas" in data:
         holiday.horas = data["horas"]
     if "tipo" in data:
@@ -285,6 +291,7 @@ def update_holiday(holiday_id):
 
     db.session.commit()
     return jsonify(holiday.serialize()), 200
+
 
 @api.route("/holidays/<int:holiday_id>", methods=["DELETE"])
 @jwt_required()
@@ -300,10 +307,12 @@ def delete_holiday(holiday_id):
 
 # Horarios
 
+
 @api.route("/users/<int:user_id>/schedules", methods=["GET"])
 @jwt_required()
 def get_schedules(user_id):
     schedules = Schedule.query.filter_by(user_id=user_id).all()
+    print(schedules)
     return jsonify([s.serialize() for s in schedules])
 
 
@@ -373,7 +382,8 @@ def add_signing(user_id):
     signing = Signing(
         user_id=user_id,
         sign_type_id=data.get("sign_type_id"),
-        datetime=datetime.fromisoformat(data["datetime"].replace("Z", "+00:00")),
+        datetime=datetime.fromisoformat(
+            data["datetime"].replace("Z", "+00:00")),
         lat=data.get("lat"),
         long=data.get("long")
     )
@@ -489,13 +499,14 @@ def get_documents(user_id):
     documents = Document.query.filter_by(user_id=user_id).all()
     return jsonify([doc.serialize() for doc in documents]), 200
 
+
 @api.route("/users/<int:user_id>/documents", methods=["POST"])
 @jwt_required()
 def add_document_file(user_id):
     print("Hola")
     if "file" not in request.files:
         return jsonify({"msg": "Archivo es requerido"}), 400
-    
+
     file = request.files["file"]
     type_id = request.form.get("type_id")
 
@@ -507,7 +518,6 @@ def add_document_file(user_id):
 
     if not allowed_file(file.filename):
         return jsonify({"msg": "Tipo de archivo no permitido"}), 400
-
 
     file_data = base64.b64encode(file.read()).decode('utf-8')
 
@@ -537,7 +547,6 @@ def update_document(user_id, doc_id):
     if "type_id" in data:
         doc.type_id = data["type_id"]
 
-
     db.session.commit()
     return jsonify(doc.serialize()), 200
 
@@ -553,13 +562,15 @@ def delete_document(user_id, doc_id):
     db.session.commit()
     return jsonify({"msg": "Document deleted"}), 200
 
-#Contracts
+# Contracts
+
 
 @api.route("/users/<int:user_id>/documents/contracts", methods=["GET"])
 @jwt_required()
 def get_contracts(user_id):
     contracts = Document.query.filter_by(user_id=user_id, type_id=1).all()
     return jsonify([doc.serialize() for doc in contracts]), 200
+
 
 @api.route("/users/<int:user_id>/documents/contracts", methods=["POST"])
 @jwt_required()
@@ -600,13 +611,15 @@ def add_contract(user_id):
 
     return jsonify(doc.serialize()), 201
 
-#Payrolls
+# Payrolls
+
 
 @api.route("/users/<int:user_id>/documents/payrolls", methods=["GET"])
 @jwt_required()
 def get_payrolls(user_id):
     payrolls = Document.query.filter_by(user_id=user_id, type_id=2).all()
     return jsonify([doc.serialize() for doc in payrolls]), 200
+
 
 @api.route("/users/<int:user_id>/documents/payrolls", methods=["POST"])
 @jwt_required()
@@ -647,7 +660,8 @@ def add_payroll(user_id):
 
     return jsonify(doc.serialize()), 201
 
-#Tipos de documentos
+# Tipos de documentos
+
 
 @api.route("/document_types", methods=["POST"])
 @jwt_required()
@@ -657,7 +671,7 @@ def create_document_type():
 
     if not name:
         return jsonify({"msg": "El nombre es requerido"}), 400
- 
+
     if DocumentType.query.filter_by(name=name).first():
         return jsonify({"msg": "Ese tipo ya existe"}), 400
 
@@ -695,7 +709,7 @@ def delete_document_type(type_id):
     db.session.commit()
     return jsonify({"msg": "Tipo eliminado"}), 200
 
-#Cambio de estado
+# Cambio de estado
 
 
 @api.route('/user/<int:user_id>/status', methods=['PUT'])
@@ -794,17 +808,19 @@ def create_status():
         "status": new_status.serialize()
     }), 200
 
+
 @api.route('/status', methods=['GET'])
 def get_status():
     status = Status.query.all()
     return jsonify([s.serialize() for s in status]), 200
 
+
 @api.route('/users/<int:user_id>/signtypes', methods=['GET'])
 @jwt_required()
 def get_sign_types(user_id):
-    
+
     # Devuelve el tipo de fichaje que debería usar el usuario según su último fichaje.
-    
+
     last_signing = Signing.query.filter_by(user_id=user_id)\
         .order_by(Signing.datetime.desc())\
         .first()
@@ -820,9 +836,63 @@ def get_sign_types(user_id):
     else:
         next_sign_type = SignType.query.filter_by(name="In").first()
 
-    
-
     if not next_sign_type:
         return jsonify({"message": "No se encontró el siguiente tipo de fichaje"}), 404
 
     return jsonify(next_sign_type.serialize()), 200
+
+
+@api.route('/signtypes', methods=['GET'])
+@jwt_required()
+def get_all_sign_types():
+
+    # Devuelve todos los tipos de fichajes
+
+    signs_all = SignType.query.all()
+
+    return jsonify([signtype.serialize() for signtype in signs_all]), 200
+
+
+@api.route("/users/<int:user_id>/signings/<int:sign_id>", methods=["DELETE"])
+@jwt_required()
+def delete_sign(user_id, sign_id):
+    sign = Signing.query.get(sign_id)
+
+    if not sign or sign.user_id != user_id:
+        return jsonify({"error": "Fichaje no encontrado"}), 404
+
+    db.session.delete(sign)
+    db.session.commit()
+    return jsonify({"message": "Fichaje eliminado"}), 200
+
+
+@api.route("/users/<int:user_id>/signings/<int:sign_id>", methods=["PUT"])
+@jwt_required()
+def update_signing(user_id, sign_id):
+    data = request.get_json()
+
+    sign = Signing.query.filter_by(user_id=user_id, id=sign_id).first()
+    if not sign:
+        return jsonify({"msg": "Signing not found"}), 404
+
+    if "lat" in data:
+        sign.lat = data["lat"]
+    if "long" in data:
+        sign.long = data["long"]
+    if "datetime" in data:
+        try:
+            sign.datetime = datetime.fromisoformat(
+                data["datetime"].replace("Z", "+00:00"))
+        except Exception:
+            return jsonify({"msg": "Invalid datetime format"}), 400
+    if "sign_type_id" in data:
+        if isinstance(data["sign_type_id"], str):
+            sign_type = SignType.query.filter_by(name=data["sign_type_id"]).first()
+            if not sign_type:
+                return jsonify({"msg": "Invalid sign_type"}), 400
+            sign.sign_type_id = sign_type.id
+        else:
+            sign.sign_type_id = data["sign_type_id"]
+
+    db.session.commit()
+    return jsonify(sign.serialize()), 200

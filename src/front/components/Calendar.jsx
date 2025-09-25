@@ -3,11 +3,13 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { addschedule, getschedule } from '../services/APIServices';
+import { addschedule, getschedule, updateSchedule, deleteSchedule } from '../services/APIServices';
 import useGlobalReducer from '../hooks/useGlobalReducer';
+import { useParams } from 'react-router-dom';
 
 export const Calendar = () => {
-  const { store, dispatch } = useGlobalReducer()
+  const { store, dispatch } = useGlobalReducer();
+  const { id } = useParams()
 
   const [events, setEvents] = useState([]);
   const [newEvent, setNewEvent] = useState({
@@ -16,90 +18,112 @@ export const Calendar = () => {
     end: ''
   });
 
-  const modalRef = useRef(null)
+  const modalRef = useRef(null);
 
-  //Cargar schedules
+  // Obtener schedules al cargar
   useEffect(() => {
     const loadSchedules = async () => {
-
       try {
-        const data = await getschedule(store.user.id)
-
+        const data = await getschedule(store.user.id);
+        console.log("schedules:", data)
         if (!data || !Array.isArray(data)) {
-          console.warn("El API no devolvió un array, data recibido:", data);
-          return; // evita el .map si no hay datos
+          console.warn("El API no devolvió un array, recibido:", data);
+          return;
         }
 
-        const userScheduleFormatted = data.map(e => ({
+        // Adaptar los datos del backend a FullCalendar
+        const formatted = data.map(e => ({
           id: e.id,
-          user_id: e.user_id,
-          start_time: e.start_datetime,
-          end_time: e.end_datetime,
+          start: e.start_time.replace(" ", "T"), // formato ISO para FullCalendar
+          end: e.end_time.replace(" ", "T"),
+          title: "Turno" // puedes cambiarlo a `${store.user.first_name}` si es siempre el mismo usuario
         }));
-        setEvents(userScheduleFormatted)
 
-        dispatch({ type: "SET_SCHEDULES", payload: data })
+        setEvents(formatted);
+        dispatch({ type: "SET_SCHEDULES", payload: data });
+
       } catch (error) {
-        console.error('Error al cargar los schedules:', error);
+        console.error("Error al cargar schedules:", error);
       }
     };
 
     loadSchedules();
   }, []);
 
-  const addSchedule = async (start, end) => {
-    try {
-      const data = await addschedule(store.user.id, start, end)
-
-      dispatch({ type: "ADD_SCHEDULES", payload: data })
-    } catch (error) {
-      console.error('Error al añadir los schedules:', error);
-    }
-
-  }
-
-  // Agregar schedules
-  const handleDateClick = async (info) => {
-    const date = info.dateStr
-    setNewEvent({
-      name: store.user.first_name,
-      start: `${date}T`,
-      end: `${date}T`,
-    })
-
-    const modal = new window.bootstrap.Modal(modalRef.current);
-    modal.show();
-
-
-  };
-
+  // Crear schedule
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const evento = {
-      name: newEvent.name,
-      start: newEvent.start,
-      end: newEvent.end
+    try {
+      const data = await addschedule(store.user.id, newEvent.start, newEvent.end);
+
+      setEvents([
+        ...events,
+        {
+          id: data.id,
+          start: data.start_time.replace(" ", "T"),
+          end: data.end_time.replace(" ", "T"),
+          title: store.user.first_name
+        }
+      ]);
+
+      dispatch({ type: "ADD_SCHEDULES", payload: data });
+
+      const modal = window.bootstrap.Modal.getInstance(modalRef.current);
+      modal.hide();
+    } catch (error) {
+      console.error("Error al guardar el evento:", error);
     }
-    console.log("data enviado", store.user.id, evento.start, evento.end)
-    addSchedule()
+  };
 
+  // Abrir modal para crear
+  const handleDateClick = (info) => {
+    const date = info.dateStr;
+    setNewEvent({
+      name: store.user.first_name,
+      start: `${date}T00:00`,
+      end: `${date}T01:00`,
+    });
 
-    setEvents([
-      ...events,
-      {
-        id: data.id,
-        name: data.first_name,
-        start: data.start_time,
-        end: data.end_time
+    const modal = new window.bootstrap.Modal(modalRef.current);
+    modal.show();
+  };
+
+  // Eliminar schedule
+  const handleEventClick = async (clickInfo) => {
+    if (window.confirm(`¿Seguro que quieres eliminar este turno?`)) {
+      try {
+        await deleteSchedule(clickInfo.event.id, id);
+
+        setEvents(events.filter(e => e.id !== clickInfo.event.id));
+        dispatch({ type: "DELETE_SCHEDULE", payload: clickInfo.event.id });
+      } catch (error) {
+        console.error("Error al eliminar el evento:", error);
       }
-    ])
+    }
+  };
 
+  // Actualizar schedule (drag & drop)
+  const handleEventDrop = async (dropInfo) => {
+    try {
+      const { id } = dropInfo.event;
+      const start = dropInfo.event.start.toISOString();
+      const end = dropInfo.event.end ? dropInfo.event.end.toISOString() : start;
 
-    const modal = window.bootstrap.Modal.getInstance(modalRef.current);
-    modal.hide();
-  }
+      // ⚠️ revisa si tu updateSchedule requiere userId
+      const updated = await updateSchedule(id, start, end);
 
+      setEvents(events.map(e =>
+        e.id === id
+          ? { ...e, start: updated.start_time.replace(" ", "T"), end: updated.end_time.replace(" ", "T") }
+          : e
+      ));
+
+      dispatch({ type: "UPDATE_SCHEDULE", payload: updated });
+    } catch (error) {
+      console.error("Error al actualizar el evento:", error);
+    }
+  };
 
   return (
     <div className='col-12 d-flex justify-content-center text-dark'>
@@ -108,12 +132,15 @@ export const Calendar = () => {
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
           selectable={true}
-          editable={false}
-          events={events}
+          editable={true}
+          events={events}   // aquí van los fichajes adaptados
           dateClick={handleDateClick}
+          eventClick={handleEventClick}
+          eventDrop={handleEventDrop}
         />
       </div>
 
+      {/* Modal Crear */}
       <div className="modal fade" ref={modalRef} tabIndex="-1">
         <div className="modal-dialog">
           <form className="modal-content" onSubmit={handleSubmit}>
@@ -175,8 +202,6 @@ export const Calendar = () => {
           </form>
         </div>
       </div>
-
     </div>
   );
 };
-

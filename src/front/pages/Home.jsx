@@ -78,25 +78,25 @@ export const Home = () => {
             <div className="col-md-6 mb-4">
               <h4 className="ms-4 text-light">WORKING</h4>
               <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                <UserCard />
+                {/* <UserCard /> */}
               </ul>
             </div>
             <div className="col-md-6 mb-4">
               <h4 className="ms-4 text-light">NOT WORKING</h4>
               <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                <UserCard />
+                {/* <UserCard /> */}
               </ul>
             </div>
             <div className="col-md-6 mb-4">
               <h4 className="ms-4 text-light">BREAK</h4>
               <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                <UserCard />
+                {/* <UserCard /> */}
               </ul>
             </div>
             <div className="col-md-6 mb-4">
               <h4 className="ms-4 text-light">HOLIDAYS</h4>
               <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                <UserCard />
+                {/* <UserCard /> */}
               </ul>
             </div>
           </div>

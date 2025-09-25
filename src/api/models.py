@@ -237,7 +237,7 @@ class Signing(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     sign_type_id: Mapped[int] = mapped_column(ForeignKey("signtype.id"))
-    datetime: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc)) # type: ignore
+    datetime: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
     lat: Mapped[float] = mapped_column(Float)
     long: Mapped[float] = mapped_column(Float)
 
@@ -250,6 +250,7 @@ class Signing(db.Model):
             "user_id": self.user_id,
             "sign_type_id": self.sign_type_id,
             "datetime": self.datetime.isoformat() if self.datetime else None,
+            "sign_type_name": SignType.query.get(self.sign_type_id).name,
             "lat": self.lat,
             "long": self.long,
         }
