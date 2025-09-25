@@ -1,15 +1,13 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import { UserCard } from "../components/UserCard.jsx";
-import { UserInfo } from "../components/UserInfo.jsx";
-import { Calendar } from "../components/Calendar.jsx";
-import {getUserByToken, getSignings, getContracts,} from "../services/APIServices.js";
+import { getUserByToken, getSignings, getContracts, getPayrolls, toggleBreak } from "../services/APIServices.js";
 import workedHours from "../components/workedHours.jsx";
+import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 
 export const Profile = () => {
   const { store, dispatch } = useGlobalReducer();
-
+  const [showHolidayForm, setShowHolidayForm] = useState(false);
   const token = localStorage.getItem("token");
 
   const handleBreak = async () => {
@@ -22,7 +20,6 @@ export const Profile = () => {
   };
 
   useEffect(() => {
-
     const fetchData = async () => {
       try {
         const user = await getUserByToken();
@@ -37,17 +34,13 @@ export const Profile = () => {
         const payrolls = await getPayrolls(user.id, token);
         dispatch({ type: "GET_PAYROLLS", payload: payrolls });
       } catch (err) {
-        console.error(" Error cargando datos del perfil:", err);
+        console.error("Error cargando datos del perfil:", err);
       }
     };
-
     fetchData();
-  }, [dispatch]);
+  }, [dispatch, token]);
 
-  const hours = useMemo(
-    () => workedHours(store.signings || []),
-    [store.signings]
-  );
+  const hours = useMemo(() => workedHours(store.signings || []), [store.signings]);
   const hoursToday = hours.hoursToday;
   const hoursWeek = hours.hoursWeek;
 
@@ -55,27 +48,20 @@ export const Profile = () => {
     return (
       <div
         className="container-fluid d-flex justify-content-center align-items-center"
-        style={{
-          backgroundColor: "#ff7b00",
-          minHeight: "100vh",
-          color: "white",
-        }}
+        style={{ backgroundColor: "#ff7b00", minHeight: "100vh", color: "white" }}
       >
         <h3>Loading...</h3>
       </div>
     );
   }
+
   return (
     <div
       className="container-fluid"
-      style={{
-        backgroundColor: "#ff7b00",
-        minHeight: "100vh",
-        color: "white",
-        padding: "2rem",
-      }}
+      style={{ backgroundColor: "#ff7b00", minHeight: "100vh", color: "white", padding: "2rem" }}
     >
       <div className="row g-4">
+        {/* Columna de usuario */}
         <div className="col-lg-4">
           <div className="card bg-dark text-white shadow-sm p-4 text-center border border-secondary">
             <img
@@ -85,23 +71,19 @@ export const Profile = () => {
               style={{ width: "150px", height: "150px", objectFit: "cover" }}
             />
             <h5 className="mb-1">
-              {store.user.first_name} {store.user.surname}{" "}
-              {store.user.last_name}
+              {store.user.first_name} {store.user.surname} {store.user.last_name}
             </h5>
-
-            <p className="text-muted mb-1">
-              Rol: {store.user.rol || "No definido"}
-            </p>
+            <p className="text-muted mb-1">Rol: {store.user.rol || "No definido"}</p>
             <p className="text-muted mb-1">DNI: {store.user.DNI || "N/A"}</p>
-            <p className="text-muted mb-1">
-              Dirección: {store.user.address || "N/A"}
-            </p>
-            <p className="text-muted mb-3">IBAN: {store.user.IBAN || "N/A"}</p>
-
+            <p className="text-muted mb-1">Dirección: {store.user.address || "N/A"}</p>
+            <p className="text-muted mb-3">IBAN: {store.user.iban || "N/A"}</p>
             <p className="small text-white">📧 {store.user.email}</p>
           </div>
         </div>
+
+        {/* Columna de información */}
         <div className="col-lg-8">
+          {/* Turn */}
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h6 className="fw-bold">Turn</h6>
             <p className="fw-semibold" style={{ color: "#ff7b00" }}>
@@ -110,15 +92,11 @@ export const Profile = () => {
             <div className="d-flex justify-content-between my-3">
               <div>
                 <small className="text-muted">Hours today</small>
-                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>
-                  {hoursToday}
-                </h4>
+                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursToday}</h4>
               </div>
               <div>
                 <small className="text-muted">Hours this week</small>
-                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>
-                  {hoursWeek}
-                </h4>
+                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursWeek}</h4>
               </div>
             </div>
             <button
@@ -130,18 +108,17 @@ export const Profile = () => {
             </button>
           </div>
 
+          {/* Contracts */}
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h6 className="fw-bold mb-3">Contracts</h6>
             {store.userContracts.length ? (
               store.userContracts.map((c) => (
                 <div key={c.id} className="mb-2">
                   <p className="mb-1">
-                    Contract type:{" "}
-                    <span className="fw-semibold">{c.type || "N/A"}</span>
+                    Contract type: <span className="fw-semibold">{c.type || "N/A"}</span>
                   </p>
                   <p className="mb-1">
-                    Start date:{" "}
-                    <span className="fw-semibold">{c.start_date || "N/A"}</span>
+                    Start date: <span className="fw-semibold">{c.start_date || "N/A"}</span>
                   </p>
                 </div>
               ))
@@ -149,6 +126,8 @@ export const Profile = () => {
               <p>No contracts</p>
             )}
           </div>
+
+          {/* Payrolls */}
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h6 className="fw-bold mb-3">Payrolls</h6>
             {store.payrolls.length ? (
@@ -166,8 +145,30 @@ export const Profile = () => {
               <p>No payrolls</p>
             )}
           </div>
+
+          {/* Vacations */}
+          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <h6 className="fw-bold mb-3">Vacation Requests</h6>
+            <button
+              className="btn w-100 text-white"
+              style={{ backgroundColor: "#ff7b00" }}
+              onClick={() => setShowHolidayForm(true)}
+            >
+              Nueva Solicitud
+            </button>
+          </div>
+
+          {/* Modal controlado por React */}
+          <SolicitudVacaciones
+            show={showHolidayForm}
+            onClose={() => setShowHolidayForm(false)}
+          />
         </div>
       </div>
     </div>
   );
 };
+
+
+
+
