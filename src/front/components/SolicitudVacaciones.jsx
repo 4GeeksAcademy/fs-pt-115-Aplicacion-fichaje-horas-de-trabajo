@@ -18,7 +18,8 @@ export default function SolicitudVacaciones({ show, onClose }) {
     if (!show) return; // solo cargar cuando se muestre
     const fetchHolidays = async () => {
       try {
-        const data = await getHolidays();
+        const token = localStorage.getItem("token");
+        const data = await getHolidays(token);
         setHolidays(data);
       } catch (err) {
         console.error("Error al cargar las solicitudes:", err);
@@ -35,14 +36,17 @@ export default function SolicitudVacaciones({ show, onClose }) {
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       if (editingId) {
-        const updated = await updateHoliday(editingId, formData);
+        const updated = await updateHoliday(editingId, formData, token);
         setHolidays(holidays.map(h => (h.id === editingId ? updated : h)));
         setEditingId(null);
       } else {
-        const created = await createHoliday(formData);
+        const created = await createHoliday(formData, token);
         setHolidays([...holidays, created]);
       }
+
+      // Limpiar formulario
       setFormData({
         fechaInicio: "",
         fechaFin: "",
@@ -50,10 +54,11 @@ export default function SolicitudVacaciones({ show, onClose }) {
         tipo: "",
         descripcion: "",
       });
-      onClose(); // cerrar modal después de enviar
+
+      
+      onClose();
     } catch (err) {
       console.error("Error al enviar la solicitud:", err);
-      // 🔹 Ya no mostramos alerta de error
     } finally {
       setLoading(false);
     }
@@ -73,11 +78,11 @@ export default function SolicitudVacaciones({ show, onClose }) {
   const handleDelete = async (id) => {
     if (!window.confirm("¿Seguro que quieres eliminar esta solicitud?")) return;
     try {
-      await deleteHoliday(id);
+      const token = localStorage.getItem("token");
+      await deleteHoliday(id, token);
       setHolidays(holidays.filter(h => h.id !== id));
     } catch (err) {
       console.error("Error al eliminar la solicitud:", err);
-      // 🔹 Sin alerta, solo log
     }
   };
 
