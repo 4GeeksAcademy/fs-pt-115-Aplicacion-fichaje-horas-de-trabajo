@@ -4,7 +4,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { Calendar } from "../components/Calendar.jsx";
-import { getUserByToken, getSignings, getContracts, getPayrolls, toggleBreak } from "../services/APIServices.js";
+import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus } from "../services/APIServices.js";
 import workedHours from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 
@@ -15,7 +15,7 @@ export const Profile = () => {
 
   const handleBreak = async () => {
     try {
-      const updated = await toggleBreak(store.user.id, token);
+      const updated = await toggleStatus(store.user.id);
       dispatch({ type: "SET_USER", payload: updated.user });
     } catch (err) {
       console.error("Error cambiando estado de descanso:", err);
