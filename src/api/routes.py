@@ -158,7 +158,7 @@ def create_user():
         return jsonify({"msg": "Solo el admin puede crear usuarios"}), 400
     data = request.json
     print(data)
-    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "is_admin", "status_id", "iban", "address", "birth_date"]
+    required_fields = ["email", "password", "first_name", "surname", "last_name", "DNI", "rol", "is_admin", "status", "iban", "address", "birth_date"]
     missing = [f for f in required_fields if f not in data or data[f] is None]
 
     if missing:
@@ -180,9 +180,6 @@ def create_user():
     if len(iban) < 15 or len(iban) > 34:
         return jsonify({"msg": "IBAN inválido. Debe tener entre 15 y 34 caracteres"}), 400
 
-    existing_users = User.query.count()
-    if existing_users > 0:
-        return jsonify({"msg": "El registro inicial ya se realizó. Usa /login"}), 400
 
     print("STATUS cargado:", STATUS)
     print("Status recibido del cliente:", data.get("status"))
@@ -209,7 +206,7 @@ def create_user():
         last_name=data["last_name"],
         DNI=data["DNI"],
         rol=data["rol"],
-        is_admin=["is_admin"],
+        is_admin=data["is_admin"],
         status_id=status_id
     )
     new_user.set_password(data["password"])
@@ -219,7 +216,7 @@ def create_user():
 
     access_token = create_access_token(identity=str(new_user.id))
 
-    return jsonify({"msg": "User boss created successfully", "token": access_token, "user": new_user.serialize()}), 200
+    return jsonify({"msg": "User created successfully", "token": access_token, "user": new_user.serialize()}), 200
 
 
 @api.route("/users/<int:id>", methods=["DELETE"])

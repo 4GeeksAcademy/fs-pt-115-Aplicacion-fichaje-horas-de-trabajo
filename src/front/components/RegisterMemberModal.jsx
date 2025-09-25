@@ -1,78 +1,95 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { crearUsuario, getUsuarios } from "../services/APIServices.js";
 
 export const RegisterMemberModal = () => {
-  const { store, dispatch } = useGlobalReducer();
-  const [isAdmin, setIsAdmin] = useState(false);
-  
+  const { dispatch } = useGlobalReducer();
 
   const [newUser, setNewUser] = useState({
-    firstName: "",
+    first_name: "",
     surname: "",
-    lastName: "",
-    birthDate: "",
+    last_name: "",
+    birth_date: "",
     address: "",
     rol: "",
     email: "",
     password: "",
-    dni_nie: "",
+    DNI: "",
     iban: "",
     is_admin: false,
+    status: "Inactivo",
   });
 
-  const handleInputsChange = (e) => {
-    setNewUser({ ...newUser, [e.target.name]: e.target.value });
-  };
-
   const [showAlert, setShowAlert] = useState(false);
+  const [alertMsg, setAlertMsg] = useState("");
+
+  const handleInputsChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setNewUser((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      newUser.firstName === "" ||
-      newUser.surname === "" ||
-      newUser.email === "" ||
-      newUser.password === "" ||
-      newUser.rol === "" ||
-      newUser.dni_nie === "" ||
-      newUser.iban === "" ||
-      newUser.address === "" ||
-      newUser.lastName === "" ||
-      !newUser.birthDate
-    ) {
+    // Validación básica
+    const requiredFields = [
+      "first_name",
+      "surname",
+      "last_name",
+      "birth_date",
+      "address",
+      "rol",
+      "email",
+      "password",
+      "DNI",
+      "iban",
+    ];
+    const missing = requiredFields.filter((f) => !newUser[f]);
+    if (missing.length > 0) {
+      setAlertMsg(`Faltan campos: ${missing.join(", ")}`);
       setShowAlert(true);
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 3000);
+      setTimeout(() => setShowAlert(false), 3000);
       return;
     }
 
-    const birthDateISO = new Date(newUser.birthDate).toISOString();
-    console.log(newUser);
-
     try {
-      const created = await crearUsuario({
-        first_name: newUser.firstName,
-        surname: newUser.surname,
-        last_name: newUser.lastName,
-        birth_date: birthDateISO,
-        address: newUser.address,
-        rol: newUser.rol,
-        email: newUser.email,
-        dni_nie: newUser.dni_nie,
-        iban: newUser.iban,
-        password: newUser.password,
-        is_admin: newUser.is_admin,
-        status: "Inactivo",
-      });
-      localStorage.setItem("token", created.token);
+      await crearUsuario(newUser);
 
+      // Refresca la lista de usuarios sin tocar el token
       getUsuarios(dispatch);
-      window.location.href = "/";
+
+      // Cerrar modal
+      const modalEl = document.getElementById("registerModal");
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      modal.hide();
+
+      // Mensaje de éxito
+      setAlertMsg("Usuario creado correctamente");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+
+      // Limpiar formulario
+      setNewUser({
+        first_name: "",
+        surname: "",
+        last_name: "",
+        birth_date: "",
+        address: "",
+        rol: "",
+        email: "",
+        password: "",
+        DNI: "",
+        iban: "",
+        is_admin: false,
+      });
     } catch (err) {
       console.error("Error creando usuario:", err);
+      setAlertMsg(err.message || "Error creando usuario");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 4000);
     }
   };
 
@@ -87,177 +104,143 @@ export const RegisterMemberModal = () => {
       <div className="modal-dialog">
         <div className="modal-content shadow rounded-4 bg-dark text-white">
           <div className="modal-header">
-            <form
-            className="mx-auto"
-              onSubmit={handleSubmit}
-            >
-              <div className="d-flex align-items-center justify-content-center mb-3"></div>
-              <h2 className="text-center mb-3">Sign In</h2>
-              {/* <div className="text-center ">
-                     <img
-                      src="https://i.pinimg.com/originals/44/48/2b/44482b0788436b607f176b6ac2c128f3.png"
-                      className="img-fluid mb-3"
-                      style={{ height: "150px" }}
-                      alt="..."
-                    /> 
-                  </div> */}
-              <div className="text-center d-flex flex-column mb-3">
-                <div className="input-group input-group-sm mb-3">
-                  <span className="input-group-text" id="inputGroup-sizing-sm">
-                    Name
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="firstName"
-                    onChange={handleInputsChange}
-                    value={newUser.firstName}
-                    aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm"
-                  />
-                </div>
-                <div className="input-group input-group-sm mb-3">
-                  <span className="input-group-text" id="inputGroup-sizing-sm">
-                    Surname
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="surname"
-                    onChange={handleInputsChange}
-                    value={newUser.surname}
-                    aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm"
-                  />
-                </div>
-                <div className="input-group input-group-sm mb-3">
-                  <span className="input-group-text" id="inputGroup-sizing-sm">
-                    Last Name
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="lastName"
-                    onChange={handleInputsChange}
-                    value={newUser.lastName}
-                    aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm"
-                  />
-                </div>
-                {/* Fecha de nacimiento*/}
-                <div className="input-group input-group-sm mb-3">
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="birthDate"
-                    onChange={handleInputsChange}
-                    value={newUser.birthDate}
-                    id="fecha"
-                  />
-                </div>
-                <div className="input-group input-group-sm mb-3">
-                  <span className="input-group-text" id="inputGroup-sizing-sm">
-                    address
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="address"
-                    onChange={handleInputsChange}
-                    value={newUser.address}
-                    aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm"
-                  />
-                </div>
-                <div className="input-group input-group-sm mb-3">
-                  <span className="input-group-text" id="inputGroup-sizing-sm">
-                    Rol
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="rol"
-                    onChange={handleInputsChange}
-                    value={newUser.rol}
-                    aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm"
-                  />
-                </div>
-                <div className="input-group input-group-sm mb-3">
-                  <span className="input-group-text" id="inputGroup-sizing-sm">
-                    Email
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="email"
-                    onChange={handleInputsChange}
-                    value={newUser.email}
-                    aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm"
-                  />
-                </div>
-                <div className="input-group input-group-sm mb-3">
-                  <span className="input-group-text" id="inputGroup-sizing-sm">
-                    Password
-                  </span>
-                  <input
-                    type="password"
-                    className="form-control"
-                    name="password"
-                    onChange={handleInputsChange}
-                    value={newUser.password}
-                    aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm"
-                  />
-                </div>
-                <div className="input-group input-group-sm mb-3">
-                  <span className="input-group-text" id="inputGroup-sizing-sm">
-                    DNI/NIE
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="dni_nie"
-                    onChange={handleInputsChange}
-                    value={newUser.dni_nie}
-                    aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm"
-                  />
-                </div>
-                <div className="input-group input-group-sm mb-3">
-                  <span className="input-group-text" id="inputGroup-sizing-sm">
-                    IBAN
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="iban"
-                    onChange={handleInputsChange}
-                    value={newUser.iban}
-                    aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-sm"
-                  />
-                </div>
-                <div className="form-check ms-3 mb-1">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="isAdmin"
-                    checked={newUser.is_admin}
-                    onChange={(e) => setIsAdmin(e.target.checked)}
-                  />
-                  <label className="form-check-label" htmlFor="isAdmin">
-                    Es admin
-                  </label>
-                </div>
+            <h2 className="modal-title">Registrar Usuario</h2>
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div className="modal-body">
+            {showAlert && (
+              <div className="alert alert-danger text-center">{alertMsg}</div>
+            )}
+            <form onSubmit={handleSubmit}>
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text">Nombre</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="first_name"
+                  value={newUser.first_name}
+                  onChange={handleInputsChange}
+                />
               </div>
-              <button
-                className="btn btn-primary w-100 mt-3"
-                data-bs-dismiss="modal"
-              >
-                Create
-              </button>{" "} {/* solo cierra el modal de momento*/}
+
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text">Apellido 1</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="surname"
+                  value={newUser.surname}
+                  onChange={handleInputsChange}
+                />
+              </div>
+
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text">Apellido 2</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="last_name"
+                  value={newUser.last_name}
+                  onChange={handleInputsChange}
+                />
+              </div>
+
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text">Fecha de Nacimiento</span>
+                <input
+                  type="date"
+                  className="form-control"
+                  name="birth_date"
+                  value={newUser.birth_date}
+                  onChange={handleInputsChange}
+                />
+              </div>
+
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text">Dirección</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="address"
+                  value={newUser.address}
+                  onChange={handleInputsChange}
+                />
+              </div>
+
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text">Rol</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="rol"
+                  value={newUser.rol}
+                  onChange={handleInputsChange}
+                />
+              </div>
+
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text">Email</span>
+                <input
+                  type="email"
+                  className="form-control"
+                  name="email"
+                  value={newUser.email}
+                  onChange={handleInputsChange}
+                />
+              </div>
+
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text">Contraseña</span>
+                <input
+                  type="password"
+                  className="form-control"
+                  name="password"
+                  value={newUser.password}
+                  onChange={handleInputsChange}
+                />
+              </div>
+
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text">DNI/NIE</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="DNI"
+                  value={newUser.DNI}
+                  onChange={handleInputsChange}
+                />
+              </div>
+
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text">IBAN</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="iban"
+                  value={newUser.iban}
+                  onChange={handleInputsChange}
+                />
+              </div>
+
+              <div className="form-check ms-3 mb-3">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  name="is_admin"
+                  checked={newUser.is_admin}
+                  onChange={handleInputsChange}
+                />
+                <label className="form-check-label">Es admin</label>
+              </div>
+
+              <button type="submit" className="btn btn-primary w-100">
+                Crear Usuario
+              </button>
             </form>
           </div>
         </div>

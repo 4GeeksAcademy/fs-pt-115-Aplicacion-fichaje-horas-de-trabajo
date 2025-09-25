@@ -4,7 +4,8 @@ import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { getUsuarios } from "../services/APIServices.js";
 import { comproveAuth } from "../components/ExpTokenFunction.jsx";
-
+import { UsersTable} from "../components/UsersTable.jsx";
+import { ClockInButton } from "../components/ClockInButton.jsx";
 export const Home = () => {
 
   const { store, dispatch } = useGlobalReducer();
@@ -27,24 +28,9 @@ export const Home = () => {
       <div className="row col-9">
         <div className="col-md-10 offset-md-1 border rounded shadow-sm my-4 p-3 bg-dark">
           <div className="mb-4 p-3 bg-dark d-flex justify-content-center align-items-center">
-            <button
-              className="btn btn-success rounded-circle m-2"
-              style={{ width: "120px", height: "120px" }}
-            >
-              Add worker
-            </button>
-            <button
-              className="btn btn-primary rounded-circle m-2"
-              style={{ width: "120px", height: "120px" }}
-            >
-              Clock in
-            </button>
-            <button
-              className="btn btn-danger rounded-circle m-2"
-              style={{ width: "120px", height: "120px" }}
-            >
-              Clock out
-            </button>
+
+            <ClockInButton/>
+            
           </div>
 
 
@@ -81,17 +67,8 @@ export const Home = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredWorkers.map((w, index) => (
-                    <UserInfo
-                      key={index}
-                      firstName={w.first_name}
-                      totalHours={w.total_hours ?? 0}
-                      breakHours={w.break_hours ?? 0}
-                      regularHours={w.regular_hours ?? 0}
-                      overtime={w.overtime ?? 0}
-                      absence={w.absence ?? 0}
+                    <UsersTable users={filteredWorkers} isAdmin={store.user?.is_admin ?? false}                    
                     />
-                  ))}
                 </tbody>
               </table>
             </div>
