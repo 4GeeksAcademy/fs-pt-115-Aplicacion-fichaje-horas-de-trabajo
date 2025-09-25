@@ -262,7 +262,6 @@ def create_holiday():
 
     return jsonify(holiday.serialize()), 201
 
-
 @api.route("/holidays/<int:holiday_id>", methods=["PUT"])
 @jwt_required()
 def update_holiday(holiday_id):
@@ -273,7 +272,6 @@ def update_holiday(holiday_id):
 
     data = request.get_json()
 
-    
     if "fechaInicio" in data:
         holiday.fecha_inicio = datetime.strptime(data["fechaInicio"], "%Y-%m-%d").date()
     if "fechaFin" in data:
@@ -288,7 +286,6 @@ def update_holiday(holiday_id):
     db.session.commit()
     return jsonify(holiday.serialize()), 200
 
-
 @api.route("/holidays/<int:holiday_id>", methods=["DELETE"])
 @jwt_required()
 def delete_holiday(holiday_id):
@@ -300,7 +297,6 @@ def delete_holiday(holiday_id):
     db.session.delete(holiday)
     db.session.commit()
     return jsonify({"message": "Holiday deleted successfully"}), 200
-
 
 # Horarios
 

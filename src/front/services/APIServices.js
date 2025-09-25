@@ -244,6 +244,7 @@ export const getHolidays = async () => {
 };
 
 
+
 // Actualizar solicitud de Vacaciones (PUT)
 export const updateHoliday = async (id, data) => {
   const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/holidays/${id}`, {
