@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint, current_app
-from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType
+from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType, SignType
 from api.utils import generate_sitemap, APIException, UPLOAD_FOLDER, allowed_file, secure_filename, os
 from flask_cors import CORS
 from datetime import time, datetime, timezone
@@ -829,3 +829,15 @@ def get_sign_types(user_id):
         return jsonify({"message": "No se encontró el siguiente tipo de fichaje"}), 404
 
     return jsonify(next_sign_type.serialize()), 200
+
+@api.route('/signtypes', methods=['GET'])
+@jwt_required()
+def get_all_sign_types():
+    
+    # Devuelve todos los tipos de fichajes
+    
+    signs_all = SignType.query.all()
+
+
+    return jsonify([signtype.serialize() for signtype in signs_all]), 200
+

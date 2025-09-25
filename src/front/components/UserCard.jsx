@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
-
+import useGlobalReducer from "../hooks/useGlobalReducer";
 // Add the image URL or import the image as needed
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 
-export const UserCard = () => {
+export const UserCard = (latitude, longitude, date, type) => {
+  const { store, dispatch } = useGlobalReducer();
+
   return (
     <li className="list-group-item col-12 d-flex align-items-center py-2 px-3 mb-2 border rounded shadow-sm bg-light">
       <img
@@ -14,10 +16,23 @@ export const UserCard = () => {
       />
 
       <div className="flex-grow-1">
-        <h6 className="mb-1">Name</h6>
-        <small className="text-muted d-block">ROLE</small>
-        <small className="text-muted d-block">LOCATION</small>
-        <small className="text-muted d-block">STATE</small>
+        <h6 className="mb-1">{store.user.first_name}</h6>
+        <small className="text-muted d-block">{store.user.rol}</small>
+        {/* Información del fichaje */}
+        <div className="mt-2">
+          <small className="d-block">
+            <strong>Latitude:</strong> {latitude}
+          </small>
+          <small className="d-block">
+            <strong>Longitude:</strong> {longitude}
+          </small>
+          <small className="d-block">
+            <strong>Datetime:</strong> {date}
+          </small>
+          <small className="d-block">
+            <strong>Type:</strong> {type}
+          </small>
+        </div>
       </div>
 
       <div>

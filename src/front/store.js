@@ -7,6 +7,7 @@ export const initialStore = () => {
     userSchedule: [],
     userContracts: [],
     payrolls: [],
+    signtypes: []
   };
 };
 
@@ -38,7 +39,12 @@ export default function storeReducer(store, action = {}) {
     case "SET_SCHEDULES":
       return {
         ...store,
-        firstUserExist: action.payload,
+        userSchedule: action.payload,
+      };
+    case "SET_SIGNTYPE":
+      return {
+        ...store,
+        signtypes: action.payload,
       };
     case "ADD_SCHEDULES":
       return {
