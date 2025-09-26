@@ -1,6 +1,6 @@
 
 const workedHours = (signings) => {
-  if (!Array.isArray(signings)) signings = [];
+  if (!Array.isArray(signings)) return { hoursToday: "0.00", hoursWeek: "0.00" };
 
   let hoursToday = 0;
   let hoursWeek = 0;
@@ -8,17 +8,19 @@ const workedHours = (signings) => {
   const now = new Date();
   const todayStr = now.toISOString().slice(0, 10);
 
-  signings.forEach(sign => {
-    if (!sign.start || !sign.end) return;
+  const sorted = [...signings].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+  let lastClockIn = null;
 
-    const start = new Date(sign.start);
-    const end = new Date(sign.end);
+  sorted.forEach(sign => {
+    const dt = new Date(sign.datetime);
 
-    const duration = (end - start) / (1000 * 60 * 60);
-    hoursWeek += duration;
-
-    if (start.toISOString().slice(0, 10) === todayStr) {
-      hoursToday += duration;
+    if (sign.sign_type_name?.toLowerCase() === "clock in") {
+      lastClockIn = dt;
+    } else if (sign.sign_type_name?.toLowerCase() === "clock out" && lastClockIn) {
+      const duration = (dt - lastClockIn) / (1000 * 60 * 60); // horas decimales
+      hoursWeek += duration;
+      if (lastClockIn.toISOString().slice(0, 10) === todayStr) hoursToday += duration;
+      lastClockIn = null;
     }
   });
 
@@ -27,5 +29,4 @@ const workedHours = (signings) => {
     hoursWeek: hoursWeek.toFixed(2),
   };
 };
-
-export default workedHours;
+export default workedHours
