@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
-import { getUsuarios } from "../services/APIServices.js";
+import { getUsuarios, getSignings } from "../services/APIServices.js";
 import { comproveAuth } from "../components/ExpTokenFunction.jsx";
 import { UsersTable } from "../components/UsersTable.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
-import workedHours from "../components/workedHours.jsx";
+import workedHours, {formatHours} from "../components/workedHours.jsx";
 import { ButtonCard } from "../components/ButtonCard.jsx";
 export const Home = () => {
 
@@ -16,8 +16,23 @@ export const Home = () => {
   comproveAuth();
 
   useEffect(() => {
-    getUsuarios(dispatch).catch((err) => console.error(err));
-  }, [dispatch]);
+    const fetchUsersWithSignings = async () => {
+    try {
+      const users = await getUsuarios(dispatch);
+      const usersWithSignings = await Promise.all(
+        users.map(async (user) => {
+          const signings = await getSignings(user.id, localStorage.getItem("token"));
+          return { ...user, signings: Array.isArray(signings) ? signings : [] };
+        })
+      );
+      dispatch({ type: "GET_USERS", payload: usersWithSignings });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchUsersWithSignings();
+}, [dispatch]);
 
   const workers = store.users || [];
 
@@ -29,10 +44,14 @@ export const Home = () => {
   const hours = workedHours(user.signings || []);
   return {
     ...user,
-    total_hours: hours.hoursWeek,
-    regular_hours: hours.hoursToday,
+    total_hours: formatHours(hours.hoursWeek),
+    regular_hours: formatHours(hours.hoursToday),
+    break_hours: "0h 0m",
+    overtime: "0h 0m",
+    absence: "0h 0m"
   };
 });
+
 
   return (
     <div className="container-fluid d-flex justify-content-center">
