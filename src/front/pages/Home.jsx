@@ -59,7 +59,7 @@ export const Home = () => {
         <div className="col-md-10 offset-md-1 border rounded shadow-sm my-4 p-3 bg-dark">
           <div className="mb-4 p-3 bg-dark d-flex justify-content-center align-items-center">
 
-            <ClockInButton />
+            <ClockInButton/>
 
           </div>
 
@@ -145,7 +145,7 @@ export const Home = () => {
                 )}
               </ul>
             </div>
-            <div className="col-md-6 mb-4">
+            {/* <div className="col-md-6 mb-4">
               <h4 className="ms-4 text-light">BREAK</h4>
               <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
                 {store.users.length ? (
@@ -184,7 +184,7 @@ export const Home = () => {
                   <p>No users in this state.</p>
                 )}
               </ul>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import rigoImageUrl from "../assets/img/rigo-baby.jpg";
+
 
 export const ButtonCard = ({ id, name, rol, state }) => {
     const navigate = useNavigate();
@@ -16,7 +18,7 @@ export const ButtonCard = ({ id, name, rol, state }) => {
             >
                 <div className="d-flex align-items-center">
                     <img
-                        src="https://via.placeholder.com/60"
+                        src={rigoImageUrl}
                         className="rounded-circle me-3"
                         style={{ width: "60px", height: "60px", objectFit: "cover" }}
                         alt={name}
