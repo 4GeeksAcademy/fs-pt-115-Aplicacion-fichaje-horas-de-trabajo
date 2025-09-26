@@ -5,11 +5,7 @@ import { useParams } from "react-router-dom";
 import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { Calendar } from "../components/Calendar.jsx";
-<<<<<<< HEAD
 import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus, getDocumentTypes, uploadDocument, getUsuarioById } from "../services/APIServices.js";
-=======
-import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus, getDocumentTypes, uploadDocument, getAllSignTypes } from "../services/APIServices.js";
->>>>>>> develop
 import workedHours from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 
