@@ -1,8 +1,17 @@
 import { useId } from "react";
 
 export function UserRequest({ user }) {
-  const autoId = useId();
+ 
+  const autoId = useId().replace(/:/g, "");
   const modalId = `userCardModal-${autoId}`;
+
+  const {
+    name = "Usuario",
+    email = "—",
+    status = "—",
+    date = "—",
+    comment = "—",
+  } = user || {};
 
   return (
     <>
@@ -11,14 +20,15 @@ export function UserRequest({ user }) {
         className="btn btn-outline-info w-100 my-2 text-start"
         data-bs-toggle="modal"
         data-bs-target={`#${modalId}`}
+        aria-controls={modalId}
       >
-        👤 {user?.name || "Usuario sin nombre"}
+        👤 {name}
       </button>
 
       <div
         className="modal fade"
         id={modalId}
-        tabIndex={-1} 
+        tabIndex={-1}
         aria-labelledby={`${modalId}-label`}
         aria-hidden="true"
       >
@@ -36,11 +46,13 @@ export function UserRequest({ user }) {
               ></button>
             </div>
             <div className="modal-body">
-              <p><strong>Nombre:</strong> {user?.name}</p>
-              <p><strong>Email:</strong> {user?.email}</p>
-              <p><strong>Estado:</strong> {user?.status}</p>
-              <p><strong>Fecha:</strong> {user?.date}</p>
-              <p><strong>Comentario:</strong> {user?.comment}</p>
+              <ul className="list-group list-group-flush">
+                <li className="list-group-item"><strong>Nombre:</strong> {name}</li>
+                <li className="list-group-item"><strong>Email:</strong> {email}</li>
+                <li className="list-group-item"><strong>Estado:</strong> {status}</li>
+                <li className="list-group-item"><strong>Fecha:</strong> {date}</li>
+                <li className="list-group-item"><strong>Comentario:</strong> {comment}</li>
+              </ul>
             </div>
             <div className="modal-footer">
               <button
