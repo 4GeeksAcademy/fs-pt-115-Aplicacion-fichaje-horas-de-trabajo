@@ -4,8 +4,9 @@ import { UserCard } from "../components/UserCard.jsx";
 import { UserInfo } from "../components/UserInfo.jsx";
 import { getUsuarios } from "../services/APIServices.js";
 import { comproveAuth } from "../components/ExpTokenFunction.jsx";
-import { UsersTable} from "../components/UsersTable.jsx";
+import { UsersTable } from "../components/UsersTable.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
+import { ButtonCard } from "../components/ButtonCard.jsx";
 export const Home = () => {
 
   const { store, dispatch } = useGlobalReducer();
@@ -29,8 +30,8 @@ export const Home = () => {
         <div className="col-md-10 offset-md-1 border rounded shadow-sm my-4 p-3 bg-dark">
           <div className="mb-4 p-3 bg-dark d-flex justify-content-center align-items-center">
 
-            <ClockInButton/>
-            
+            <ClockInButton />
+
           </div>
 
 
@@ -67,8 +68,8 @@ export const Home = () => {
                   </tr>
                 </thead>
                 <tbody>
-                    <UsersTable users={filteredWorkers} isAdmin={store.user?.is_admin ?? false}                    
-                    />
+                  <UsersTable users={filteredWorkers} isAdmin={store.user?.is_admin ?? false}
+                  />
                 </tbody>
               </table>
             </div>
@@ -78,25 +79,81 @@ export const Home = () => {
             <div className="col-md-6 mb-4">
               <h4 className="ms-4 text-light">WORKING</h4>
               <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                {/* <UserCard /> */}
+                {store.users.length ? (
+                  store.users
+                    .filter((c) => c.status_id === 1)
+                    .map((c) => (
+                      <ButtonCard
+                        id={c.id}
+                        key={c.id}
+                        name={c.first_name}
+                        rol={c.rol}
+                        state={"Activo"}
+                      />
+                    ))
+                ) : (
+                  <p>No users in this state.</p>
+                )}
               </ul>
             </div>
             <div className="col-md-6 mb-4">
               <h4 className="ms-4 text-light">NOT WORKING</h4>
               <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                {/* <UserCard /> */}
+                {store.users.length ? (
+                  store.users
+                    .filter((c) => c.status_id === 2)
+                    .map((c) => (
+                      <ButtonCard
+                        id={c.id}
+                        key={c.id}
+                        name={c.first_name}
+                        rol={c.rol}
+                        state={"Inactivo"}
+                      />
+                    ))
+                ) : (
+                  <p>No users in this state.</p>
+                )}
               </ul>
             </div>
             <div className="col-md-6 mb-4">
               <h4 className="ms-4 text-light">BREAK</h4>
               <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                {/* <UserCard /> */}
+                {store.users.length ? (
+                  store.users
+                    .filter((c) => c.status_id === 3)
+                    .map((c) => (
+                      <ButtonCard
+                        id={c.id}
+                        key={c.id}
+                        name={c.first_name}
+                        rol={c.rol}
+                        state={"En Descanso"}
+                      />
+                    ))
+                ) : (
+                  <p>No users in this state.</p>
+                )}
               </ul>
             </div>
             <div className="col-md-6 mb-4">
               <h4 className="ms-4 text-light">HOLIDAYS</h4>
               <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                {/* <UserCard /> */}
+                {store.users.length ? (
+                  store.users
+                    .filter((c) => c.status_id === 4)
+                    .map((c) => (
+                      <ButtonCard
+                        id={c.id}
+                        key={c.id}
+                        name={c.first_name}
+                        rol={c.rol}
+                        state={"De Vacaciones"}
+                      />
+                    ))
+                ) : (
+                  <p>No users in this state.</p>
+                )}
               </ul>
             </div>
           </div>

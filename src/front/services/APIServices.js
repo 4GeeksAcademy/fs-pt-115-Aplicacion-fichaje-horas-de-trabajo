@@ -386,22 +386,25 @@ export const addschedule = async (id, start_datetime, end_datetime) => {
   return await response.json();
 };
 
-export const deleteSchedule = async (signing_id, user_id) => {
+export const deleteSchedule = async (userId, scheduleId) => {
   const token = localStorage.getItem("token");
 
-  const res = await fetch(
-    `${
-      import.meta.env.VITE_BACKEND_URL
-    }/api/users/${user_id}/schedules/${signing_id}`,
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/schedules/${scheduleId}`,
     {
       method: "DELETE",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     }
   );
-  if (!res.ok) throw new Error("Error al eliminar el horario");
-  return res.json();
+
+  if (!response.ok) {
+    throw new Error("Error al eliminar el schedule");
+  }
+
+  return true;
 };
 
 export const getschedule = async (id) => {
