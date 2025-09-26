@@ -6,6 +6,7 @@ import { getUsuarios } from "../services/APIServices.js";
 import { comproveAuth } from "../components/ExpTokenFunction.jsx";
 import { UsersTable} from "../components/UsersTable.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
+import workedHours from "../components/workedHours.jsx";
 export const Home = () => {
 
   const { store, dispatch } = useGlobalReducer();
@@ -22,6 +23,15 @@ export const Home = () => {
   const filteredWorkers = workers.filter((w) =>
     w.first_name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const usersWithHours = filteredWorkers.map(user => {
+  const hours = workedHours(user.signings || []);
+  return {
+    ...user,
+    total_hours: hours.hoursWeek,
+    regular_hours: hours.hoursToday,
+  };
+});
 
   return (
     <div className="container-fluid d-flex justify-content-center">
@@ -67,7 +77,7 @@ export const Home = () => {
                   </tr>
                 </thead>
                 <tbody>
-                    <UsersTable users={filteredWorkers} isAdmin={store.user?.is_admin ?? false}                    
+                    <UsersTable users={usersWithHours} isAdmin={store.user?.is_admin ?? false}                    
                     />
                 </tbody>
               </table>

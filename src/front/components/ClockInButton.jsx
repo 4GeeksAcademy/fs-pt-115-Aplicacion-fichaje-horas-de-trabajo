@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { addsigning, getLocation, getSignType, toggleStatus } from "../services/APIServices";
+import { addsigning, getLocation, getSignType, toggleStatus, getSignings } from "../services/APIServices";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 
 export const ClockInButton = () => {
-  const { store } = useGlobalReducer();
+  const { store, dispatch } = useGlobalReducer();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
@@ -13,6 +13,7 @@ export const ClockInButton = () => {
     setMessage(null);
 
     try {
+      const token = localStorage.getItem("token");
       const locationData = await getLocation();
       const lat = locationData["latitude"];
       const long = locationData["longitude"];
@@ -30,6 +31,8 @@ export const ClockInButton = () => {
       };
 
       const created = await addsigning(store.user.id, signingData);
+      const updatedSignings = await getSignings(store.user.id, token);
+      dispatch({ type: "GET_SIGNINGS", payload: updatedSignings });
       console.log("Fichaje Creado:", created)
 
       await toggleStatus(store.user.id);
