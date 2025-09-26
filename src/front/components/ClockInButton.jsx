@@ -33,6 +33,7 @@ export const ClockInButton = () => {
       const created = await addsigning(store.user.id, signingData);
       const updatedSignings = await getSignings(store.user.id, token);
       dispatch({ type: "GET_SIGNINGS", payload: updatedSignings });
+
       console.log("Fichaje Creado:", created)
 
       await toggleStatus(store.user.id);
@@ -45,12 +46,11 @@ export const ClockInButton = () => {
       setLoading(false);
     }
   };
-
   return (
     <>
       <button
-        className="btn btn-success rounded-circle m-2"
-        style={{ width: "120px", height: "120px" }}
+        className="btn w-100 text-white"
+        style={{ backgroundColor: "#ff7b00" }}
         onClick={onButtonClick}
         disabled={loading}
       >
@@ -58,7 +58,7 @@ export const ClockInButton = () => {
       </button>
 
       {message && (
-        <div className="mt-2 text-center">
+        <div className="mt-2 text-center text-light d-flex flex-column">
           <span>{message}</span>
         </div>
       )}

@@ -21,34 +21,24 @@ export const Calendar = () => {
   const modalRef = useRef(null);
 
   // Obtener schedules al cargar
-  useEffect(() => {
-    const loadSchedules = async () => {
-      try {
-        const data = await getschedule(store.user.id);
-        console.log("schedules:", data)
-        if (!data || !Array.isArray(data)) {
-          console.warn("El API no devolvió un array, recibido:", data);
-          return;
-        }
-
-        // Adaptar los datos del backend a FullCalendar
-        const formatted = data.map(e => ({
-          id: e.id,
-          start: e.start_time.replace(" ", "T"), // formato ISO para FullCalendar
-          end: e.end_time.replace(" ", "T"),
-          title: "Turno" // puedes cambiarlo a `${store.user.first_name}` si es siempre el mismo usuario
-        }));
-
-        setEvents(formatted);
-        dispatch({ type: "SET_SCHEDULES", payload: data });
-
-      } catch (error) {
-        console.error("Error al cargar schedules:", error);
-      }
-    };
-
-    loadSchedules();
-  }, []);
+useEffect(() => {
+  const loadSchedules = async () => {
+    try {
+      const data = await getschedule(id); // 👈 usa el id del perfil
+      const formatted = data.map(e => ({
+        id: e.id,
+        start: e.start_time.replace(" ", "T"),
+        end: e.end_time.replace(" ", "T"),
+        title: "Turno",
+      }));
+      setEvents(formatted);  // 👈 solo setEvents
+      dispatch({ type: "SET_SCHEDULES", payload: data }); // opcional, si quieres Redux
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  loadSchedules();
+}, [id]);
 
   // Crear schedule
   const handleSubmit = async (e) => {
@@ -93,9 +83,10 @@ export const Calendar = () => {
   const handleEventClick = async (clickInfo) => {
     if (window.confirm(`¿Seguro que quieres eliminar este turno?`)) {
       try {
-        await deleteSchedule(clickInfo.event.id, id);
+        await deleteSchedule(Number(id), clickInfo.event.id);
 
-        setEvents(events.filter(e => e.id !== clickInfo.event.id));
+        setEvents(prev => prev.filter(e => e.id !== clickInfo.event.id));
+
         dispatch({ type: "DELETE_SCHEDULE", payload: clickInfo.event.id });
       } catch (error) {
         console.error("Error al eliminar el evento:", error);
@@ -110,7 +101,6 @@ export const Calendar = () => {
       const start = dropInfo.event.start.toISOString();
       const end = dropInfo.event.end ? dropInfo.event.end.toISOString() : start;
 
-      // ⚠️ revisa si tu updateSchedule requiere userId
       const updated = await updateSchedule(id, start, end);
 
       setEvents(events.map(e =>
@@ -133,7 +123,7 @@ export const Calendar = () => {
           initialView="timeGridWeek"
           selectable={true}
           editable={true}
-          events={events}   // aquí van los fichajes adaptados
+          events={events}
           dateClick={handleDateClick}
           eventClick={handleEventClick}
           eventDrop={handleEventDrop}
