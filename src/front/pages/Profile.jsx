@@ -8,6 +8,7 @@ import { Calendar } from "../components/Calendar.jsx";
 import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus, getDocumentTypes, uploadDocument, getUsuarioById } from "../services/APIServices.js";
 import workedHours from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
+import { ClockInButton } from "../components/ClockInButton.jsx";
 
 export const Profile = () => {
   const { id } = useParams();
@@ -166,17 +167,26 @@ export const Profile = () => {
                 <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursWeek}</h4>
               </div>
             </div>
-            <button className="btn w-100 text-white" style={{ backgroundColor: "#ff7b00" }} onClick={handleBreakClick}>Start / End Break</button>
+            <ClockInButton />
           </div>
-
+          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <h6 className="fw-bold mb-3">Requests</h6>
+            <button
+              className="btn w-100 text-white"
+              style={{ backgroundColor: "#ff7b00" }}
+              onClick={() => setShowHolidayForm(true)}
+            >
+              Nueva Solicitud
+            </button>
+          </div>
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h4 className="ms-4 text-light">SIGNINGS</h4>
             <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
               {store.signings.length ? (
                 store.signings.map((c) => (
                   <UserCard
-                    sign_id = {c.id}
-                    key = {c.id}
+                    sign_id={c.id}
+                    key={c.id}
                     latitude={c.lat}
                     longitude={c["long"]}
                     date={c.datetime}
@@ -217,24 +227,25 @@ export const Profile = () => {
             ) : (
               <p>No contracts</p>
             )}
-
-            <div className="mt-3">
-              <input type="file" onChange={e => setContractFile(e.target.files[0])} />
-              <select value={contractType} onChange={e => setContractType(e.target.value)}>
-                <option value="">Selecciona tipo</option>
-                {documentTypes
-                  .filter(t => t.name.toLowerCase() === "contract")
-                  .map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-              </select>
-              <button
-                className="btn btn-warning ms-2"
-                onClick={() => handleUpload(contractFile, contractType, true)}
-              >
-                Subir contrato
-              </button>
-            </div>
+            {store.user?.is_admin && (
+              <div className="mt-3">
+                <input type="file" onChange={e => setContractFile(e.target.files[0])} />
+                <select value={contractType} onChange={e => setContractType(e.target.value)}>
+                  <option value="">Selecciona tipo</option>
+                  {documentTypes
+                    .filter(t => t.name.toLowerCase() === "contract")
+                    .map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                </select>
+                <button
+                  className="btn btn-warning ms-2"
+                  onClick={() => handleUpload(contractFile, contractType, true)}
+                >
+                  Subir contrato
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
@@ -259,6 +270,7 @@ export const Profile = () => {
             ) : (
               <p>No payrolls</p>
             )}
+            {store.user?.is_admin && (
 
             <div className="mt-3">
               <input type="file" onChange={e => setPayrollFile(e.target.files[0])} />
@@ -277,19 +289,10 @@ export const Profile = () => {
                 Subir nómina
               </button>
             </div>
+            )}
           </div>
 
 
-          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-            <h6 className="fw-bold mb-3">Vacation Requests</h6>
-            <button
-              className="btn w-100 text-white"
-              style={{ backgroundColor: "#ff7b00" }}
-              onClick={() => setShowHolidayForm(true)}
-            >
-              Nueva Solicitud
-            </button>
-          </div>
 
           <SolicitudVacaciones
             show={showHolidayForm}

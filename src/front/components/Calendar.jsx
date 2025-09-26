@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -21,24 +21,24 @@ export const Calendar = () => {
   const modalRef = useRef(null);
 
   // Obtener schedules al cargar
-useEffect(() => {
-  const loadSchedules = async () => {
-    try {
-      const data = await getschedule(id); // 👈 usa el id del perfil
-      const formatted = data.map(e => ({
-        id: e.id,
-        start: e.start_time.replace(" ", "T"),
-        end: e.end_time.replace(" ", "T"),
-        title: "Turno",
-      }));
-      setEvents(formatted);  // 👈 solo setEvents
-      dispatch({ type: "SET_SCHEDULES", payload: data }); // opcional, si quieres Redux
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  loadSchedules();
-}, [id]);
+  useEffect(() => {
+    const loadSchedules = async () => {
+      try {
+        const data = await getschedule(id);
+        const formatted = data.map(e => ({
+          id: e.id,
+          start: e.start_time.replace(" ", "T"),
+          end: e.end_time.replace(" ", "T"),
+          title: "Turno",
+        }));
+        setEvents(formatted);  
+        dispatch({ type: "SET_SCHEDULES", payload: data });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadSchedules();
+  }, [id]);
 
   // Crear schedule
   const handleSubmit = async (e) => {
@@ -70,7 +70,7 @@ useEffect(() => {
   const handleDateClick = (info) => {
     const date = info.dateStr;
     setNewEvent({
-      name: store.user.first_name,
+      name: id,
       start: `${date}T00:00`,
       end: `${date}T01:00`,
     });
@@ -94,26 +94,44 @@ useEffect(() => {
     }
   };
 
-  // Actualizar schedule (drag & drop)
-  const handleEventDrop = async (dropInfo) => {
-    try {
-      const { id } = dropInfo.event;
-      const start = dropInfo.event.start.toISOString();
-      const end = dropInfo.event.end ? dropInfo.event.end.toISOString() : start;
+const formatToTime = (date) => {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
 
-      const updated = await updateSchedule(id, start, end);
+// Actualizar schedule (drag & drop)
+const handleEventDrop = async (dropInfo) => {
+  try {
+    const scheduleId = dropInfo.event.id;
+    const startDate = dropInfo.event.start;
+    const endDate = dropInfo.event.end || startDate;
 
-      setEvents(events.map(e =>
-        e.id === id
-          ? { ...e, start: updated.start_time.replace(" ", "T"), end: updated.end_time.replace(" ", "T") }
+    const updates = {
+      start_time: formatToTime(startDate), 
+      end_time: formatToTime(endDate),
+    };
+
+    console.log("Updating schedule:", { id, scheduleId, updates });
+
+    const updated = await updateSchedule(Number(id), scheduleId, updates);
+
+    setEvents((prev) =>
+      prev.map((e) =>
+        String(e.id) === String(scheduleId)
+          ? {
+              ...e,
+              start: updated.start_time.replace(" ", "T"),
+              end: updated.end_time.replace(" ", "T"),
+            }
           : e
-      ));
+      )
+    );
 
-      dispatch({ type: "UPDATE_SCHEDULE", payload: updated });
-    } catch (error) {
-      console.error("Error al actualizar el evento:", error);
-    }
-  };
+    dispatch({ type: "UPDATE_SCHEDULE", payload: updated });
+  } catch (error) {
+    console.error("Error al actualizar el evento:", error);
+  }
+};
 
   return (
     <div className='col-12 d-flex justify-content-center text-dark'>
@@ -130,7 +148,6 @@ useEffect(() => {
         />
       </div>
 
-      {/* Modal Crear */}
       <div className="modal fade" ref={modalRef} tabIndex="-1">
         <div className="modal-dialog">
           <form className="modal-content" onSubmit={handleSubmit}>

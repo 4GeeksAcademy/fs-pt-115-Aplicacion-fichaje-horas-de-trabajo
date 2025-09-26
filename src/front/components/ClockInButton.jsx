@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { addsigning, getLocation, getSignType, toggleStatus, getSignings } from "../services/APIServices";
 import useGlobalReducer from "../hooks/useGlobalReducer";
+import { useParams } from "react-router-dom";
 
 export const ClockInButton = () => {
   const { store, dispatch } = useGlobalReducer();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const { id: paramId } = useParams();
+
+  // Si hay id en la URL, se usa ese, si no, se usa el del store
+  const targetUserId = paramId ? Number(paramId) : store.user.id;
 
   const onButtonClick = async (e) => {
     e.preventDefault();
@@ -18,11 +23,13 @@ export const ClockInButton = () => {
       const lat = locationData["latitude"];
       const long = locationData["longitude"];
 
-      const lastSigningData = await getSignType(store.user.id);
-      console.log("lastsigningdata:", lastSigningData)
+      // Se consulta el último signing del usuario correcto
+      const lastSigningData = await getSignType(targetUserId);
+
+      console.log("lastSigningData:", lastSigningData);
 
       const signingData = {
-        user_id: store.user.id,
+        user_id: targetUserId,
         sign_type_id: lastSigningData?.id,
         sign_type_name: lastSigningData?.name,
         datetime: new Date().toISOString(),
@@ -30,13 +37,13 @@ export const ClockInButton = () => {
         long,
       };
 
-      const created = await addsigning(store.user.id, signingData);
-      const updatedSignings = await getSignings(store.user.id, token);
+      const created = await addsigning(targetUserId, signingData);
+      const updatedSignings = await getSignings(targetUserId, token);
       dispatch({ type: "GET_SIGNINGS", payload: updatedSignings });
 
-      console.log("Fichaje Creado:", created)
+      console.log("Fichaje Creado:", created);
 
-      await toggleStatus(store.user.id);
+      await toggleStatus(targetUserId);
 
       setMessage("Fichaje realizado con éxito");
     } catch (err) {
@@ -46,6 +53,7 @@ export const ClockInButton = () => {
       setLoading(false);
     }
   };
+
   return (
     <>
       <button
