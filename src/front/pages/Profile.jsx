@@ -8,6 +8,7 @@ import { Calendar } from "../components/Calendar.jsx";
 import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus, getDocumentTypes, uploadDocument, getUsuarioById } from "../services/APIServices.js";
 import workedHours, { formatHours } from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
+import { ClockInButton } from "../components/ClockInButton.jsx";
 
 export const Profile = () => {
   const { id } = useParams();
@@ -98,14 +99,14 @@ export const Profile = () => {
   }, [dispatch, token, id]);
 
   const hours = useMemo(() => workedHours(store.signings || []), [store.signings]);
-  const hoursTodayFormatted = formatHours(hours.hoursToday);
-  const hoursWeekFormatted = formatHours(hours.hoursWeek);
+  const hoursTodayFormatted = hours.hoursToday;
+  const hoursMonthFormatted = hours.hoursMonth;
 
   const handleBreakClick = async () => {
     if (!store.user?.id || profileUser?.id !== store.user.id) return;
 
     try {
-      const updated = await toggleBreak(store.user.id, token);
+      const updated = await toggleStatus(store.user.id);
       dispatch({ type: "SET_USER", payload: updated.user });
     } catch (err) {
       console.error("Error cambiando estado de descanso:", err);
@@ -255,11 +256,11 @@ export const Profile = () => {
                 <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursTodayFormatted}</h4>
               </div>
               <div>
-                <small>Hours this week</small>
-                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursWeekFormatted}</h4>
+                <small>Hours this Month</small>
+                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursMonthFormatted}</h4>
               </div>
             </div>
-            <button className="btn w-100 text-white" style={{ backgroundColor: "#ff7b00" }} onClick={handleBreakClick}>Start / End Break</button>
+            <ClockInButton/>
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">

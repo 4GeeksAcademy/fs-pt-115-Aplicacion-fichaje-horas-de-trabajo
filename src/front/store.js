@@ -8,6 +8,10 @@ export const initialStore = () => {
     userContracts: [],
     payrolls: [],
     signtypes: [],
+    hoursToday: 0,
+    hoursMonth: 0,
+    lastMonth: null, 
+    history: [],
   };
 };
 
@@ -18,6 +22,16 @@ export default function storeReducer(store, action = {}) {
         ...store,
         signings: action.payload,
       };
+      
+    case "SET_HOURS_DATA":
+      return {
+        ...store,
+        hoursToday: action.payload.hoursToday,
+        hoursMonth: action.payload.hoursMonth,
+        lastMonth: action.payload.lastMonth,
+        history: action.payload.history,
+      };
+    
     case "GET_USERS":
       return {
         ...store,

@@ -6,33 +6,63 @@ import { getUsuarios, getSignings } from "../services/APIServices.js";
 import { comproveAuth } from "../components/ExpTokenFunction.jsx";
 import { UsersTable } from "../components/UsersTable.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
-import workedHours, {formatHours} from "../components/workedHours.jsx";
+import calculateWorkedHours from "../components/workedHours.jsx";
 import { ButtonCard } from "../components/ButtonCard.jsx";
-export const Home = () => {
 
-  const { store, dispatch } = useGlobalReducer();
+export const Home = () => {
+    const { store, dispatch } = useGlobalReducer();
   const [search, setSearch] = useState("");
 
   comproveAuth();
 
   useEffect(() => {
     const fetchUsersWithSignings = async () => {
-    try {
-      const users = await getUsuarios(dispatch);
-      const usersWithSignings = await Promise.all(
-        users.map(async (user) => {
-          const signings = await getSignings(user.id, localStorage.getItem("token"));
-          return { ...user, signings: Array.isArray(signings) ? signings : [] };
-        })
-      );
-      dispatch({ type: "GET_USERS", payload: usersWithSignings });
-    } catch (err) {
-      console.error(err);
-    }
-  };
+      try {
+        const users = await getUsuarios(dispatch);
+        const usersWithSignings = await Promise.all(
+          users.map(async (user) => {
+            const signings = await getSignings(
+              user.id,
+              localStorage.getItem("token")
+            );
+            return { ...user, signings: Array.isArray(signings) ? signings : [] };
+          })
+        );
+        dispatch({ type: "GET_USERS", payload: usersWithSignings });
 
-  fetchUsersWithSignings();
-}, [dispatch]);
+        const currentUser = usersWithSignings.find(u => u.id === store.user?.id);
+        if (currentUser) {
+          const { hoursToday, hoursMonth } = calculateWorkedHours(currentUser.signings || []);
+          dispatch({
+            type: "SET_HOURS_DATA",
+            payload: {
+              hoursToday,
+              hoursMonth,
+              lastMonth: {
+                year: new Date().getFullYear(),
+                month: new Date().getMonth() + 1,
+                hours: hoursMonth,
+              },
+              history: store.history || [],
+            },
+          });
+          console.log("Horas guardadas en store:", {
+  hoursToday,
+  hoursMonth,
+  lastMonth: {
+    year: new Date().getFullYear(),
+    month: new Date().getMonth(),
+    hours: hoursMonth,
+  },
+});
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUsersWithSignings();
+  }, [dispatch, store.user?.id, store.history]);
 
   const workers = store.users || [];
 
@@ -40,19 +70,20 @@ export const Home = () => {
     w.first_name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const usersWithHours = filteredWorkers.map(user => {
-  const hours = workedHours(user.signings || []);
-  return {
-    ...user,
-    total_hours: formatHours(hours.hoursWeek),
-    regular_hours: formatHours(hours.hoursToday),
-    break_hours: "0h 0m",
-    overtime: "0h 0m",
-    absence: "0h 0m"
-  };
-});
+  const usersWithHours = filteredWorkers.map((user) => {
+    const { hoursToday, hoursMonth } = calculateWorkedHours(user.signings || []);
 
+    return {
+      ...user,
+      total_hours: hoursMonth,
+      regular_hours: hoursToday,
+      break_hours: "0h 0m",
+      overtime: "0h 0m",
+      absence: "0h 0m",          
+    };
+  });
 
+ 
   return (
     <div className="container-fluid d-flex justify-content-center">
       <div className="row col-9">
