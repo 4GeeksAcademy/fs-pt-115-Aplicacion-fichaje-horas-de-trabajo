@@ -98,7 +98,6 @@ export default function SolicitudVacaciones({ show, onClose }) {
           </div>
 
           <div className="modal-body">
-            {/* Lista de solicitudes */}
             {holidays.length > 0 && (
               <ul className="list-group mb-3">
                 {holidays.map(h => (
@@ -130,7 +129,6 @@ export default function SolicitudVacaciones({ show, onClose }) {
               </ul>
             )}
 
-            {/* Formulario */}
             <div className="mb-3">
               <label className="form-label">Desde</label>
               <input

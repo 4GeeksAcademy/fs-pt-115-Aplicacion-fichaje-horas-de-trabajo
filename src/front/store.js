@@ -12,7 +12,8 @@ export const initialStore = () => {
     hoursMonth: 0,
     lastMonth: null,
     history: [],
-    historicSignings: []
+    historicSignings: [],
+    profile_image: null,
   };
 };
 
@@ -28,7 +29,6 @@ export default function storeReducer(store, action = {}) {
         ...store,
         historicSignings: action.payload,
       };
-      ;
     case "SET_HOURS_DATA":
       return {
         ...store,
@@ -105,6 +105,13 @@ export default function storeReducer(store, action = {}) {
         userSchedule: store.userSchedule.map((e) =>
           e.id === action.payload.id ? { ...e, ...action.payload } : e
         ),
+      };
+
+    case "UPDATE_PROFILE_IMAGE":
+      return {
+        ...store,
+        user: { ...store.user, ...action.payload },
+        profile_image: action.payload.profile_image || store.profile_image,
       };
     default:
       throw Error("Unknown action.");

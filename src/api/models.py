@@ -24,6 +24,7 @@ class User(db.Model):
     birth_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
     address: Mapped[str] = mapped_column(String(255), nullable=False)
     iban: Mapped[str] = mapped_column(String(34), nullable=False)
+    profile_image = mapped_column(db.String(250), nullable=True)
 
     documents: Mapped[list["Document"]] = relationship(back_populates="user")
     holidays: Mapped[list["Holidays"]] = relationship(back_populates="user")
@@ -51,7 +52,8 @@ class User(db.Model):
             "DNI": self.DNI,
             "rol": self.rol,
             "is_admin": self.is_admin,
-            "status_id": self.status_id
+            "status_id": self.status_id,
+            "profile_image": self.profile_image
         }
 
 

@@ -4,7 +4,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { useParams } from "react-router-dom";
 import { UserCard } from "../components/UserCard.jsx";
 import { Calendar } from "../components/Calendar.jsx";
-import { getUserByToken, getSignings, getContracts, getPayrolls, getDocumentTypes, uploadDocument, getUsuarioById, getHistoricSignings } from "../services/APIServices.js";
+import { getUserByToken, getSignings, getContracts, getPayrolls, getDocumentTypes, uploadDocument, getUsuarioById, toggleStatus, uploadProfileImage, getHistoricSignings } from "../services/APIServices.js";
 import workedHours, { formatHours } from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
@@ -22,6 +22,7 @@ export const Profile = () => {
   const [payrollFile, setPayrollFile] = useState(null);
   const [payrollType, setPayrollType] = useState("");
   const [documentTypes, setDocumentTypes] = useState([]);
+  const [profileImage, setProfileIamge] = useState(null)
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -145,12 +146,25 @@ export const Profile = () => {
       <div className="row g-4 mt-1 d-flex justify-content-center">
         <div className="col-lg-3">
           <div className="card bg-dark text-white shadow-sm p-4 text-center border border-secondary">
-            <img
-              src={rigoImageUrl}
-              alt="User"
-              className="rounded-circle mx-auto mb-3"
-              style={{ width: "150px", height: "150px", objectFit: "cover" }}
-            />
+            <div className="text-center">
+              <input
+                type="file"
+                accept="image/*"
+                id="profileImageInput"
+                style={{ display: "none" }}
+                onChange={(e) => handleProfileImageUpload(e.target.files[0])}
+              />
+
+              <label htmlFor="profileImageInput" style={{ cursor: "pointer" }}>
+                <img
+                  src={profileUser?.profile_image || rigoImageUrl}
+                  alt="User"
+                  className="rounded-circle mx-auto mb-3"
+                  style={{ width: "150px", height: "150px", objectFit: "cover" }}
+                />
+              </label>
+            </div>
+
             <h5 className="mb-1">
               {profileUser.first_name} {profileUser.surname} {profileUser.last_name}
             </h5>
