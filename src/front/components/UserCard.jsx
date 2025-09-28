@@ -7,10 +7,12 @@ import { useParams } from "react-router-dom";
 export const UserCard = ({ sign_id, latitude, longitude, date, type }) => {
   const { store, dispatch } = useGlobalReducer();
   const [showModal, setShowModal] = useState(false);
-
   const { id } = useParams();
 
-  // Función para formatear fecha para mostrar en la tarjeta
+  const targetUser = id
+    ? store.users.find((u) => String(u.id) === String(id))
+    : store.user;
+
   const formatDateForCard = (dateString) => {
     if (!dateString) return "Sin fecha";
     const d = new Date(dateString);
@@ -23,7 +25,6 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type }) => {
     });
   };
 
-  // Función para formatear fecha para el input datetime-local
   const formatDateForInput = (dateString) => {
     if (!dateString) return "";
     const d = new Date(dateString);
@@ -38,7 +39,7 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type }) => {
   });
 
   const handleDelete = async () => {
-    await deleteSigning(sign_id, id);
+    await deleteSigning(sign_id, targetUser.id);
     dispatch({
       type: "DELETE_SIGNING",
       payload: sign_id,
@@ -56,7 +57,7 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type }) => {
   };
 
   const handleSave = async () => {
-    const updated = await updateSigning(id, sign_id, formData);
+    const updated = await updateSigning(targetUser.id, sign_id, formData);
 
     dispatch({
       type: "EDIT_SIGNING",
@@ -64,6 +65,14 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type }) => {
     });
     setShowModal(false);
   };
+
+  if (!targetUser) {
+    return (
+      <li className="list-group-item text-danger">
+        Usuario no encontrado
+      </li>
+    );
+  }
 
   return (
     <>
@@ -81,8 +90,8 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type }) => {
               style={{ width: "70px", height: "70px", objectFit: "cover" }}
               alt="User"
             />
-            <h6 className="mb-0">{store?.user?.first_name ?? "Usuario"}</h6>
-            <small className="text-muted">{store?.user?.rol ?? "Rol"}</small>
+            <h6 className="mb-0">{targetUser.first_name}</h6>
+            <small className="text-muted">{targetUser.rol}</small>
           </div>
 
           {/* Columna de datos */}
@@ -129,6 +138,7 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type }) => {
         </div>
       </li>
 
+      {/* Modal de edición */}
       {showModal && (
         <div className="modal fade show d-block" tabIndex="-1">
           <div className="modal-dialog">

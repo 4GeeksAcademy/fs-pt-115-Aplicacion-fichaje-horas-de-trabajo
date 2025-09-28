@@ -434,24 +434,25 @@ export const getschedule = async (id) => {
   // si tu backend devuelve directamente un array [...]
   return data;
 }
+
 export const updateSchedule = async (userId, scheduleId, updates) => {
   const token = localStorage.getItem("token");
+  const url = `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/schedules/${scheduleId}`;
 
-  const response = await fetch(
-    `${
-      import.meta.env.VITE_BACKEND_URL
-    }/api/users/${userId}/schedules/${scheduleId}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(updates),
-    }
-  );
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(updates),
+  });
 
-  if (!response.ok) throw new Error("Error al actualizar el fichaje");
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("Update failed:", response.status, text);
+    throw new Error(`Error al actualizar: ${response.status} - ${text}`);
+  }
   return response.json();
 };
 
