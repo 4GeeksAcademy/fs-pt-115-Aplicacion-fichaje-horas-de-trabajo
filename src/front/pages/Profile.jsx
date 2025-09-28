@@ -3,9 +3,8 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { useParams } from "react-router-dom";
 import { UserCard } from "../components/UserCard.jsx";
-import { UserInfo } from "../components/UserInfo.jsx";
 import { Calendar } from "../components/Calendar.jsx";
-import { getUserByToken, getSignings, getContracts, getPayrolls, toggleStatus, getDocumentTypes, uploadDocument, getUsuarioById } from "../services/APIServices.js";
+import { getUserByToken, getSignings, getContracts, getPayrolls, getDocumentTypes, uploadDocument, getUsuarioById, toggleStatus } from "../services/APIServices.js";
 import workedHours, { formatHours } from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
@@ -106,7 +105,7 @@ export const Profile = () => {
     if (!store.user?.id || profileUser?.id !== store.user.id) return;
 
     try {
-      const updated = await toggleBreak(store.user.id, token);
+      const updated = await toggleStatus(store.user.id);
       dispatch({ type: "SET_USER", payload: updated.user });
     } catch (err) {
       console.error("Error cambiando estado de descanso:", err);
@@ -144,61 +143,6 @@ export const Profile = () => {
             <p className="mb-3">IBAN: {profileUser.iban || "N/A"}</p>
             <p className="small">📧 {profileUser.email}</p>
           </div>
-        </div>
-
-
-        <div className="col-lg-8">
-          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-            <h6 className="fw-bold">Turn</h6>
-            <p className="fw-semibold" style={{ color: "#ff7b00" }}>Estado: Activo</p>
-            <div className="d-flex justify-content-between my-3">
-              <div>
-                <small className="text-muted">Hours today</small>
-                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursToday}</h4>
-              </div>
-              <div>
-                <small className="text-muted">Hours this week</small>
-                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursWeek}</h4>
-              </div>
-            </div>
-            <ClockInButton />
-          </div>
-          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-            <h6 className="fw-bold mb-3">Requests</h6>
-            <button
-              className="btn w-100 text-white"
-              style={{ backgroundColor: "#ff7b00" }}
-              onClick={() => setShowHolidayForm(true)}
-            >
-              Nueva Solicitud
-            </button>
-          </div>
-          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-            <h4 className="ms-4 text-light">SIGNINGS</h4>
-            <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-              {store.signings.length ? (
-                store.signings.map((c) => (
-                  <UserCard
-                    sign_id={c.id}
-                    key={c.id}
-                    latitude={c.lat}
-                    longitude={c["long"]}
-                    date={c.datetime}
-                    type={c.sign_type_name}
-                  />
-                ))
-              ) : (
-                <p>No signings</p>
-              )}
-            </ul>
-          </div>
-
-          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-            <h2 className="m-2">Calendario de Horarios</h2>
-            <Calendar />
-          </div>
-
-          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
 
           <div className="card my-4 p-4 bg-dark text-white border border-secondary">
             <h6 className="fw-bold mb-3">Contracts</h6>
@@ -222,24 +166,23 @@ export const Profile = () => {
               <p>No contracts</p>
             )}
             {store.user?.is_admin && (
-
-              <div className="mt-3">
-                <input type="file" onChange={e => setContractFile(e.target.files[0])} />
-                <select value={contractType} onChange={e => setContractType(e.target.value)}>
-                  <option value="">Selecciona tipo</option>
-                  {documentTypes
-                    .filter(t => t.name.toLowerCase() === "contract")
-                    .map(t => (
-                      <option key={t.id} value={t.id}>{t.name}</option>
-                    ))}
-                </select>
-                <button
-                  className="btn btn-warning ms-2"
-                  onClick={() => handleUpload(contractFile, contractType, true)}
-                >
-                  Subir contrato
-                </button>
-              </div>
+            <div className="mt-3">
+              <input type="file" onChange={e => setContractFile(e.target.files[0])} />
+              <select value={contractType} onChange={e => setContractType(e.target.value)}>
+                <option value="">Selecciona tipo</option>
+                {documentTypes
+                  .filter(t => t.name.toLowerCase() === "contract")
+                  .map(t => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+              </select>
+              <button
+                className="btn btn-warning ms-2"
+                onClick={() => handleUpload(contractFile, contractType, true)}
+              >
+                Subir contrato
+              </button>
+            </div>
             )}
           </div>
 
@@ -265,7 +208,6 @@ export const Profile = () => {
               <p>No payrolls</p>
             )}
             {store.user?.is_admin && (
-
             <div className="mt-3">
               <input type="file" onChange={e => setPayrollFile(e.target.files[0])} />
               <select value={payrollType} onChange={e => setPayrollType(e.target.value)}>
@@ -317,7 +259,7 @@ export const Profile = () => {
                 <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursWeekFormatted}</h4>
               </div>
             </div>
-            <button className="btn w-100 text-white" style={{ backgroundColor: "#ff7b00" }} onClick={handleBreakClick}>Start / End Break</button>
+            <ClockInButton/>
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
@@ -349,5 +291,3 @@ export const Profile = () => {
     </div>
   );
 };
-
-
