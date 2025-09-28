@@ -106,15 +106,3 @@ export const Navbar = () => {
     </nav>
   );
 };
-// <hr className="text-light" />
-// <div className="row text-center mb-4">
-//   <h2 className="text-light">Request Pending</h2>
-//   <Link to="/admin/request">
-//   <button
-//     type="button"
-//     class="btn btn-success w-100 p-2">
-//     Ir a Request
-//   </button>
-//   </Link>
-// </div>
-// <hr className="text-light" />

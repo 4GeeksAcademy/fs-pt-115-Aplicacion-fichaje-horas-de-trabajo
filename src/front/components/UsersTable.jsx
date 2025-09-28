@@ -11,11 +11,11 @@ export const UsersTable = ({ users, isAdmin }) => {
   return (
     <>
       {users.map((user) => (
-        <tr key={user.id}>
+        <tr className="border rounded shadow-sm" key={user.id}>
           <td>
             {isAdmin ? (
               <button
-                className="btn btn-link p-0 text-white"
+                className="btn btn-link p-0 text-link"
                 onClick={() => handleClick(user.id)}
               >
                 {user.first_name}

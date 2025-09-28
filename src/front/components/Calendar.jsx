@@ -107,8 +107,8 @@ const handleEventDrop = async (dropInfo) => {
     const endDate = dropInfo.event.end || startDate;
 
     const updates = {
-      start_time: formatToTime(startDate), 
-      end_time: formatToTime(endDate),
+      start_time: startDate.toISOString(), // ej: 2025-09-28T09:27:00.000Z
+      end_time: endDate.toISOString(),
     };
 
     console.log("Updating schedule:", { id, scheduleId, updates });

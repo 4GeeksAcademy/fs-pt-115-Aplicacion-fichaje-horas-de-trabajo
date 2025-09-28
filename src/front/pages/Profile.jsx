@@ -4,7 +4,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { useParams } from "react-router-dom";
 import { UserCard } from "../components/UserCard.jsx";
 import { Calendar } from "../components/Calendar.jsx";
-import { getUserByToken, getSignings, getContracts, getPayrolls, getDocumentTypes, uploadDocument, getUsuarioById, toggleStatus } from "../services/APIServices.js";
+import { getUserByToken, getSignings, getContracts, getPayrolls, getDocumentTypes, uploadDocument, getUsuarioById, getHistoricSignings } from "../services/APIServices.js";
 import workedHours, { formatHours } from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
@@ -15,7 +15,8 @@ export const Profile = () => {
   const [profileUser, setProfileUser] = useState(null);
   const [showHolidayForm, setShowHolidayForm] = useState(false);
   const token = localStorage.getItem("token");
-
+  const [activeTab, setActiveTab] = useState("signings");
+  const [loading, setLoading] = useState(true);
   const [contractFile, setContractFile] = useState(null);
   const [contractType, setContractType] = useState("");
   const [payrollFile, setPayrollFile] = useState(null);
@@ -61,62 +62,78 @@ export const Profile = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let user;
-        if (id) {
-          user = await getUsuarioById(id, token);
-        } else {
-          user = await getUserByToken();
-          dispatch({ type: "SET_USER", payload: user });
-        }
-        setProfileUser(user);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
 
-        const signings = await getSignings(user.id, token);
-        dispatch({
-          type: "GET_SIGNINGS",
-          payload: Array.isArray(signings) ? signings : [],
-        });
+      let user = null;
 
-        const contracts = await getContracts(user.id, token);
-        dispatch({
-          type: "GET_CONTRACTS",
-          payload: Array.isArray(contracts) ? contracts : [],
-        });
-
-        const payrolls = await getPayrolls(user.id, token);
-        dispatch({
-          type: "GET_PAYROLLS",
-          payload: Array.isArray(payrolls) ? payrolls : [],
-        });
-      } catch (err) {
-        console.error("Error cargando datos:", err);
+      if (id) {
+        console.log("🔎 Buscando usuario por id desde la URL:", id);
+        user = await getUsuarioById(id, token);
+      } else {
+        console.log("🔎 Buscando usuario desde token");
+        user = await getUserByToken(token);
+        dispatch({ type: "SET_USER", payload: user });
       }
-    };
+
+      if (!user || !user.id) {
+        console.error("❌ Usuario no encontrado o sin ID:", user);
+        return;
+      }
+
+      console.log("✅ Usuario cargado:", user);
+      setProfileUser(user);
+
+      const signings = await getSignings(user.id, token);
+      console.log("Signings recibidos:", signings);
+      dispatch({
+        type: "GET_SIGNINGS",
+        payload: Array.isArray(signings) ? signings : [],
+      });
+
+      const historicSignigns = await getHistoricSignings(user.id, token);
+      console.log(" Historic signings recibidos:", historicSignigns);
+      dispatch({
+        type: "GET_HISTORIC_SIGNINGS",
+        payload: Array.isArray(historicSignigns) ? historicSignigns : [],
+      });
+
+      const contracts = await getContracts(user.id, token);
+      console.log("Contracts recibidos:", contracts);
+      dispatch({
+        type: "GET_CONTRACTS",
+        payload: Array.isArray(contracts) ? contracts : [],
+      });
+
+      const payrolls = await getPayrolls(user.id, token);
+      console.log("Payrolls recibidos:", payrolls);
+      dispatch({
+        type: "GET_PAYROLLS",
+        payload: Array.isArray(payrolls) ? payrolls : [],
+      });
+
+
+    } catch (err) {
+      console.error("🔥 Error cargando datos:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
-  }, [dispatch, token, id]);
+  }, [id, token]);
 
   const hours = useMemo(() => workedHours(store.signings || []), [store.signings]);
   const hoursTodayFormatted = hours.hoursToday;
   const hoursMonthFormatted = hours.hoursMonth;
 
-  const handleBreakClick = async () => {
-    if (!store.user?.id || profileUser?.id !== store.user.id) return;
-
-    try {
-      const updated = await toggleStatus(store.user.id);
-      dispatch({ type: "SET_USER", payload: updated.user });
-    } catch (err) {
-      console.error("Error cambiando estado de descanso:", err);
-    }
-  };
-
   if (!profileUser) {
     return (
       <div
         className="container-fluid d-flex justify-content-center align-items-center"
-        style={{ backgroundColor: "#ff7b00", minHeight: "100vh", color: "white" }}
+        style={{ backgroundColor: "#dfa06fff", minHeight: "100vh", color: "white" }}
       >
         <h3>Loading...</h3>
       </div>
@@ -125,8 +142,8 @@ export const Profile = () => {
 
   return (
     <div>
-      <div className="row g-4 mt-1">
-        <div className="col-lg-4">
+      <div className="row g-4 mt-1 d-flex justify-content-center">
+        <div className="col-lg-3">
           <div className="card bg-dark text-white shadow-sm p-4 text-center border border-secondary">
             <img
               src={rigoImageUrl}
@@ -166,23 +183,23 @@ export const Profile = () => {
               <p>No contracts</p>
             )}
             {store.user?.is_admin && (
-            <div className="mt-3">
-              <input type="file" onChange={e => setContractFile(e.target.files[0])} />
-              <select value={contractType} onChange={e => setContractType(e.target.value)}>
-                <option value="">Selecciona tipo</option>
-                {documentTypes
-                  .filter(t => t.name.toLowerCase() === "contract")
-                  .map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-              </select>
-              <button
-                className="btn btn-warning ms-2"
-                onClick={() => handleUpload(contractFile, contractType, true)}
-              >
-                Subir contrato
-              </button>
-            </div>
+              <div className="mt-3">
+                <input type="file" onChange={e => setContractFile(e.target.files[0])} />
+                <select value={contractType} onChange={e => setContractType(e.target.value)}>
+                  <option value="">Selecciona tipo</option>
+                  {documentTypes
+                    .filter(t => t.name.toLowerCase() === "contract")
+                    .map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                </select>
+                <button
+                  className="btn btn-warning m-3"
+                  onClick={() => handleUpload(contractFile, contractType, true)}
+                >
+                  Subir contrato
+                </button>
+              </div>
             )}
           </div>
 
@@ -208,34 +225,34 @@ export const Profile = () => {
               <p>No payrolls</p>
             )}
             {store.user?.is_admin && (
-            <div className="mt-3">
-              <input type="file" onChange={e => setPayrollFile(e.target.files[0])} />
-              <select value={payrollType} onChange={e => setPayrollType(e.target.value)}>
-                <option value="">Selecciona tipo</option>
-                {documentTypes
-                  .filter(t => t.name.toLowerCase() === "payroll")
-                  .map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-              </select>
-              <button
-                className="btn btn-warning ms-2"
-                onClick={() => handleUpload(payrollFile, payrollType, false)}
-              >
-                Subir nómina
-              </button>
-            </div>
+              <div className="mt-3">
+                <input type="file" onChange={e => setPayrollFile(e.target.files[0])} />
+                <select value={payrollType} onChange={e => setPayrollType(e.target.value)}>
+                  <option value="">Selecciona tipo</option>
+                  {documentTypes
+                    .filter(t => t.name.toLowerCase() === "payroll")
+                    .map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                </select>
+                <button
+                  className="btn btn-warning m-3"
+                  onClick={() => handleUpload(payrollFile, payrollType, false)}
+                >
+                  Subir nómina
+                </button>
+              </div>
             )}
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h6 className="fw-bold mb-3">Vacation Requests</h6>
             <button
-              className="btn w-100 text-white"
-              style={{ backgroundColor: "#ff7b00" }}
+              className="btn w-100 text-dark"
+              style={{ backgroundColor: "#ff9028ff" }}
               onClick={() => setShowHolidayForm(true)}
             >
-              Nueva Solicitud
+              <strong>Nueva Solicitud</strong>
             </button>
           </div>
 
@@ -245,9 +262,11 @@ export const Profile = () => {
           />
         </div>
 
-        <div className="col-lg-8">
+        <div className="col-lg-7">
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-            <h6 className="fw-bold">Turn : {profileUser.status}</h6>
+            <h6 className="fw-bold">
+              Turn: {profileUser.status_id == 1 ? "Activo" : "Inactivo"}
+            </h6>
             <p className="fw-semibold" style={{ color: "#ff7b00" }}></p>
             <div className="d-flex justify-content-between my-3">
               <div>
@@ -259,27 +278,75 @@ export const Profile = () => {
                 <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursMonthFormatted}</h4>
               </div>
             </div>
-            <ClockInButton/>
+            <ClockInButton onClockIn={() => fetchData()} />
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-            <h4 className="ms-4 text-light">SIGNINGS</h4>
-            <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-              {store.signings.length ? (
-                store.signings.map((c) => (
-                  <UserCard
-                    sign_id = {c.id}
-                    key = {c.id}
-                    latitude={c.lat}
-                    longitude={c["long"]}
-                    date={c.datetime}
-                    type={c.sign_type_name}
-                  />
-                ))
-              ) : (
-                <p>No signings</p>
-              )}
-            </ul>
+            {/* Navegador */}
+            <div className="flex border-b border-secondary mb-3">
+              <button
+                className={`px-4 py-2 text-sm ${activeTab === "signings" ? "border-b-2 border-info text-info" : "text-dark"
+                  }`}
+                onClick={() => setActiveTab("signings")}
+              >
+                SIGNINGS
+              </button>
+              <button
+                className={`px-4 py-2 text-sm ${activeTab === "historic" ? "border-b-2 border-info text-info" : "text-dark"
+                  }`}
+                onClick={() => setActiveTab("historic")}
+              >
+                HISTORIC SIGNINGS
+              </button>
+            </div>
+
+            {/* Contenido dinámico */}
+            {activeTab === "signings" && (
+              <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
+                {loading ? (
+                  <p>Cargando signings...</p>
+                ) : store.signings.length ? (
+                  store.signings.map((c) => (
+                    <UserCard
+                      sign_id={c.id}
+                      key={c.id}
+                      latitude={c.lat}
+                      longitude={c["long"]}
+                      date={c.datetime}
+                      type={c.sign_type_name}
+                      user={profileUser}
+                      isHistoric={false}
+
+                    />
+                  ))
+                ) : (
+                  <p>No signings</p>
+                )}
+              </ul>
+            )}
+
+            {activeTab === "historic" && (
+              <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
+                {loading ? (
+                  <p>Cargando históricos...</p>
+                ) : store.historicSignings?.length ? (
+                  store.historicSignings.map((o) => (
+                    <UserCard
+                      sign_id={o.id}
+                      key={o.id}
+                      latitude={o.lat}
+                      longitude={o["long"]}
+                      date={o.datetime}
+                      type={o.sign_type_name}
+                      user={profileUser}
+                      isHistoric={true}
+                    />
+                  ))
+                ) : (
+                  <p>No historic signings</p>
+                )}
+              </ul>
+            )}
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
