@@ -615,3 +615,25 @@ export const updateSigning = async (userId, signId, updates) => {
   if (!response.ok) throw new Error("Error al actualizar el fichaje");
   return response.json();
 };
+
+export const uploadProfileImage = async (userId, token, file) => {
+  if (!file) return null;
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/profile_image`,{
+    method: "POST",
+    headers:{
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData, 
+  });
+
+  if (!response.ok){
+    const err= await response.json();
+    throw new Error ( err.msg || "Error subiendo imagen");
+  }
+
+  return response.json();
+}

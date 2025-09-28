@@ -12,6 +12,8 @@ from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from .historial_status import STATUS
 import base64
+from flask import send_from_directory
+
 
 api = Blueprint("api", __name__)
 
@@ -896,3 +898,40 @@ def update_signing(user_id, sign_id):
 
     db.session.commit()
     return jsonify(sign.serialize()), 200
+
+
+@api.route("/users/<int:user_id>/profile_image", methods=["POST"])
+@jwt_required()
+def upload_profile_image(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"msg": "Usuario no encontrado"}), 404
+
+    if "image" not in request.files:
+        return jsonify({"msg": "No se subió ninguna imagen"}), 400
+
+    file = request.files["image"]
+    if file.filename == "":
+        return jsonify({"msg": "Archivo vacío"}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({"msg": "Tipo de archivo no permitido"}), 400
+
+    filename = secure_filename(file.filename)
+    upload_folder = os.path.join(os.getcwd(), "uploads")
+    os.makedirs(upload_folder, exist_ok=True)
+    file_path = os.path.join(upload_folder, filename)
+    file.save(file_path)
+
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"msg": "Usuario no encontrado"}), 404
+
+    user.profile_image = f"/uploads/{filename}"
+    db.session.commit()
+
+    return jsonify(user.serialize()), 200
+
+@api.route('/uploads/<path:filename>', methods=['GET'])
+def uploaded_file(filename):
+    return send_from_directory(os.path.join(os.getcwd(), "uploads"), filename)
