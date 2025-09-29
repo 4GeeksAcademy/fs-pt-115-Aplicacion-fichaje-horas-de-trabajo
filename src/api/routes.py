@@ -423,34 +423,9 @@ def get_signings(user_id):
     signings = Signing.query.filter_by(user_id=user_id).all()
     return jsonify([s.serialize() for s in signings])
 
-@api.route("/users/<int:user_id>/historicsignings", methods=["GET"])
-@jwt_required()
-def get_historic_signings(user_id):
-    signings = Signing.query.filter_by(user_id=user_id).all()
-    return jsonify([s.serialize() for s in signings])
-
 @api.route("/users/<int:user_id>/signings", methods=["POST"])
 @jwt_required()
 def add_signing(user_id):
-    data = request.json
-
-    signing = Signing(
-        user_id=user_id,
-        sign_type_id=data.get("sign_type_id"),
-        datetime=datetime.fromisoformat(
-            data["datetime"].replace("Z", "+00:00")),
-        lat=data.get("lat"),
-        long=data.get("long")
-    )
-
-    db.session.add(signing)
-    db.session.commit()
-
-    return jsonify(signing.serialize()), 201
-
-@api.route("/users/<int:user_id>/historicsignings", methods=["POST"])
-@jwt_required()
-def add_historic_signing(user_id):
     data = request.json
 
     signing = Signing(
@@ -934,9 +909,10 @@ def delete_sign(user_id, sign_id):
     if not sign or sign.user_id != user_id:
         return jsonify({"error": "Fichaje no encontrado"}), 404
 
-    db.session.delete(sign)
+
+    sign.is_historic = True
     db.session.commit()
-    return jsonify({"message": "Fichaje eliminado"}), 200
+    return jsonify({"message": "Fichaje convertido a historico"}), 200
 
 
 @api.route("/users/<int:user_id>/signings/<int:sign_id>", methods=["PUT"])

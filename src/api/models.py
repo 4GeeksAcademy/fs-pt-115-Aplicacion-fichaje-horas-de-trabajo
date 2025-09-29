@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, text, Date, Text
+from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Date, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from flask_bcrypt import generate_password_hash, check_password_hash
 from datetime import time, datetime, timezone, date
@@ -242,6 +242,7 @@ class Signing(db.Model):
     datetime: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
     lat: Mapped[float] = mapped_column(Float)
     long: Mapped[float] = mapped_column(Float)
+    is_historic: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user: Mapped["User"] = relationship(back_populates="signings")
     sign_type: Mapped["SignType"] = relationship(back_populates="signings")
@@ -255,6 +256,7 @@ class Signing(db.Model):
             "sign_type_name": SignType.query.get(self.sign_type_id).name,
             "lat": self.lat,
             "long": self.long,
+            "is_historic": self.is_historic
         }
 
 

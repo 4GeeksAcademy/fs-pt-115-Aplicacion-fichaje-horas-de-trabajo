@@ -3,3 +3,7 @@ body {
     color: #343a40;
     font-family: Arial, sans-serif;
 }
+button:disabled {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
