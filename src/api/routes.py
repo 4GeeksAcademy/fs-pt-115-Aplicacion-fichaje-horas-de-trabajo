@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify, url_for, Blueprint, current_app
 from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType, SignType
 from api.utils import generate_sitemap, APIException, UPLOAD_FOLDER, allowed_file, secure_filename, os
 from flask_cors import CORS
-from datetime import time, datetime, timezone
+from datetime import time, datetime, timezone, date
 from api.historial_status import STATUS
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
@@ -367,17 +367,34 @@ def add_schedule(user_id):
 @jwt_required()
 def update_schedule(user_id, schedule_id):
     schedule = Schedule.query.filter_by(
-        user_id=user_id, id=schedule_id).first()
+        user_id=user_id, id=schedule_id
+    ).first()
     if not schedule:
         return jsonify({"message": "Schedule not found"}), 404
 
     data = request.json
+
     if "shift" in data:
         schedule.shift = data["shift"]
+
     if "start_time" in data:
-        schedule.start_time = time.fromisoformat(data["start_time"])
+        raw = data["start_time"]
+        try:
+            # Caso 1: frontend manda "HH:MM:SS"
+            t = time.fromisoformat(raw)
+            schedule.start_time = datetime.combine(date.today(), t)
+        except ValueError:
+            # Caso 2: frontend manda "2025-10-01T07:57:00.000Z"
+            schedule.start_time = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+
     if "end_time" in data:
-        schedule.end_time = time.fromisoformat(data["end_time"])
+        raw = data["end_time"]
+        try:
+            t = time.fromisoformat(raw)
+            schedule.end_time = datetime.combine(date.today(), t)
+        except ValueError:
+            schedule.end_time = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+
     if "day" in data:
         schedule.day = data["day"]
 
@@ -406,6 +423,11 @@ def get_signings(user_id):
     signings = Signing.query.filter_by(user_id=user_id).all()
     return jsonify([s.serialize() for s in signings])
 
+@api.route("/users/<int:user_id>/historicsignings", methods=["GET"])
+@jwt_required()
+def get_historic_signings(user_id):
+    signings = Signing.query.filter_by(user_id=user_id).all()
+    return jsonify([s.serialize() for s in signings])
 
 @api.route("/users/<int:user_id>/signings", methods=["POST"])
 @jwt_required()
@@ -426,6 +448,24 @@ def add_signing(user_id):
 
     return jsonify(signing.serialize()), 201
 
+@api.route("/users/<int:user_id>/historicsignings", methods=["POST"])
+@jwt_required()
+def add_historic_signing(user_id):
+    data = request.json
+
+    signing = Signing(
+        user_id=user_id,
+        sign_type_id=data.get("sign_type_id"),
+        datetime=datetime.fromisoformat(
+            data["datetime"].replace("Z", "+00:00")),
+        lat=data.get("lat"),
+        long=data.get("long")
+    )
+
+    db.session.add(signing)
+    db.session.commit()
+
+    return jsonify(signing.serialize()), 201
 
 # Requests
 

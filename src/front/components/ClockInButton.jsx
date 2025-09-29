@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { addsigning, getLocation, getSignType, toggleStatus, getSignings } from "../services/APIServices";
+import { addsigning, getLocation, getSignType, toggleStatus, getSignings, getHistoricSignings, addhistoricsigning } from "../services/APIServices";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { useParams } from "react-router-dom";
 
-export const ClockInButton = () => {
+export const ClockInButton = ({ onClockIn}) => {
   const { store, dispatch } = useGlobalReducer();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -23,10 +23,8 @@ export const ClockInButton = () => {
       const lat = locationData["latitude"];
       const long = locationData["longitude"];
 
-      // Se consulta el último signing del usuario correcto
+      // Último tipo de signing
       const lastSigningData = await getSignType(targetUserId);
-
-      console.log("lastSigningData:", lastSigningData);
 
       const signingData = {
         user_id: targetUserId,
@@ -38,14 +36,25 @@ export const ClockInButton = () => {
       };
 
       const created = await addsigning(targetUserId, signingData);
+      console.log("Fichaje Creado:", created);
+
+      const createdhistoric = await addhistoricsigning(targetUserId, signingData);
+      console.log("Fichaje Creado:", createdhistoric);
+
       const updatedSignings = await getSignings(targetUserId, token);
       dispatch({ type: "GET_SIGNINGS", payload: updatedSignings });
 
-      console.log("Fichaje Creado:", created);
+      const updatedHistoricSignings = await getHistoricSignings(targetUserId, token);
+      dispatch({ type: "GET_HISTORIC_SIGNINGS", payload: updatedHistoricSignings });
+      console.log("Historic signings:", updatedHistoricSignings)
 
       await toggleStatus(targetUserId);
 
       setMessage("Fichaje realizado con éxito");
+
+      if (onClockIn) {
+        onClockIn();
+      }
     } catch (err) {
       console.error("Error creando fichaje:", err);
       setMessage("Hubo un error al realizar el fichaje");
@@ -57,12 +66,12 @@ export const ClockInButton = () => {
   return (
     <>
       <button
-        className="btn w-100 text-white"
-        style={{ backgroundColor: "#ff7b00" }}
+        className="btn w-100 text-dark "
+        style={{ backgroundColor: "#d38a45ff" }}
         onClick={onButtonClick}
         disabled={loading}
       >
-        {loading ? "Loading..." : "Clock In"}
+        {loading ? "Loading..." : <strong>Clock In</strong>}
       </button>
 
       {message && (

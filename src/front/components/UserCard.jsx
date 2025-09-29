@@ -4,14 +4,12 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import { deleteSigning, updateSigning } from "../services/APIServices";
 import { useParams } from "react-router-dom";
 
-export const UserCard = ({ sign_id, latitude, longitude, date, type }) => {
+export const UserCard = ({ sign_id, latitude, longitude, date, type, user, isHistoric }) => {
   const { store, dispatch } = useGlobalReducer();
   const [showModal, setShowModal] = useState(false);
-  const { id } = useParams();
 
-  const targetUser = id
-    ? store.users.find((u) => String(u.id) === String(id))
-    : store.user;
+  const targetUser = user || store.user;
+
 
   const formatDateForCard = (dateString) => {
     if (!dateString) return "Sin fecha";
@@ -118,22 +116,25 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type }) => {
             </div>
           </div>
 
-          {/* Columna de acciones */}
           <div className="col-md-2 d-flex flex-column align-items-end gap-2">
-            <button
-              type="button"
-              className="btn btn-danger btn-sm w-100"
-              onClick={handleDelete}
-            >
-              <i className="fa-solid fa-trash me-1"></i> Eliminar
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline-primary btn-sm w-100"
-              onClick={handleEdit}
-            >
-              <i className="fa-solid fa-pencil me-1"></i> Editar
-            </button>
+            {!isHistoric && (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm w-100"
+                  onClick={handleDelete}
+                >
+                  <i className="fa-solid fa-trash me-1"></i> Eliminar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-primary btn-sm w-100"
+                  onClick={handleEdit}
+                >
+                  <i className="fa-solid fa-pencil me-1"></i> Editar
+                </button>
+              </>
+            )}
           </div>
         </div>
       </li>

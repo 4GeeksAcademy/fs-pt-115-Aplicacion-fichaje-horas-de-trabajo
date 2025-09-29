@@ -318,6 +318,34 @@ export const addsigning = async (id, newSigning) => {
   return await response.json();
 };
 
+export const addhistoricsigning = async (id, newSigning) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}/historicsignings`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        user_id: id,
+        sign_type_id: newSigning.sign_type_id,
+        datetime: new Date(newSigning.datetime).toISOString(),
+        lat: newSigning.lat,
+        long: newSigning.long,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("No se ha podido registrar el fichaje");
+  }
+
+  return await response.json();
+};
+
 export const deleteSigning = async (signing_id, user_id) => {
   const token = localStorage.getItem("token");
 
@@ -334,28 +362,6 @@ export const deleteSigning = async (signing_id, user_id) => {
   );
   if (!res.ok) throw new Error("Error al eliminar el fichaje");
   return res.json();
-};
-
-export const getsignings = async (id) => {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}api/users/${id}/signings`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Error al obtener fichajes", 400);
-  }
-  const data = await response.json();
-
-  return data.signing;
 };
 
 //HORARIOS
@@ -459,6 +465,17 @@ export const updateSchedule = async (userId, scheduleId, updates) => {
 export const getSignings = async (userId, token) => {
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/signings`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  return response.json();
+};
+
+export const getHistoricSignings = async (userId, token) => {
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/historicsignings`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }

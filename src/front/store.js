@@ -12,6 +12,7 @@ export const initialStore = () => {
     hoursMonth: 0,
     lastMonth: null,
     history: [],
+    historicSignings: [],
     profile_image: null,
   };
 };
@@ -22,6 +23,12 @@ export default function storeReducer(store, action = {}) {
       return {
         ...store,
         signings: action.payload,
+      };
+
+    case "GET_HISTORIC_SIGNINGS":
+      return {
+        ...store,
+        historicSignings: action.payload,
       };
 
     case "SET_HOURS_DATA":
