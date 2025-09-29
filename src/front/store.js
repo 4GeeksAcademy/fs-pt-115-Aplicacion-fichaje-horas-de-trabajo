@@ -24,11 +24,13 @@ export default function storeReducer(store, action = {}) {
         ...store,
         signings: action.payload,
       };
+
     case "GET_HISTORIC_SIGNINGS":
       return {
         ...store,
         historicSignings: action.payload,
       };
+
     case "SET_HOURS_DATA":
       return {
         ...store,
@@ -48,6 +50,15 @@ export default function storeReducer(store, action = {}) {
       return {
         ...store,
         user: action.payload,
+      };
+
+    case "UPDATE_USER":
+      return {
+        ...store,
+        user: { ...store.user, ...action.payload },
+        users: store.users.map((u) =>
+          u.id === action.payload.id ? { ...u, ...action.payload } : u
+        ),
       };
 
     case "SET_FIRST_USER_EXIST":

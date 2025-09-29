@@ -13,6 +13,7 @@ from flask_jwt_extended import jwt_required
 from .historial_status import STATUS
 import base64
 from flask import send_from_directory
+from flask_bcrypt import generate_password_hash
 
 
 api = Blueprint("api", __name__)
@@ -220,6 +221,36 @@ def create_user():
     access_token = create_access_token(identity=str(new_user.id))
 
     return jsonify({"msg": "User created successfully", "token": access_token, "user": new_user.serialize()}), 200
+
+
+@api.route("/users/<int:id>", methods=["PUT"])
+@jwt_required()
+def update_user(id):
+    user = User.query.get(id)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    data = request.get_json()
+
+    if "password" in data and data["password"]:
+        user.password_hash = generate_password_hash(data["password"])
+
+
+    if "last_name" in data: user.last_name = data["last_name"]
+    if "surname" in data: user.surname = data["surname"]
+    if "first_name" in data: user.first_name = data["first_name"]
+    if "email" in data: user.email = data["email"]
+    if "DNI" in data: user.DNI = data["DNI"]
+    if "rol" in data: user.rol = data["rol"]
+    if "is_admin" in data: user.is_admin = data["is_admin"]
+    if "birth_date" in data: user.birth_date = datetime.strptime(data["birth_date"], "%Y-%m-%d")
+    if "address" in data: user.address = data["address"]
+    if "iban" in data: user.iban = data["iban"]
+    if "profile_image" in data: user.profile_image = data["profile_image"]
+
+    db.session.commit()
+
+    return jsonify(user.serialize()), 200
 
 
 @api.route("/users/<int:id>", methods=["DELETE"])
