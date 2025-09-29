@@ -67,7 +67,7 @@ export const ClockInButton = ({ onClockIn}) => {
     <>
       <button
         className="btn w-100 text-dark "
-        style={{ backgroundColor: "#ff9028ff" }}
+        style={{ backgroundColor: "#d38a45ff" }}
         onClick={onButtonClick}
         disabled={loading}
       >

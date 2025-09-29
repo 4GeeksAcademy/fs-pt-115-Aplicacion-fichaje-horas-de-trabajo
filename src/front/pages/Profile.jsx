@@ -63,6 +63,18 @@ export const Profile = () => {
     }
   };
 
+  const handleProfileImageUpload = async (file) => {
+    if (!file) return;
+    try {
+      const result = await uploadProfileImage(profileUser.id, token, file);
+      dispatch({ type: "UPDATE_PROFILE_IMAGE", payload: { profile_image: result.profile_image } });
+      setProfileUser({ ...profileUser, profile_image: result.profile_image });
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -263,7 +275,7 @@ export const Profile = () => {
             <h6 className="fw-bold mb-3">Vacation Requests</h6>
             <button
               className="btn w-100 text-dark"
-              style={{ backgroundColor: "#ff9028ff" }}
+              style={{ backgroundColor: "#d38a45ff" }}
               onClick={() => setShowHolidayForm(true)}
             >
               <strong>Nueva Solicitud</strong>
