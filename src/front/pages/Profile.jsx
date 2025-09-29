@@ -8,6 +8,7 @@ import { getUserByToken, getSignings, getContracts, getPayrolls, getDocumentType
 import workedHours, { formatHours } from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
+import { EditUserModal } from "../components/EditUserModal.jsx";
 
 export const Profile = () => {
   const { id } = useParams();
@@ -141,6 +142,14 @@ export const Profile = () => {
       <div className="row g-4 mt-1">
         <div className="col-lg-4">
           <div className="card bg-dark text-white shadow-sm p-4 text-center border border-secondary">
+            <button
+              className="btn btn-sm btn-outline-light position-absolute top-0 start-0 m-2"
+              data-bs-toggle="modal"
+              data-bs-target="#editUserModal"
+              title="Editar usuario">
+              <i className="fas fa-pencil-alt"></i>
+            </button>
+            <EditUserModal />
             <div className="text-center">
               <input
                 type="file"
@@ -270,6 +279,8 @@ export const Profile = () => {
             onClose={() => setShowHolidayForm(false)}
           />
         </div>
+
+
 
         <div className="col-lg-8">
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">

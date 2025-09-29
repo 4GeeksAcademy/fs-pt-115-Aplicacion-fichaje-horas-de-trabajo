@@ -150,7 +150,7 @@ export const getUsuarioById = async (id, token) => {
 // ACTUALIZAR USUARIO
 export const actualizarUsuario = async (id, data) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/usuario/${id}`,
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
     {
       method: "PUT",
       headers: {

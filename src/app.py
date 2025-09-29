@@ -24,7 +24,7 @@ app.url_map.strict_slashes = False
 
 FRONTEND_URL = os.getenv("VITE_FRONTEND_URL", "http://localhost:3000")
 
-CORS(app, origins=[FRONTEND_URL], supports_credentials=True)
+CORS(app)
 
 # Setup the Flask-JWT-Extended extension
 app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
