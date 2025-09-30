@@ -1,32 +1,37 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import useGlobalReducer from "../hooks/useGlobalReducer"; 
 import { getHolidays, createHoliday, updateHoliday, deleteHoliday } from "../services/APIServices";
 
 export default function SolicitudVacaciones({ show, onClose }) {
-  const [holidays, setHolidays] = useState([]);
+  const { store, dispatch } = useGlobalReducer();
+  const holidays = store.holidays;
   const [formData, setFormData] = useState({
     fechaInicio: "",
     fechaFin: "",
     horas: "",
     tipo: "",
     descripcion: "",
+    adminMessage: "",
+    status: "",
   });
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  // Traer solicitudes al montar el componente
+  // Filtrar solo las solicitudes del usuario logueado
+  const userHolidays = holidays.filter(h => h.user.id === store.user.id);
+
   useEffect(() => {
-    if (!show) return; // solo cargar cuando se muestre
+    if (!show) return;
     const fetchHolidays = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const data = await getHolidays(token);
-        setHolidays(data);
+        const data = await getHolidays();
+        dispatch({ type: "GET_HOLIDAYS", payload: data });
       } catch (err) {
         console.error("Error al cargar las solicitudes:", err);
       }
     };
     fetchHolidays();
-  }, [show]);
+  }, [show, dispatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,26 +41,25 @@ export default function SolicitudVacaciones({ show, onClose }) {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
       if (editingId) {
-        const updated = await updateHoliday(editingId, formData, token);
-        setHolidays(holidays.map(h => (h.id === editingId ? updated : h)));
+        const updated = await updateHoliday(editingId, { ...formData });
+        dispatch({ type: "UPDATE_HOLIDAY", payload: updated });
         setEditingId(null);
       } else {
-        const created = await createHoliday(formData, token);
-        setHolidays([...holidays, created]);
+        const created = await createHoliday(formData);
+        dispatch({ type: "ADD_HOLIDAY", payload: { ...created, status: "pendiente", adminMessage: "" } });
       }
 
-      // Limpiar formulario
       setFormData({
         fechaInicio: "",
         fechaFin: "",
         horas: "",
         tipo: "",
         descripcion: "",
+        adminMessage: "",
+        status: "",
       });
 
-      
       onClose();
     } catch (err) {
       console.error("Error al enviar la solicitud:", err);
@@ -72,21 +76,22 @@ export default function SolicitudVacaciones({ show, onClose }) {
       horas: holiday.horas || "",
       tipo: holiday.tipo,
       descripcion: holiday.descripcion || "",
+      adminMessage: holiday.adminMessage || "",
+      status: holiday.status || "pendiente",
     });
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("¿Seguro que quieres eliminar esta solicitud?")) return;
     try {
-      const token = localStorage.getItem("token");
-      await deleteHoliday(id, token);
-      setHolidays(holidays.filter(h => h.id !== id));
+      await deleteHoliday(id);
+      dispatch({ type: "DELETE_HOLIDAY", payload: id });
     } catch (err) {
       console.error("Error al eliminar la solicitud:", err);
     }
   };
 
-  if (!show) return null; // no renderizar nada si no se muestra
+  if (!show) return null;
 
   return (
     <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
@@ -98,32 +103,26 @@ export default function SolicitudVacaciones({ show, onClose }) {
           </div>
 
           <div className="modal-body">
-            {holidays.length > 0 && (
+            {userHolidays.length > 0 && (
               <ul className="list-group mb-3">
-                {holidays.map(h => (
-                  <li
-                    key={h.id}
-                    className="list-group-item d-flex justify-content-between align-items-center"
-                  >
-                    <span>
-                      <strong>Desde:</strong> {h.fechaInicio} |{" "}
-                      <strong>Hasta:</strong> {h.fechaFin} |{" "}
-                      <strong>Tipo:</strong> {h.tipo}
-                    </span>
-                    <span>
-                      <button
-                        className="btn btn-sm btn-warning me-2"
-                        onClick={() => handleEdit(h)}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDelete(h.id)}
-                      >
-                        Eliminar
-                      </button>
-                    </span>
+                {userHolidays.map(h => (
+                  <li key={h.id} className="list-group-item d-flex flex-column justify-content-between align-items-start">
+                    <div className="d-flex justify-content-between w-100">
+                      <span>
+                        <strong>Desde:</strong> {h.fechaInicio} |{" "}
+                        <strong>Hasta:</strong> {h.fechaFin} |{" "}
+                        <strong>Tipo:</strong> {h.tipo} |{" "}
+                        <strong>Estado:</strong>{" "}
+                        {h.status === "pendiente" ? "⏳ Pendiente" : h.status === "aprobado" ? "✅ Aprobado" : "❌ Rechazado"}
+                      </span>
+                      <span>
+                        <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(h)}>Editar</button>
+                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(h.id)}>Eliminar</button>
+                      </span>
+                    </div>
+                    {h.adminMessage && (
+                      <small className="text-info mt-1"><strong>Mensaje del admin:</strong> {h.adminMessage}</small>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -131,45 +130,22 @@ export default function SolicitudVacaciones({ show, onClose }) {
 
             <div className="mb-3">
               <label className="form-label">Desde</label>
-              <input
-                type="date"
-                name="fechaInicio"
-                className="form-control"
-                value={formData.fechaInicio}
-                onChange={handleChange}
-              />
+              <input type="date" name="fechaInicio" className="form-control" value={formData.fechaInicio} onChange={handleChange} />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Hasta</label>
-              <input
-                type="date"
-                name="fechaFin"
-                className="form-control"
-                value={formData.fechaFin}
-                onChange={handleChange}
-              />
+              <input type="date" name="fechaFin" className="form-control" value={formData.fechaFin} onChange={handleChange} />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Horas (opcional)</label>
-              <input
-                type="time"
-                name="horas"
-                className="form-control"
-                value={formData.horas}
-                onChange={handleChange}
-              />
+              <input type="time" name="horas" className="form-control" value={formData.horas} onChange={handleChange} />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Tipo de solicitud</label>
-              <select
-                name="tipo"
-                className="form-select"
-                value={formData.tipo}
-                onChange={handleChange}
-              >
+              <select name="tipo" className="form-select" value={formData.tipo} onChange={handleChange}>
                 <option value="">Seleccionar...</option>
                 <option value="vacaciones">Vacaciones</option>
                 <option value="incidencias">Incidencias</option>
@@ -180,32 +156,32 @@ export default function SolicitudVacaciones({ show, onClose }) {
 
             <div className="mb-3">
               <label className="form-label">Descripción</label>
-              <textarea
-                name="descripcion"
-                rows="3"
-                className="form-control"
-                value={formData.descripcion}
-                onChange={handleChange}
-                placeholder="Escribe detalles de la solicitud..."
-              />
+              <textarea name="descripcion" rows="3" className="form-control" value={formData.descripcion} onChange={handleChange} placeholder="Escribe detalles de la solicitud..." />
             </div>
+
+            {/* Solo admin puede modificar status y adminMessage */}
+            {store.user.is_admin && editingId && (
+              <>
+                <div className="mb-3">
+                  <label className="form-label">Estado</label>
+                  <select name="status" className="form-select" value={formData.status} onChange={handleChange}>
+                    <option value="pendiente">⏳ Pendiente</option>
+                    <option value="aprobado">✅ Aprobado</option>
+                    <option value="rechazado">❌ Rechazado</option>
+                  </select>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Mensaje del admin</label>
+                  <textarea name="adminMessage" rows="2" className="form-control" value={formData.adminMessage} onChange={handleChange} placeholder="Escribe un mensaje para el usuario..." />
+                </div>
+              </>
+            )}
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              Cerrar
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading
-                ? "Procesando..."
-                : editingId
-                ? "Guardar cambios"
-                : "Enviar solicitud"}
+            <button type="button" className="btn btn-secondary" onClick={onClose}>Cerrar</button>
+            <button type="button" className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
+              {loading ? "Procesando..." : editingId ? "Guardar cambios" : "Enviar solicitud"}
             </button>
           </div>
         </div>
@@ -213,4 +189,3 @@ export default function SolicitudVacaciones({ show, onClose }) {
     </div>
   );
 }
-

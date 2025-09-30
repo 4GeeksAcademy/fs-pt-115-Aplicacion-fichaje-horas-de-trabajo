@@ -6,14 +6,16 @@ export function UserRequest({ user }) {
   const modalId = `userCardModal-${autoId}`;
 
   const {
-    name = "Usuario",
-    email = "—",
+    user: userInfo = {},
+    fechaInicio = "—",
+    fechaFin = "—",
+    descripcion = "—",
+    tipo = "—",
     status = "—",
-    date = "—",
-    comment = "—",
   } = user || {};
 
-  return (
+  const { email = "—" } = userInfo;
+   return (
     <>
       <button
         type="button"
@@ -22,7 +24,7 @@ export function UserRequest({ user }) {
         data-bs-target={`#${modalId}`}
         aria-controls={modalId}
       >
-        👤 {name}
+        👤 {email}
       </button>
 
       <div
@@ -47,11 +49,12 @@ export function UserRequest({ user }) {
             </div>
             <div className="modal-body">
               <ul className="list-group list-group-flush">
-                <li className="list-group-item"><strong>Nombre:</strong> {name}</li>
                 <li className="list-group-item"><strong>Email:</strong> {email}</li>
+                <li className="list-group-item"><strong>Tipo:</strong> {tipo}</li>
                 <li className="list-group-item"><strong>Estado:</strong> {status}</li>
-                <li className="list-group-item"><strong>Fecha:</strong> {date}</li>
-                <li className="list-group-item"><strong>Comentario:</strong> {comment}</li>
+                <li className="list-group-item"><strong>Desde:</strong> {fechaInicio}</li>
+                <li className="list-group-item"><strong>Hasta:</strong> {fechaFin}</li>
+                <li className="list-group-item"><strong>Comentario:</strong> {descripcion}</li>
               </ul>
             </div>
             <div className="modal-footer">

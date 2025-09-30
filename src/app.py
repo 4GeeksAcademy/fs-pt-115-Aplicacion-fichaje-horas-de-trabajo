@@ -13,6 +13,7 @@ from api.commands import setup_commands
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from datetime import timedelta
+from flask_bcrypt import Bcrypt
 
 # from models import Person
 
@@ -25,6 +26,7 @@ app.url_map.strict_slashes = False
 FRONTEND_URL = os.getenv("VITE_FRONTEND_URL", "http://localhost:3000")
 
 CORS(app)
+bcrypt = Bcrypt(app)
 
 # Setup the Flask-JWT-Extended extension
 app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
