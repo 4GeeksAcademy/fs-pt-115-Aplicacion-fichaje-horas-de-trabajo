@@ -37,7 +37,7 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type, user, isHis
   });
 
   const handleDelete = async () => {
-    await deleteSigning(sign_id, targetUser.id);
+    await deleteSigning(sign_id, targetUser.id, dispatch);
     dispatch({
       type: "DELETE_SIGNING",
       payload: sign_id,

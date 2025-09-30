@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { addsigning, getLocation, getSignType, toggleStatus, getSignings, getHistoricSignings, addhistoricsigning } from "../services/APIServices";
+import { addsigning, getLocation, getSignType, toggleStatus, getSignings} from "../services/APIServices";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { useParams } from "react-router-dom";
 
@@ -38,15 +38,8 @@ export const ClockInButton = ({ onClockIn}) => {
       const created = await addsigning(targetUserId, signingData);
       console.log("Fichaje Creado:", created);
 
-      const createdhistoric = await addhistoricsigning(targetUserId, signingData);
-      console.log("Fichaje Creado:", createdhistoric);
-
-      const updatedSignings = await getSignings(targetUserId, token);
-      dispatch({ type: "GET_SIGNINGS", payload: updatedSignings });
-
-      const updatedHistoricSignings = await getHistoricSignings(targetUserId, token);
-      dispatch({ type: "GET_HISTORIC_SIGNINGS", payload: updatedHistoricSignings });
-      console.log("Historic signings:", updatedHistoricSignings)
+      const updatedSignings = await getSignings(targetUserId, dispatch);
+      console.log("Fichajes obtenidos:", updatedSignings);
 
       await toggleStatus(targetUserId);
 

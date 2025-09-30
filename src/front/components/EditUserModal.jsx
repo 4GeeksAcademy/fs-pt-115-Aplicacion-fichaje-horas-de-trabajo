@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import { actualizarUsuario, getUsuarios } from "../services/APIServices.js" 
+import { actualizarUsuario, getUsuarios } from "../services/APIServices.js"
 
 
 export const EditUserModal = () => {
@@ -27,20 +27,20 @@ export const EditUserModal = () => {
 
   useEffect(() => {
     if (user) {
-      
-        let formattedDate = "";
-        if (user.birth_date){
-            const d = new Date( user.birth_date);
-            if(!isNaN(d.getTime())){
-                formattedDate=d.toISOString().split
-            }
+
+      let formattedDate = "";
+      if (user.birth_date) {
+        const d = new Date(user.birth_date);
+        if (!isNaN(d.getTime())) {
+          formattedDate = d.toISOString().split("T")[0];
         }
+      }
 
       setFormData({
         first_name: user.first_name || "",
         surname: user.surname || "",
         last_name: user.last_name || "",
-        birth_date:formattedDate,
+        birth_date: formattedDate,
         address: user.address || "",
         rol: user.rol || "",
         email: user.email || "",
@@ -76,6 +76,7 @@ export const EditUserModal = () => {
       ...updatedUser,
       password: formData.password
     });
+
 
 
       const modalEl = document.getElementById("editUserModal");
@@ -231,7 +232,7 @@ export const EditUserModal = () => {
                 />
               </div>
 
-              <div className="form-check ms-3 mb-3">
+              {store.user.isadmin && (<div className="form-check ms-3 mb-3">
                 <input
                   className="form-check-input"
                   type="checkbox"
@@ -240,7 +241,7 @@ export const EditUserModal = () => {
                   onChange={handleInputsChange}
                 />
                 <label className="form-check-label">Es admin</label>
-              </div>
+              </div>)}
 
               <button type="submit" className="btn btn-primary w-100">
                 Guardar Cambios

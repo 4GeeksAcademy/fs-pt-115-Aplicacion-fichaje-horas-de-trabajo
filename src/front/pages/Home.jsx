@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import { getUsuarios, getSignings, getHistoricSignings } from "../services/APIServices.js";
+import { getUsuarios, getSignings,  } from "../services/APIServices.js";
 import { comproveAuth } from "../components/ExpTokenFunction.jsx";
 import { UsersTable } from "../components/UsersTable.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
@@ -22,15 +22,14 @@ export const Home = () => {
 
         const usersWithData = await Promise.all(
           users.map(async (user) => {
-            const [signings, historicSignings] = await Promise.all([
-              getSignings(user.id, token),
-              getHistoricSignings(user.id, token),
+            const [signings, ] = await Promise.all([
+              getSignings(user.id, dispatch),
+
             ]);
 
             return {
               ...user,
               signings: Array.isArray(signings) ? signings : [],
-              historicSignings: Array.isArray(historicSignings) ? historicSignings : [],
             };
           })
         );
@@ -51,7 +50,6 @@ export const Home = () => {
                 month: new Date().getMonth() + 1,
                 hours: hoursMonth,
               },
-              history: currentUser.historicSignings || [],
             },
           });
         }

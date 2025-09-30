@@ -1,12 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
-
+import useGlobalReducer from "../hooks/useGlobalReducer";
 
 export const ButtonCard = ({ id, name, rol, state }) => {
     const navigate = useNavigate();
+    const { store } = useGlobalReducer();
 
     const handleClick = () => {
-        navigate(`/profile/${id}`);
+        if (store.user.is_admin) {
+            navigate(`/profile/${id}`);
+        }
     };
 
     return (
@@ -14,7 +17,8 @@ export const ButtonCard = ({ id, name, rol, state }) => {
             <button
                 onClick={handleClick}
                 className="w-100 d-flex align-items-center justify-content-between py-3 px-4 mb-2 border rounded shadow-sm bg-light text-start"
-                style={{ cursor: "pointer" }}
+                style={{ cursor: store.user.is_admin ? "pointer" : "not-allowed" }}
+                disabled={!store.user.is_admin}
             >
                 <div className="d-flex align-items-center">
                     <img

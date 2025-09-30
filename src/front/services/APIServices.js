@@ -57,7 +57,7 @@ export const crearUsuario = async (newUser) => {
         DNI: newUser.DNI,
         iban: newUser.iban,
         address: newUser.address,
-        birth_date:newUser.birth_date,
+        birth_date: newUser.birth_date,
         rol: newUser.rol,
         is_admin: newUser.is_admin,
         password: newUser.password,
@@ -127,13 +127,16 @@ export const getUserByToken = async () => {
 
 export const getUsuarioById = async (id, token) => {
   try {
-    const resp = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const resp = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (!resp.ok) {
       throw new Error(`Error obteniendo usuario ${id}: ${resp.status}`);
@@ -244,15 +247,18 @@ export const checkUsuarios = async () => {
 
 //SOLICITUDES DE VACACIONES
 export const createHoliday = async (data) => {
-  const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token");
   const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify(data),
   });
   const respuesta = await res.json();
   console.log(respuesta);
-  return respuesta
+  return respuesta;
 };
 
 export const getHolidays = async () => {
@@ -266,23 +272,31 @@ export const getHolidays = async () => {
 
 export const updateHoliday = async (id, data) => {
   const token = getToken();
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/holidays/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
   if (!res.ok) throw new Error("Error al actualizar la solicitud");
   return res.json();
 };
 
 export const deleteHoliday = async (id) => {
-
   const token = getToken();
-  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/holidays/${id}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/holidays/${id}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
 
   if (!res.ok) throw new Error("Error al eliminar la solicitud");
   return res.json();
@@ -318,35 +332,7 @@ export const addsigning = async (id, newSigning) => {
   return await response.json();
 };
 
-export const addhistoricsigning = async (id, newSigning) => {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}/historicsignings`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        user_id: id,
-        sign_type_id: newSigning.sign_type_id,
-        datetime: new Date(newSigning.datetime).toISOString(),
-        lat: newSigning.lat,
-        long: newSigning.long,
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("No se ha podido registrar el fichaje");
-  }
-
-  return await response.json();
-};
-
-export const deleteSigning = async (signing_id, user_id) => {
+export const deleteSigning = async (signing_id, user_id, dispatch) => {
   const token = localStorage.getItem("token");
 
   const res = await fetch(
@@ -360,6 +346,7 @@ export const deleteSigning = async (signing_id, user_id) => {
       },
     }
   );
+  getSignings(user_id, dispatch)
   if (!res.ok) throw new Error("Error al eliminar el fichaje");
   return res.json();
 };
@@ -396,7 +383,9 @@ export const deleteSchedule = async (userId, scheduleId) => {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/schedules/${scheduleId}`,
+    `${
+      import.meta.env.VITE_BACKEND_URL
+    }/api/users/${userId}/schedules/${scheduleId}`,
     {
       method: "DELETE",
       headers: {
@@ -439,11 +428,13 @@ export const getschedule = async (id) => {
 
   // si tu backend devuelve directamente un array [...]
   return data;
-}
+};
 
 export const updateSchedule = async (userId, scheduleId, updates) => {
   const token = localStorage.getItem("token");
-  const url = `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/schedules/${scheduleId}`;
+  const url = `${
+    import.meta.env.VITE_BACKEND_URL
+  }/api/users/${userId}/schedules/${scheduleId}`;
 
   const response = await fetch(url, {
     method: "PUT",
@@ -462,26 +453,27 @@ export const updateSchedule = async (userId, scheduleId, updates) => {
   return response.json();
 };
 
-export const getSignings = async (userId, token) => {
+export const getSignings = async (userId, dispatch) => {
+  const token = localStorage.getItem("token");
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/signings`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
   );
+  const data = await response.json();
+  console.log("dispatch:", dispatch);
 
-  return response.json();
-};
+  const historicSignings = data.filter((signing) => signing.is_historic);
+  console.log("historicSignings:", historicSignings);
 
-export const getHistoricSignings = async (userId, token) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/historicsignings`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
+  const signings = data.filter((signing) => signing.is_historic == false);
+  console.log("signings:", signings);
 
-  return response.json();
+  dispatch({ type: "GET_HISTORIC_SIGNINGS", payload: historicSignings });
+  dispatch({ type: "GET_SIGNINGS", payload: signings});
+
+  return data;
 };
 
 export const getContracts = async (userId, token) => {
@@ -533,7 +525,7 @@ export const uploadDocument = async (userId, token, file, typeId) => {
     }
   );
 
-  const text = await response.text(); 
+  const text = await response.text();
   if (!response.ok) {
     try {
       const err = JSON.parse(text);
@@ -639,18 +631,21 @@ export const uploadProfileImage = async (userId, token, file) => {
   const formData = new FormData();
   formData.append("image", file);
 
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/profile_image`,{
-    method: "POST",
-    headers:{
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData, 
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/profile_image`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    }
+  );
 
-  if (!response.ok){
-    const err= await response.json();
-    throw new Error ( err.msg || "Error subiendo imagen");
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.msg || "Error subiendo imagen");
   }
 
   return response.json();
-}
+};

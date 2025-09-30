@@ -4,7 +4,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { useParams } from "react-router-dom";
 import { UserCard } from "../components/UserCard.jsx";
 import { Calendar } from "../components/Calendar.jsx";
-import { getUserByToken, getSignings, getContracts, getPayrolls, getDocumentTypes, uploadDocument, getUsuarioById, toggleStatus, uploadProfileImage, getHistoricSignings } from "../services/APIServices.js";
+import { getUserByToken, getSignings, getContracts, getPayrolls, getDocumentTypes, uploadDocument, getUsuarioById, toggleStatus, uploadProfileImage} from "../services/APIServices.js";
 import workedHours, { formatHours } from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
@@ -99,19 +99,9 @@ export const Profile = () => {
       console.log("Usuario cargado:", user);
       setProfileUser(user);
 
-      const signings = await getSignings(user.id, token);
+      const signings = await getSignings(user.id, dispatch);
       console.log("Signings recibidos:", signings);
-      dispatch({
-        type: "GET_SIGNINGS",
-        payload: Array.isArray(signings) ? signings : [],
-      });
 
-      const historicSignigns = await getHistoricSignings(user.id, token);
-      console.log(" Historic signings recibidos:", historicSignigns);
-      dispatch({
-        type: "GET_HISTORIC_SIGNINGS",
-        payload: Array.isArray(historicSignigns) ? historicSignigns : [],
-      });
 
       const contracts = await getContracts(user.id, token);
       console.log("Contracts recibidos:", contracts);
