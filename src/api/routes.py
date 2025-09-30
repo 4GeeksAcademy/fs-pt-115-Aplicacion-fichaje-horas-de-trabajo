@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint, current_app
-from api.models import db, User, Status, Holidays, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType, SignType
+from api.models import db, User, Status, Holidays,HolidayStatus, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType, SignType
 from api.utils import generate_sitemap, APIException, UPLOAD_FOLDER, allowed_file, secure_filename, os
 from flask_cors import CORS
 from datetime import time, datetime, timezone, date
@@ -270,7 +270,16 @@ def delete_user(id):
 @jwt_required()
 def get_holidays():
     user_id = get_jwt_identity()
-    holidays = Holidays.query.filter_by(user_id=user_id).all()
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    if user.is_admin:
+        holidays = Holidays.query.all()
+    else:
+        holidays = Holidays.query.filter_by(user_id=user_id).all()
+
     return jsonify([h.serialize() for h in holidays]), 200
 
 
@@ -303,24 +312,36 @@ def create_holiday():
 @jwt_required()
 def update_holiday(holiday_id):
     user_id = get_jwt_identity()
-    holiday = Holidays.query.filter_by(id=holiday_id, user_id=user_id).first()
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"message": "Usuario no encontrado"}), 404
+
+    holiday = Holidays.query.get(holiday_id)
     if not holiday:
         return jsonify({"message": "Holiday not found"}), 404
 
     data = request.get_json()
 
-    if "fechaInicio" in data:
-        holiday.fecha_inicio = datetime.strptime(
-            data["fechaInicio"], "%Y-%m-%d").date()
-    if "fechaFin" in data:
-        holiday.fecha_fin = datetime.strptime(
-            data["fechaFin"], "%Y-%m-%d").date()
-    if "horas" in data:
-        holiday.horas = data["horas"]
-    if "tipo" in data:
-        holiday.tipo = data["tipo"]
-    if "descripcion" in data:
-        holiday.descripcion = data["descripcion"]
+    if not user.is_admin:
+        if holiday.user_id != user_id:
+            return jsonify({"message": "No autorizado"}), 403
+        if "status" in data or "adminMessage" in data:
+            return jsonify({"message": "No autorizado"}), 403
+        if "fechaInicio" in data:
+            holiday.fecha_inicio = datetime.strptime(data["fechaInicio"], "%Y-%m-%d").date()
+        if "fechaFin" in data:
+            holiday.fecha_fin = datetime.strptime(data["fechaFin"], "%Y-%m-%d").date()
+        if "horas" in data:
+            holiday.horas = data["horas"]
+        if "tipo" in data:
+            holiday.tipo = data["tipo"]
+        if "descripcion" in data:
+            holiday.descripcion = data["descripcion"]
+    else:
+        if "status" in data:
+            holiday.status = HolidayStatus(data["status"])
+        if "adminMessage" in data:
+            holiday.admin_message = data["adminMessage"]
 
     db.session.commit()
     return jsonify(holiday.serialize()), 200

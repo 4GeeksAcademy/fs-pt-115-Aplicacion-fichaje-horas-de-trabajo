@@ -14,6 +14,7 @@ export const initialStore = () => {
     history: [],
     historicSignings: [],
     profile_image: null,
+    holidays:[]
   };
 };
 
@@ -124,6 +125,33 @@ export default function storeReducer(store, action = {}) {
         user: { ...store.user, ...action.payload },
         profile_image: action.payload.profile_image || store.profile_image,
       };
+
+    case "GET_HOLIDAYS":
+      return {
+        ...store,
+        holidays: action.payload,
+      };
+
+    case "ADD_HOLIDAY":
+      return {
+        ...store,
+        holidays: [...store.holidays, action.payload],
+      };
+
+    case "UPDATE_HOLIDAY":
+      return {
+        ...store,
+        holidays: store.holidays.map((h) =>
+          h.id === action.payload.id ? { ...h, ...action.payload } : h
+        ),
+      };
+
+    case "DELETE_HOLIDAY":
+      return {
+        ...store,
+        holidays: store.holidays.filter((h) => h.id !== action.payload),
+      };
+
     default:
       throw Error("Unknown action.");
   }

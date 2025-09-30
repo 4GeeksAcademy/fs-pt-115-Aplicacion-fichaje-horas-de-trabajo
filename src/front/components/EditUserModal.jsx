@@ -73,10 +73,10 @@ export const EditUserModal = () => {
 
       setFormData({
       ...formData,
-      ...usuarioActualizado,
-      // No sobrescribir password si está vacío
+      ...updatedUser,
       password: formData.password
     });
+
 
       const modalEl = document.getElementById("editUserModal");
       const modal = bootstrap.Modal.getInstance(modalEl);

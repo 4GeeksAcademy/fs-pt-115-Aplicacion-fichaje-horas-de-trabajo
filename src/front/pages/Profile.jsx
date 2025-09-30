@@ -83,10 +83,10 @@ export const Profile = () => {
       let user = null;
 
       if (id) {
-        console.log("🔎 Buscando usuario por id desde la URL:", id);
+        console.log("Buscando usuario por id desde la URL:", id);
         user = await getUsuarioById(id, token);
       } else {
-        console.log("🔎 Buscando usuario desde token");
+        console.log(" Buscando usuario desde token");
         user = await getUserByToken(token);
         dispatch({ type: "SET_USER", payload: user });
       }
@@ -96,7 +96,7 @@ export const Profile = () => {
         return;
       }
 
-      console.log("✅ Usuario cargado:", user);
+      console.log("Usuario cargado:", user);
       setProfileUser(user);
 
       const signings = await getSignings(user.id, token);

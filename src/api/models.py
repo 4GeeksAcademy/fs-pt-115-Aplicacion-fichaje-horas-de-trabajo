@@ -1,8 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Time, text, Date, Text
+from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Date, Text, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from flask_bcrypt import generate_password_hash, check_password_hash
 from datetime import time, datetime, timezone, date
+import enum
 
 db = SQLAlchemy()
 
@@ -26,12 +27,14 @@ class User(db.Model):
     iban: Mapped[str] = mapped_column(String(34), nullable=False)
     profile_image = mapped_column(db.String(250), nullable=True)
 
-    documents: Mapped[list["Document"]] = relationship(back_populates="user")
-    holidays: Mapped[list["Holidays"]] = relationship(back_populates="user")
-    schedules: Mapped[list["Schedule"]] = relationship(back_populates="user")
-    signings: Mapped[list["Signing"]] = relationship(back_populates="user")
+    documents: Mapped[list["Document"]] = relationship(back_populates="user",cascade="all, delete-orphan",passive_deletes=True)
+    holidays: Mapped[list["Holidays"]] = relationship(back_populates="user",cascade="all, delete-orphan",passive_deletes=True)
+    schedules: Mapped[list["Schedule"]] = relationship(back_populates="user",cascade="all, delete-orphan",passive_deletes=True)
+    signings: Mapped[list["Signing"]] = relationship(back_populates="user",cascade="all, delete-orphan",passive_deletes=True)
     requests: Mapped[list["Request"]] = relationship(back_populates="employee", foreign_keys=lambda: Request.user_id)
     admin_request: Mapped[list["Request"]] = relationship(back_populates="admin", foreign_keys=lambda: Request.admin_id)
+    status_history: Mapped[list["StatusHistory"]] = relationship(back_populates="user",cascade="all, delete-orphan",passive_deletes=True)
+
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password).decode("utf-8")
@@ -64,6 +67,7 @@ class Status(db.Model):
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
 
     users: Mapped[list["User"]] = relationship(backref="status")
+    status_history: Mapped[list["StatusHistory"]] = relationship(back_populates="status")
 
     def serialize(self):
         return {
@@ -75,13 +79,13 @@ class StatusHistory(db.Model):
     __tablename__ = "status_history"
 
     id : Mapped[int]= mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     status_id: Mapped[int] = mapped_column(Integer, ForeignKey("status.id"), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
 
-    user = db.relationship("User", backref="status_history")
-    status = db.relationship("Status", backref="status_history")
+    user: Mapped["User"] = relationship(back_populates="status_history")
+    status: Mapped["Status"] = relationship(back_populates="status_history")
 
     def serialize(self):
         return {
@@ -109,7 +113,7 @@ class Document(db.Model):
     __tablename__ = "document"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column (ForeignKey("user.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column (ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     type_id: Mapped[int] = mapped_column(ForeignKey("document_type.id"), nullable=False)
     file_url: Mapped[str] = mapped_column(Text, nullable=False)
     uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
@@ -187,19 +191,25 @@ class StatusRequest(db.Model):
 
     request: Mapped["Request"] = relationship(back_populates="request_status")
 
+class HolidayStatus(enum.Enum):
+    PENDIENTE = "pendiente"
+    APROBADO = "aprobado"
+    RECHAZADO = "rechazado"
 
+    
 
 class Holidays(db.Model):
     __tablename__ = "holidays"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
-
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     fecha_inicio: Mapped[date] = mapped_column(Date, nullable=False)
     fecha_fin: Mapped[date] = mapped_column(Date, nullable=False)
     horas: Mapped[str | None] = mapped_column(String(10))
     tipo: Mapped[str] = mapped_column(String(50), nullable=False)
     descripcion: Mapped[str | None] = mapped_column(String(500))
+    status: Mapped[HolidayStatus] = mapped_column(Enum(HolidayStatus,native_enum=False), default=HolidayStatus.PENDIENTE, nullable=False)
+    admin_message: Mapped[str | None] = mapped_column(String(500))
 
     user: Mapped["User"] = relationship(back_populates="holidays")
 
@@ -211,13 +221,19 @@ class Holidays(db.Model):
             "horas": self.horas,
             "tipo": self.tipo,
             "descripcion": self.descripcion,
+            "status": self.status.value if self.status else None,
+            "adminMessage": self.admin_message,
+            "user": {
+                "id": self.user.id if self.user else None,
+                "email": self.user.email if self.user else None
+            }
         }
 
 class Schedule(db.Model):
     __tablename__ = "schedule"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id",ondelete="CASCADE"))
     start_time: Mapped[datetime] = mapped_column(DateTime)
     end_time: Mapped[datetime] = mapped_column(DateTime)
 
@@ -237,7 +253,7 @@ class Signing(db.Model):
     __tablename__ = "signing"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id",ondelete="CASCADE"))
     sign_type_id: Mapped[int] = mapped_column(ForeignKey("signtype.id"))
     datetime: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
     lat: Mapped[float] = mapped_column(Float)
