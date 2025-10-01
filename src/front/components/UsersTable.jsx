@@ -11,7 +11,7 @@ export const UsersTable = ({ users, isAdmin }) => {
   return (
     <>
       {users.map((user) => (
-        <tr className="border rounded shadow-sm" key={user.id}>
+        <tr className="border rounded shadow-sm bg-dark" key={user.id}>
           <td>
             {isAdmin ? (
               <button
@@ -25,10 +25,8 @@ export const UsersTable = ({ users, isAdmin }) => {
             )}
           </td>
           <td className="text-end">{user.total_hours ?? 0}</td>
-          <td className="text-end">{user.break_hours ?? 0}</td>
           <td className="text-end">{user.regular_hours ?? 0}</td>
-          <td className="text-end">{user.overtime ?? 0}</td>
-          <td className="text-end">{user.absence ?? 0}</td>
+          <td className="text-end">{user.month_hours ?? 0}</td>
         </tr>
       ))}
     </>

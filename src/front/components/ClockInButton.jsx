@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { addsigning, getLocation, getSignType, toggleStatus, getSignings} from "../services/APIServices";
+import { addsigning, getLocation, getSignType, toggleStatus, getSignings, getUserByToken} from "../services/APIServices";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { useParams } from "react-router-dom";
 
@@ -18,7 +18,6 @@ export const ClockInButton = ({ onClockIn}) => {
     setMessage(null);
 
     try {
-      const token = localStorage.getItem("token");
       const locationData = await getLocation();
       const lat = locationData["latitude"];
       const long = locationData["longitude"];
@@ -41,6 +40,8 @@ export const ClockInButton = ({ onClockIn}) => {
       const updatedSignings = await getSignings(targetUserId, dispatch);
       console.log("Fichajes obtenidos:", updatedSignings);
 
+      const user= await getUserByToken()
+
       await toggleStatus(targetUserId);
 
       setMessage("Fichaje realizado con éxito");
@@ -59,8 +60,8 @@ export const ClockInButton = ({ onClockIn}) => {
   return (
     <>
       <button
-        className="btn w-100 text-dark "
-        style={{ backgroundColor: "#d38a45ff" }}
+        className="btn w-100 text-2C2C2C "
+        style={{ backgroundColor: "#FF7B00" }}
         onClick={onButtonClick}
         disabled={loading}
       >

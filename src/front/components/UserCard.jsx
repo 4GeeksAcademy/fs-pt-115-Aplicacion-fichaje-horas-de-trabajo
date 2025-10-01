@@ -1,10 +1,8 @@
 import { useState } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer";
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import { deleteSigning, updateSigning } from "../services/APIServices";
-import { useParams } from "react-router-dom";
 
-export const UserCard = ({ sign_id, latitude, longitude, date, type, user, isHistoric }) => {
+export const UserCard = ({ sign_id, latitude, longitude, date, type, user, isHistoric, image }) => {
   const { store, dispatch } = useGlobalReducer();
   const [showModal, setShowModal] = useState(false);
 
@@ -76,14 +74,14 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type, user, isHis
     <>
       {/* Tarjeta */}
       <li
-        className="list-group-item col-12 border rounded shadow-sm bg-light mb-3 p-3 text-dark"
+        className="list-group-item col-12 border rounded shadow-sm bg-grey mb-3 p-3 text-light"
         key={sign_id}
       >
         <div className="row align-items-center">
           {/* Columna de avatar */}
           <div className="col-md-2 text-center">
             <img
-              src={rigoImageUrl}
+              src={image || "https://static.thenounproject.com/png/881504-200.png"}
               className="rounded-circle mb-2"
               style={{ width: "70px", height: "70px", objectFit: "cover" }}
               alt="User"

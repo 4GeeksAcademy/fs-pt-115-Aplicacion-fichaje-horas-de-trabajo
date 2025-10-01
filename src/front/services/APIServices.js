@@ -346,7 +346,7 @@ export const deleteSigning = async (signing_id, user_id, dispatch) => {
       },
     }
   );
-  getSignings(user_id, dispatch)
+  getSignings(user_id, dispatch);
   if (!res.ok) throw new Error("Error al eliminar el fichaje");
   return res.json();
 };
@@ -471,7 +471,7 @@ export const getSignings = async (userId, dispatch) => {
   console.log("signings:", signings);
 
   dispatch({ type: "GET_HISTORIC_SIGNINGS", payload: historicSignings });
-  dispatch({ type: "GET_SIGNINGS", payload: signings});
+  dispatch({ type: "GET_SIGNINGS", payload: signings });
 
   return data;
 };
@@ -648,4 +648,29 @@ export const uploadProfileImage = async (userId, token, file) => {
   }
 
   return response.json();
+};
+
+export const getprofileimage = async (user_id, dispatch) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${user_id}/profile_image`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error al recuperar foto de perfil", 400);
+  }
+
+  const data = await response.json();
+  console.log("profile_image:", data);
+  dispatch({ type: "UPDATE_PROFILE_IMAGE", payload: { profile_image: data } });
+
+  return data;
 };

@@ -1,7 +1,3 @@
-import { Link } from "react-router-dom";
-
-// Add the image URL or import the image as needed
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 
 export const News = () => {
   return (

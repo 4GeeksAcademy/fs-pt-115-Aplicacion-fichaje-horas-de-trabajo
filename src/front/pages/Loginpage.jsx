@@ -34,7 +34,6 @@ export const Loginpage = () => {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#dfa06fff",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

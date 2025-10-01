@@ -17,7 +17,7 @@ export const RegisterMemberModal = () => {
     DNI: "",
     iban: "",
     is_admin: false,
-    status: "Inactivo",
+    status: "Unavailable",
   });
 
   const [showAlert, setShowAlert] = useState(false);

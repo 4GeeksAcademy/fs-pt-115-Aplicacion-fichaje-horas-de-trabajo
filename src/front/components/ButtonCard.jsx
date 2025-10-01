@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer";
+import { Profile } from "../pages/Profile";
 
-export const ButtonCard = ({ id, name, rol, state }) => {
+export const ButtonCard = ({ id, name, rol, state, image }) => {
     const navigate = useNavigate();
     const { store } = useGlobalReducer();
 
@@ -16,13 +16,13 @@ export const ButtonCard = ({ id, name, rol, state }) => {
         <li>
             <button
                 onClick={handleClick}
-                className="w-100 d-flex align-items-center justify-content-between py-3 px-4 mb-2 border rounded shadow-sm bg-light text-start"
+                className="w-100 d-flex align-items-center justify-content-between py-3 px-4 mb-2 border rounded shadow-sm bg-dark text-light text-start"
                 style={{ cursor: store.user.is_admin ? "pointer" : "not-allowed" }}
                 disabled={!store.user.is_admin}
             >
                 <div className="d-flex align-items-center">
                     <img
-                        src={rigoImageUrl}
+                        src={image || "https://static.thenounproject.com/png/881504-200.png"}
                         className="rounded-circle me-3"
                         style={{ width: "60px", height: "60px", objectFit: "cover" }}
                         alt={name}
@@ -30,9 +30,9 @@ export const ButtonCard = ({ id, name, rol, state }) => {
 
                     <div>
                         <h6 className="mb-1 fw-bold">{name}</h6>
-                        <small className="text-muted d-block">{rol}</small>
+                        <small className=" d-block text-light">{rol}</small>
                         <small
-                            className={`d-block fw-semibold ${state === "Activo" ? "text-success" : "text-danger"
+                            className={`d-block fw-semibold ${state === "Active" ? "text-success" : "text-danger"
                                 }`}
                         >
                             {state}
@@ -40,7 +40,7 @@ export const ButtonCard = ({ id, name, rol, state }) => {
                     </div>
                 </div>
 
-                <i className="fa-solid fa-chevron-right text-muted"></i>
+                <i className="fa-solid fa-chevron-right text-light"></i>
             </button>
         </li>
     );

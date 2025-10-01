@@ -1003,3 +1003,14 @@ def upload_profile_image(user_id):
 @api.route('/uploads/<path:filename>', methods=['GET'])
 def uploaded_file(filename):
     return send_from_directory(os.path.join(os.getcwd(), "uploads"), filename)
+
+@api.route('/users/<int:user_id>/profile_image', methods=['GET'])
+@jwt_required()
+def get_profile_image(user_id):
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({"msg": "Usuario no encontrado"}), 400
+
+    return jsonify({"profile_image": user.profile_image}), 200
