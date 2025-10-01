@@ -194,7 +194,7 @@ export const Profile = () => {
                       <div className="col-md-4 mb-2 mb-md-0">
                         <p className="mb-1">Contract type: <span className="fw-semibold">{c.type || "N/A"}</span></p>
                       </div>
-                      <div className="-md-4 mb-2 mb-md-0">
+                      <div className="col-md-4 mb-2 mb-md-0">
                         <p className="mb-1">Start date: <span className="fw-semibold">{c.start_date || "N/A"}</span></p>
                       </div>
                       <div className="col-md-4">
