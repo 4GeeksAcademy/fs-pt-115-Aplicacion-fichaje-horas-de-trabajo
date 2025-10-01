@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
-import { AdminDashboard } from "./pages/AdminDashboard";
 import { Loginpage } from "./pages/Loginpage";
 import { SignUp } from "./pages/SignUp";
 import { Profile } from "./pages/Profile";
@@ -33,7 +32,6 @@ export const router = createBrowserRouter(
     <Route path="/profile/:id" element={<Profile/>} />
     <Route path="/admin/request" element={<Request/>} />
     <Route path="/admin/signup" element={<SignUp/>} />
-    <Route path="/admin" element={<AdminDashboard/>} />
   </Route>
 
   {/* Protege la ruta si ya hay usuarios */}
