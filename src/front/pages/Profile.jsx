@@ -74,7 +74,7 @@ export const Profile = () => {
     }
   };
 
-   const fetchData = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
 
@@ -179,140 +179,138 @@ export const Profile = () => {
             </h5>
             <p className="mb-1">Rol: {profileUser.rol || "No definido"}</p>
             <p className="mb-1">DNI: {profileUser.DNI || "N/A"}</p>
-            <p className="mb-1">Dirección: {profileUser.address || "N/A"}</p>
+            <p className="mb-1">Adress: {profileUser.address || "N/A"}</p>
             <p className="mb-3">IBAN: {profileUser.iban || "N/A"}</p>
             <p className="small">📧 {profileUser.email}</p>
           </div>
 
-<div className="container my-4">
-  {/* Contracts Card */}
-  <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-    <h6 className="fw-bold mb-3">Contracts</h6>
-    {store.userContracts.length ? (
-      store.userContracts.map(c => (
-        <div key={c.id} className="mb-3 p-3 bg-secondary rounded">
-          <div className="row">
-            <div className="col-12 col-md-4 mb-2 mb-md-0">
-              <p className="mb-1">Contract type: <span className="fw-semibold">{c.type || "N/A"}</span></p>
+          <div className="container my-4">
+            <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+              <h6 className="fw-bold mb-3">Contracts</h6>
+              {store.userContracts.length ? (
+                store.userContracts.map(c => (
+                  <div key={c.id} className="mb-3 p-3 bg-secondary rounded">
+                    <div className="row">
+                      <div className="col-12 col-md-4 mb-2 mb-md-0">
+                        <p className="mb-1">Contract type: <span className="fw-semibold">{c.type || "N/A"}</span></p>
+                      </div>
+                      <div className="col-12 col-md-4 mb-2 mb-md-0">
+                        <p className="mb-1">Start date: <span className="fw-semibold">{c.start_date || "N/A"}</span></p>
+                      </div>
+                      <div className="col-12 col-md-4">
+                        {c.file_url && (
+                          <a
+                            href={`data:application/pdf;base64,${c.file_url}`}
+                            download={`contract_${c.id}.pdf`}
+                            className="text-info"
+                          >
+                            Read / Download
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p>No contracts</p>
+              )}
+
+              {store.user?.is_admin && (
+                <div className="mt-3">
+                  <div className="row g-2 align-items-center">
+                    <div className="col-12 col-md-4">
+                      <input className="form-control" type="file" onChange={e => setContractFile(e.target.files[0])} />
+                    </div>
+                    <div className="col-12 col-md-4">
+                      <select
+                        className="form-select"
+                        value={contractType}
+                        onChange={e => setContractType(e.target.value)}
+                      >
+                        <option value="">Select Type</option>
+                        {documentTypes
+                          .filter(t => t.name.toLowerCase() === "contract")
+                          .map(t => (
+                            <option key={t.id} value={t.id}>{t.name}</option>
+                          ))}
+                      </select>
+                    </div>
+                    <div className="col-12 col-md-4">
+                      <button
+                        className="btn btn-warning w-100"
+                        onClick={() => handleUpload(contractFile, contractType, true)}
+                      >
+                        Upload Contract
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="col-12 col-md-4 mb-2 mb-md-0">
-              <p className="mb-1">Start date: <span className="fw-semibold">{c.start_date || "N/A"}</span></p>
-            </div>
-            <div className="col-12 col-md-4">
-              {c.file_url && (
-                <a
-                  href={`data:application/pdf;base64,${c.file_url}`}
-                  download={`contract_${c.id}.pdf`}
-                  className="text-info"
-                >
-                  Read / Download
-                </a>
+
+            <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+              <h6 className="fw-bold mb-3">Payrolls</h6>
+              {store.payrolls.length ? (
+                store.payrolls.map(p => (
+                  <div key={p.id} className="mb-3 p-3 bg-secondary rounded">
+                    <div className="row">
+                      <div className="col-12 col-md-4 mb-2 mb-md-0">
+                        <p className="mb-1">Month: <span className="fw-semibold">{p.month}</span></p>
+                      </div>
+                      <div className="col-12 col-md-4 mb-2 mb-md-0">
+                        <p className="mb-1">Amount: <span className="fw-semibold">{p.amount}</span></p>
+                      </div>
+                      <div className="col-12 col-md-4">
+                        {p.file_url && (
+                          <a
+                            href={`data:application/pdf;base64,${p.file_url}`}
+                            download={`payroll_${p.id}.pdf`}
+                            className="text-info"
+                          >
+                            Read / Download
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p>No payrolls</p>
+              )}
+
+              {store.user?.is_admin && (
+                <div className="mt-3">
+                  <div className="row g-2 align-items-center">
+                    <div className="col-12 col-md-4">
+                      <input className="form-control" type="file" onChange={e => setPayrollFile(e.target.files[0])} />
+                    </div>
+                    <div className="col-12 col-md-4">
+                      <select
+                        className="form-select"
+                        value={payrollType}
+                        onChange={e => setPayrollType(e.target.value)}
+                      >
+                        <option value="">Select Type</option>
+                        {documentTypes
+                          .filter(t => t.name.toLowerCase() === "payroll")
+                          .map(t => (
+                            <option key={t.id} value={t.id}>{t.name}</option>
+                          ))}
+                      </select>
+                    </div>
+                    <div className="col-12 col-md-4">
+                      <button
+                        className="btn btn-warning w-100"
+                        onClick={() => handleUpload(payrollFile, payrollType, false)}
+                      >
+                        Upload Payroll
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
-        </div>
-      ))
-    ) : (
-      <p>No contracts</p>
-    )}
-
-    {store.user?.is_admin && (
-      <div className="mt-3">
-        <div className="row g-2 align-items-center">
-          <div className="col-12 col-md-4">
-            <input className="form-control" type="file" onChange={e => setContractFile(e.target.files[0])} />
-          </div>
-          <div className="col-12 col-md-4">
-            <select
-              className="form-select"
-              value={contractType}
-              onChange={e => setContractType(e.target.value)}
-            >
-              <option value="">Select Type</option>
-              {documentTypes
-                .filter(t => t.name.toLowerCase() === "contract")
-                .map(t => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-            </select>
-          </div>
-          <div className="col-12 col-md-4">
-            <button
-              className="btn btn-warning w-100"
-              onClick={() => handleUpload(contractFile, contractType, true)}
-            >
-              Upload Contract
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
-  </div>
-
-  {/* Payrolls Card */}
-  <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-    <h6 className="fw-bold mb-3">Payrolls</h6>
-    {store.payrolls.length ? (
-      store.payrolls.map(p => (
-        <div key={p.id} className="mb-3 p-3 bg-secondary rounded">
-          <div className="row">
-            <div className="col-12 col-md-4 mb-2 mb-md-0">
-              <p className="mb-1">Month: <span className="fw-semibold">{p.month}</span></p>
-            </div>
-            <div className="col-12 col-md-4 mb-2 mb-md-0">
-              <p className="mb-1">Amount: <span className="fw-semibold">{p.amount}</span></p>
-            </div>
-            <div className="col-12 col-md-4">
-              {p.file_url && (
-                <a
-                  href={`data:application/pdf;base64,${p.file_url}`}
-                  download={`payroll_${p.id}.pdf`}
-                  className="text-info"
-                >
-                  Read / Download
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      ))
-    ) : (
-      <p>No payrolls</p>
-    )}
-
-    {store.user?.is_admin && (
-      <div className="mt-3">
-        <div className="row g-2 align-items-center">
-          <div className="col-12 col-md-4">
-            <input className="form-control" type="file" onChange={e => setPayrollFile(e.target.files[0])} />
-          </div>
-          <div className="col-12 col-md-4">
-            <select
-              className="form-select"
-              value={payrollType}
-              onChange={e => setPayrollType(e.target.value)}
-            >
-              <option value="">Select Type</option>
-              {documentTypes
-                .filter(t => t.name.toLowerCase() === "payroll")
-                .map(t => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-            </select>
-          </div>
-          <div className="col-12 col-md-4">
-            <button
-              className="btn btn-warning w-100"
-              onClick={() => handleUpload(payrollFile, payrollType, false)}
-            >
-              Upload Payroll
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
-  </div>
-</div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
             <h6 className="fw-bold mb-3">Vacation Requests</h6>
@@ -352,7 +350,6 @@ export const Profile = () => {
           </div>
 
           <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
-            {/* Navegador */}
             <div className="flex border-b border-secondary mb-3">
               <button
                 className={`px-4 py-2 bg-dark text-sm ${activeTab === "signings" ? "border-b-2 border-info text-info" : "text-light"
