@@ -72,7 +72,6 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type, user, isHis
 
   return (
     <>
-      {/* Tarjeta */}
       <li
         className="list-group-item col-12 border rounded shadow-sm bg-grey mb-3 p-3 text-light"
         key={sign_id}
@@ -90,7 +89,6 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type, user, isHis
             <small className="text-muted">{targetUser.rol}</small>
           </div>
 
-          {/* Columna de datos */}
           <div className="col-md-8">
             <div className="row mb-2">
               <div className="col-sm-6">
@@ -137,7 +135,6 @@ export const UserCard = ({ sign_id, latitude, longitude, date, type, user, isHis
         </div>
       </li>
 
-      {/* Modal de edición */}
       {showModal && (
         <div className="modal fade show d-block" tabIndex="-1">
           <div className="modal-dialog">
