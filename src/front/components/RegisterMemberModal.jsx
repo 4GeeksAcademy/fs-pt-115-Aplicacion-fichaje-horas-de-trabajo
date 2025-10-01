@@ -67,7 +67,7 @@ export const RegisterMemberModal = () => {
       modal.hide();
 
       // Mensaje de éxito
-      setAlertMsg("Usuario creado correctamente");
+      setAlertMsg("User created successfully");
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 3000);
 
@@ -87,7 +87,7 @@ export const RegisterMemberModal = () => {
       });
     } catch (err) {
       console.error("Error creando usuario:", err);
-      setAlertMsg(err.message || "Error creando usuario");
+      setAlertMsg(err.message || "Error creating user");
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 4000);
     }
@@ -104,7 +104,7 @@ export const RegisterMemberModal = () => {
       <div className="modal-dialog">
         <div className="modal-content shadow rounded-4 bg-dark text-white">
           <div className="modal-header">
-            <h2 className="modal-title">Registrar Usuario</h2>
+            <h2 className="modal-title">Register User</h2>
             <button
               type="button"
               className="btn-close"
@@ -118,7 +118,7 @@ export const RegisterMemberModal = () => {
             )}
             <form onSubmit={handleSubmit}>
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Nombre</span>
+                <span className="input-group-text">Name</span>
                 <input
                   type="text"
                   className="form-control"
@@ -129,7 +129,7 @@ export const RegisterMemberModal = () => {
               </div>
 
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Apellido 1</span>
+                <span className="input-group-text">Last Name</span>
                 <input
                   type="text"
                   className="form-control"
@@ -140,7 +140,7 @@ export const RegisterMemberModal = () => {
               </div>
 
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Apellido 2</span>
+                <span className="input-group-text">Second Last Name</span>
                 <input
                   type="text"
                   className="form-control"
@@ -151,7 +151,7 @@ export const RegisterMemberModal = () => {
               </div>
 
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Fecha de Nacimiento</span>
+                <span className="input-group-text">Birth Date</span>
                 <input
                   type="date"
                   className="form-control"
@@ -162,7 +162,7 @@ export const RegisterMemberModal = () => {
               </div>
 
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Dirección</span>
+                <span className="input-group-text">Address</span>
                 <input
                   type="text"
                   className="form-control"
@@ -195,7 +195,7 @@ export const RegisterMemberModal = () => {
               </div>
 
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Contraseña</span>
+                <span className="input-group-text">Password</span>
                 <input
                   type="password"
                   className="form-control"
@@ -235,11 +235,11 @@ export const RegisterMemberModal = () => {
                   checked={newUser.is_admin}
                   onChange={handleInputsChange}
                 />
-                <label className="form-check-label">Es admin</label>
+                <label className="form-check-label">Is Admin</label>
               </div>
 
               <button type="submit" className="btn btn-primary w-100">
-                Crear Usuario
+                Create User
               </button>
             </form>
           </div>

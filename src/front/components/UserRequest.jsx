@@ -37,24 +37,24 @@ export function UserRequest({ user }) {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id={`${modalId}-label`}>
-                Datos de la Solicitud
+              <h5 className="modal-title text-dark" id={`${modalId}-label`}>
+                Request Details
               </h5>
               <button
                 type="button"
                 className="btn-close"
                 data-bs-dismiss="modal"
-                aria-label="Cerrar"
+                aria-label="Close"
               ></button>
             </div>
             <div className="modal-body">
               <ul className="list-group list-group-flush">
                 <li className="list-group-item"><strong>Email:</strong> {email}</li>
-                <li className="list-group-item"><strong>Tipo:</strong> {tipo}</li>
-                <li className="list-group-item"><strong>Estado:</strong> {status}</li>
-                <li className="list-group-item"><strong>Desde:</strong> {fechaInicio}</li>
-                <li className="list-group-item"><strong>Hasta:</strong> {fechaFin}</li>
-                <li className="list-group-item"><strong>Comentario:</strong> {descripcion}</li>
+                <li className="list-group-item"><strong>Type:</strong> {tipo}</li>
+                <li className="list-group-item"><strong>Status:</strong> {status}</li>
+                <li className="list-group-item"><strong>From:</strong> {fechaInicio}</li>
+                <li className="list-group-item"><strong>Until:</strong> {fechaFin}</li>
+                <li className="list-group-item"><strong>Comments:</strong> {descripcion}</li>
               </ul>
             </div>
             <div className="modal-footer">
@@ -63,7 +63,7 @@ export function UserRequest({ user }) {
                 className="btn btn-secondary"
                 data-bs-dismiss="modal"
               >
-                Cerrar
+                Close
               </button>
             </div>
           </div>

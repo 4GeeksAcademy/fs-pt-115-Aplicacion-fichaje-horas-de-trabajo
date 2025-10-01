@@ -107,7 +107,7 @@ export const EditUserModal = () => {
       <div className="modal-dialog">
         <div className="modal-content shadow rounded-4 bg-dark text-white">
           <div className="modal-header">
-            <h2 className="modal-title">Editar Perfil</h2>
+            <h2 className="modal-title">Edit Profile</h2>
             <button
               type="button"
               className="btn-close"
@@ -123,7 +123,7 @@ export const EditUserModal = () => {
             )}
             <form onSubmit={handleSubmit}>
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Nombre</span>
+                <span className="input-group-text">Name</span>
                 <input
                   type="text"
                   className="form-control"
@@ -134,7 +134,7 @@ export const EditUserModal = () => {
               </div>
 
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Apellido 1</span>
+                <span className="input-group-text">Last Name</span>
                 <input
                   type="text"
                   className="form-control"
@@ -145,7 +145,7 @@ export const EditUserModal = () => {
               </div>
 
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Apellido 2</span>
+                <span className="input-group-text">Second Last Name</span>
                 <input
                   type="text"
                   className="form-control"
@@ -156,7 +156,7 @@ export const EditUserModal = () => {
               </div>
 
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Fecha de Nacimiento</span>
+                <span className="input-group-text">Birth Date</span>
                 <input
                   type="date"
                   className="form-control"
@@ -167,7 +167,7 @@ export const EditUserModal = () => {
               </div>
 
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Dirección</span>
+                <span className="input-group-text">Address</span>
                 <input
                   type="text"
                   className="form-control"
@@ -200,7 +200,7 @@ export const EditUserModal = () => {
               </div>
 
               <div className="input-group input-group-sm mb-3">
-                <span className="input-group-text">Contraseña (nueva)</span>
+                <span className="input-group-text">Password (new)</span>
                 <input
                   type="password"
                   className="form-control"
@@ -240,11 +240,11 @@ export const EditUserModal = () => {
                   checked={formData.is_admin}
                   onChange={handleInputsChange}
                 />
-                <label className="form-check-label">Es admin</label>
+                <label className="form-check-label">Is Admin</label>
               </div>)}
 
               <button type="submit" className="btn btn-primary w-100">
-                Guardar Cambios
+                Save Changes
               </button>
             </form>
           </div>

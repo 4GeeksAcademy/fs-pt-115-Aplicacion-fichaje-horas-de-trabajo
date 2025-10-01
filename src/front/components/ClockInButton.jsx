@@ -44,14 +44,14 @@ export const ClockInButton = ({ onClockIn}) => {
 
       await toggleStatus(targetUserId);
 
-      setMessage("Fichaje realizado con éxito");
+      setMessage("Clock-in completed successfully");
 
       if (onClockIn) {
         onClockIn();
       }
     } catch (err) {
       console.error("Error creando fichaje:", err);
-      setMessage("Hubo un error al realizar el fichaje");
+      setMessage("There was an error clocking in");
     } finally {
       setLoading(false);
     }

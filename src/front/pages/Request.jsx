@@ -52,7 +52,7 @@ export const Request = () => {
       >
         <h5>{title}</h5>
         {list.length === 0 ? (
-          <p className="text-muted">No hay solicitudes</p>
+          <p className="text-white">There are no requests</p>
         ) : (
           list.map((req) => (
             <div key={req.id} className="mb-2">
@@ -74,11 +74,11 @@ export const Request = () => {
   };
 
   return (
-    <div className="container d-flex flex-column align-items-center">
-      <h1 className="m-2">Solicitudes de Vacaciones</h1>
-      {renderSection("Pendientes", "pendiente")}
-      {renderSection("Aceptadas", "aprobado")}
-      {renderSection("Rechazadas", "rechazado")}
+    <div className="container mt-5 d-flex flex-column align-items-center text-white border border border rounded bg-dark">
+      <h1 className="my-4 p-5">Vacation Requests</h1>
+      {renderSection("Pending", "pendiente")}
+      {renderSection("Accepted", "aprobado")}
+      {renderSection("Rejected", "rechazado")}
     </div>
   );
 };
