@@ -379,7 +379,7 @@ export const addschedule = async (id, start_datetime, end_datetime) => {
   return await response.json();
 };
 
-export const deleteSchedule = async (userId, scheduleId) => {
+export const deleteSchedule = async (userId, scheduleId, dispatch) => {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
@@ -398,11 +398,14 @@ export const deleteSchedule = async (userId, scheduleId) => {
   if (!response.ok) {
     throw new Error("Error al eliminar el schedule");
   }
+  dispatch({ type: "DELETE_SCHEDULE", payload: scheduleId });
+
+  await getschedule(userId, dispatch);
 
   return true;
 };
 
-export const getschedule = async (id) => {
+export const getschedule = async (id, dispatch) => {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
@@ -418,15 +421,11 @@ export const getschedule = async (id) => {
 
   const data = await response.json();
   console.log("Respuesta cruda del backend:", data);
-
+  dispatch({ type: "SET_SCHEDULES", payload: data });
   if (!response.ok) {
     throw new Error("Error al obtener fichajes");
   }
 
-  // si tu backend devuelve { schedules: [...] }
-  // return data.schedules;
-
-  // si tu backend devuelve directamente un array [...]
   return data;
 };
 

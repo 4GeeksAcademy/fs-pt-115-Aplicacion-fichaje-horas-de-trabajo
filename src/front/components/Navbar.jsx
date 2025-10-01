@@ -79,8 +79,8 @@ export const Navbar = () => {
                 <li className="nav-item">
                   <Link to="/admin/request">
                     <button className="btn btn-primary m-2">
-                      Requests{" "}
-                      <span className="badge text-bg-secondary">4</span>
+                      Requests
+                      <span className="badge text-bg-secondary"></span>
                     </button>
                   </Link>
                 </li>

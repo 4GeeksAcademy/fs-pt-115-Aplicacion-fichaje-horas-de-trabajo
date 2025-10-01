@@ -110,6 +110,7 @@ export default function storeReducer(store, action = {}) {
       return {
         ...store,
         userSchedule: store.userSchedule.filter((e) => e.id !== action.payload),
+        
       };
     case "UPDATE_SCHEDULE":
       return {
