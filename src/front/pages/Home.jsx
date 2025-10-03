@@ -94,8 +94,8 @@ export const Home = () => {
   return (
 <div className="container-fluid mt-4">
   <div className="row g-4">
-    <div className="col-12 col-lg-3 d-flex justify-content-center">
-      <div className="card bg-dark text-white shadow-sm p-3 text-center border border-secondary w-100" style={{ maxHeight: "400px" }}>
+    <div className="col-lg-3 d-flex justify-content-center">
+      <div className="card bg-dark text-white shadow-sm p-3 text-center border border w-100" style={{ maxHeight: "400px" }}>
         <img
           src={profileImage?.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
           alt="User"
@@ -114,7 +114,7 @@ export const Home = () => {
 
         <div className="col-12 col-lg-9">
           <div className="border rounded shadow-sm p-4 bg-dark h-100">
-            <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <div className="card mb-4 p-4 bg-dark text-white border border">
               <h6 className="fw-bold">
                 Turn: {store.user.status_id == 1 ? "Active" : "Unavailable"}
               </h6>

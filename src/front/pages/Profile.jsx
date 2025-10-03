@@ -145,8 +145,8 @@ export const Profile = () => {
   return (
     <div>
       <div className="row g-4 mt-1 d-flex justify-content-center">
-        <div className="col-lg-3">
-          <div className="card bg-dark text-white shadow-sm p-4 text-center border border-secondary">
+        <div className="col-lg-4">
+          <div className="card bg-dark text-white shadow-sm p-4 text-center border border">
             <button
               className="btn btn-sm btn-outline-light position-absolute top-0 start-0 m-2"
               data-bs-toggle="modal"
@@ -184,20 +184,20 @@ export const Profile = () => {
             <p className="small">📧 {profileUser.email}</p>
           </div>
 
-          <div className="container my-4">
-            <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+          <div className="container my-4 text-center">
+            <div className="card mb-4 p-2 bg-dark text-white border border">
               <h6 className="fw-bold mb-3">Contracts</h6>
               {store.userContracts.length ? (
                 store.userContracts.map(c => (
                   <div key={c.id} className="mb-3 p-3 bg-secondary rounded">
                     <div className="row">
-                      <div className="col-12 col-md-4 mb-2 mb-md-0">
+                      <div className="col-md-4 mb-2 mb-md-0">
                         <p className="mb-1">Contract type: <span className="fw-semibold">{c.type || "N/A"}</span></p>
                       </div>
-                      <div className="col-12 col-md-4 mb-2 mb-md-0">
+                      <div className="col-md-4 mb-2 mb-md-0">
                         <p className="mb-1">Start date: <span className="fw-semibold">{c.start_date || "N/A"}</span></p>
                       </div>
-                      <div className="col-12 col-md-4">
+                      <div className="col-md-4">
                         {c.file_url && (
                           <a
                             href={`data:application/pdf;base64,${c.file_url}`}
@@ -218,10 +218,10 @@ export const Profile = () => {
               {store.user?.is_admin && (
                 <div className="mt-3">
                   <div className="row g-2 align-items-center">
-                    <div className="col-12 col-md-4">
+                    <div className="col-md-4">
                       <input className="form-control" type="file" onChange={e => setContractFile(e.target.files[0])} />
                     </div>
-                    <div className="col-12 col-md-4">
+                    <div className="col-md-4">
                       <select
                         className="form-select"
                         value={contractType}
@@ -235,12 +235,13 @@ export const Profile = () => {
                           ))}
                       </select>
                     </div>
-                    <div className="col-12 col-md-4">
+                    <div className="col-md-4">
                       <button
-                        className="btn btn-warning w-100"
+                        className="btn w-100 text-dark"
+                        style={{ backgroundColor: "#FF7B00" }}
                         onClick={() => handleUpload(contractFile, contractType, true)}
                       >
-                        Upload Contract
+                        <strong>Upload Contract</strong>
                       </button>
                     </div>
                   </div>
@@ -248,19 +249,19 @@ export const Profile = () => {
               )}
             </div>
 
-            <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+            <div className="card mb-4 p-4 bg-dark text-white border border">
               <h6 className="fw-bold mb-3">Payrolls</h6>
               {store.payrolls.length ? (
                 store.payrolls.map(p => (
                   <div key={p.id} className="mb-3 p-3 bg-secondary rounded">
                     <div className="row">
-                      <div className="col-12 col-md-4 mb-2 mb-md-0">
+                      <div className="col-md-4 mb-2 mb-md-0">
                         <p className="mb-1">Month: <span className="fw-semibold">{p.month}</span></p>
                       </div>
-                      <div className="col-12 col-md-4 mb-2 mb-md-0">
+                      <div className="col-md-4 mb-2 mb-md-0">
                         <p className="mb-1">Amount: <span className="fw-semibold">{p.amount}</span></p>
                       </div>
-                      <div className="col-12 col-md-4">
+                      <div className="col-md-4">
                         {p.file_url && (
                           <a
                             href={`data:application/pdf;base64,${p.file_url}`}
@@ -281,10 +282,10 @@ export const Profile = () => {
               {store.user?.is_admin && (
                 <div className="mt-3">
                   <div className="row g-2 align-items-center">
-                    <div className="col-12 col-md-4">
+                    <div className="col-md-4">
                       <input className="form-control" type="file" onChange={e => setPayrollFile(e.target.files[0])} />
                     </div>
-                    <div className="col-12 col-md-4">
+                    <div className="col-md-4">
                       <select
                         className="form-select"
                         value={payrollType}
@@ -298,12 +299,13 @@ export const Profile = () => {
                           ))}
                       </select>
                     </div>
-                    <div className="col-12 col-md-4">
+                    <div className="col-md-4">
                       <button
-                        className="btn btn-warning w-100"
+                        className="btn w-100 text-dark"
+                        style={{ backgroundColor: "#FF7B00" }}
                         onClick={() => handleUpload(payrollFile, payrollType, false)}
                       >
-                        Upload Payroll
+                        <strong>Upload Payroll</strong>
                       </button>
                     </div>
                   </div>
@@ -312,7 +314,7 @@ export const Profile = () => {
             </div>
           </div>
 
-          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+          <div className="card mb-4 p-4 bg-dark text-white border border text-center">
             <h6 className="fw-bold mb-3">Vacation Requests</h6>
             <button
               className="btn w-100 text-dark"
@@ -331,7 +333,7 @@ export const Profile = () => {
 
         <div className="col-lg-7">
 
-          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+          <div className="card mb-4 p-4 bg-dark text-white border border">
             <h6 className="fw-bold">
               Turn: {profileUser.status_id == 1 ? "Active" : "Unavailable"}
             </h6>
@@ -349,7 +351,7 @@ export const Profile = () => {
             <ClockInButton onClockIn={() => fetchData()} />
           </div>
 
-          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+          <div className="card mb-4 p-4 bg-dark text-white border border">
             <div className="flex border-b border-secondary mb-3">
               <button
                 className={`px-4 py-2 bg-dark text-sm ${activeTab === "signings" ? "border-b-2 border-info text-info" : "text-light"
@@ -417,7 +419,7 @@ export const Profile = () => {
             )}
           </div>
 
-          <div className="card mb-4 p-4 bg-dark text-white border border-secondary">
+          <div className="card mb-4 p-4 bg-dark text-white border border">
             <h2 className="m-2">Schedule</h2>
             <Calendar />
           </div>
