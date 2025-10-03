@@ -21,7 +21,7 @@ flask-migrate = "*"
 flask-bcrypt = "*"
 flask-jwt-extended = "*"
 flask-cors = "*"
-
+tomli = "*"
 [requires]
 python_version = "3.13"
 

@@ -1,7 +1,7 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint, current_app
+from flask import  request, jsonify,  Blueprint, current_app
 from api.models import db, User, Status, Holidays,HolidayStatus, Schedule, Signing, Request, RequestType, StatusHistory, StatusRequest, Document, DocumentType, SignType
 from api.utils import generate_sitemap, APIException, UPLOAD_FOLDER, allowed_file, secure_filename, os
 from flask_cors import CORS
@@ -65,7 +65,7 @@ def signup():
 
     status_id = STATUS[status_input]
 
-    birth_date = datetime.fromisoformat(data["birth_date"])
+    birth_date = datetime.fromisoformat(data["birth_date"].replace("Z", "+00:00"))
 
     new_user = User(
         email=data["email"],
