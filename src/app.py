@@ -14,6 +14,8 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from datetime import timedelta
 from flask_bcrypt import Bcrypt
+import cloudinary
+
 
 # from models import Person
 
@@ -32,6 +34,13 @@ bcrypt = Bcrypt(app)
 app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=5)
 jwt = JWTManager(app)
+
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('API_KEY'),
+    api_secret=os.getenv('API_SECRET'),
+    secure=True
+)
 
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=300)
 # database condiguration

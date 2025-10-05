@@ -14,7 +14,7 @@ export const initialStore = () => {
     history: [],
     historicSignings: [],
     profile_image: null,
-    holidays:[]
+    holidays: [],
   };
 };
 
@@ -89,11 +89,24 @@ export default function storeReducer(store, action = {}) {
         userContracts: action.payload,
       };
 
+    case "DELETE_CONTRACT":
+      return {
+        ...store,
+        userContracts: store.userContracts.filter((doc) => doc.id !== action.payload),
+      };
+
     case "GET_PAYROLLS":
       return {
         ...store,
         payrolls: action.payload,
       };
+
+    case "DELETE_PAYROLL":
+      return {
+        ...store,
+        payrolls: store.payrolls.filter((doc) => doc.id !== action.payload),
+      };
+
     case "DELETE_SIGNING":
       return {
         ...store,
@@ -110,7 +123,6 @@ export default function storeReducer(store, action = {}) {
       return {
         ...store,
         userSchedule: store.userSchedule.filter((e) => e.id !== action.payload),
-        
       };
     case "UPDATE_SCHEDULE":
       return {

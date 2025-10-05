@@ -10,7 +10,6 @@ flask-swagger = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
 gunicorn = "*"
-cloudinary = "*"
 flask-admin = "*"
 typing-extensions = "*"
 wtforms = "==3.1.2"
@@ -22,6 +21,8 @@ flask-bcrypt = "*"
 flask-jwt-extended = "*"
 flask-cors = "*"
 tomli = "*"
+cloudinary = "*"
+
 [requires]
 python_version = "3.13"
 

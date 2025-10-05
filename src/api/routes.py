@@ -14,6 +14,7 @@ from .historial_status import STATUS
 import base64
 from flask import send_from_directory
 from flask_bcrypt import generate_password_hash
+import cloudinary
 
 
 api = Blueprint("api", __name__)
@@ -588,12 +589,17 @@ def add_document_file(user_id):
     if not allowed_file(file.filename):
         return jsonify({"msg": "Tipo de archivo no permitido"}), 400
 
-    file_data = base64.b64encode(file.read()).decode('utf-8')
+    upload_result = cloudinary.uploader.upload(
+        file,
+        resource_type="raw",
+        folder=f"user_documents/{user_id}"
+    )
 
     doc = Document(
         user_id=user_id,
         type_id=int(type_id),
-        file_url=file_data,
+        file_url=upload_result.get("secure_url"),
+        public_id=upload_result.get("public_id")
     )
     db.session.add(doc)
     db.session.commit()
@@ -623,12 +629,22 @@ def update_document(user_id, doc_id):
 @api.route("/users/<int:user_id>/documents/<int:doc_id>", methods=["DELETE"])
 @jwt_required()
 def delete_document(user_id, doc_id):
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+
+    if not current_user or not current_user.is_admin:
+        return jsonify({"msg": "No autorizado"}), 403
+
     doc = Document.query.filter_by(user_id=user_id, id=doc_id).first()
     if not doc:
         return jsonify({"msg": "Document not found"}), 404
 
+    if getattr(doc, "public_id", None):
+        cloudinary.uploader.destroy(doc.public_id, resource_type="raw")
+
     db.session.delete(doc)
     db.session.commit()
+
     return jsonify({"msg": "Document deleted"}), 200
 
 # Contracts
@@ -914,9 +930,6 @@ def get_sign_types(user_id):
 @api.route('/signtypes', methods=['GET'])
 @jwt_required()
 def get_all_sign_types():
-
-    # Devuelve todos los tipos de fichajes
-
     signs_all = SignType.query.all()
 
     return jsonify([signtype.serialize() for signtype in signs_all]), 200
@@ -985,32 +998,24 @@ def upload_profile_image(user_id):
     if not allowed_file(file.filename):
         return jsonify({"msg": "Tipo de archivo no permitido"}), 400
 
-    filename = secure_filename(file.filename)
-    upload_folder = os.path.join(os.getcwd(), "uploads")
-    os.makedirs(upload_folder, exist_ok=True)
-    file_path = os.path.join(upload_folder, filename)
-    file.save(file_path)
+    upload_result = cloudinary.uploader.upload(
+        file,
+        folder="profile_images",
+        public_id=f"user_{user_id}_profile",
+        overwrite=True
+    )
 
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({"msg": "Usuario no encontrado"}), 404
-
-    user.profile_image = f"/uploads/{filename}"
+    user.profile_image = upload_result.get("secure_url")
     db.session.commit()
 
     return jsonify(user.serialize()), 200
 
-@api.route('/uploads/<path:filename>', methods=['GET'])
-def uploaded_file(filename):
-    return send_from_directory(os.path.join(os.getcwd(), "uploads"), filename)
 
 @api.route('/users/<int:user_id>/profile_image', methods=['GET'])
 @jwt_required()
 def get_profile_image(user_id):
-    user_id = get_jwt_identity()
     user = User.query.get(user_id)
-
     if not user:
-        return jsonify({"msg": "Usuario no encontrado"}), 400
+        return jsonify({"msg": "Usuario no encontrado"}), 404
 
     return jsonify({"profile_image": user.profile_image}), 200

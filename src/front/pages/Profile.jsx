@@ -3,7 +3,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import { useParams } from "react-router-dom";
 import { UserCard } from "../components/UserCard.jsx";
 import { Calendar } from "../components/Calendar.jsx";
-import { getUserByToken, getSignings, getContracts, getPayrolls, getDocumentTypes, uploadDocument, getUsuarioById, uploadProfileImage } from "../services/APIServices.js";
+import { getUserByToken, getSignings, getContracts, getPayrolls, getDocumentTypes, uploadDocument, getUsuarioById, uploadProfileImage, deleteDocument } from "../services/APIServices.js";
 import workedHours from "../components/workedHours.jsx";
 import SolicitudVacaciones from "../components/SolicitudVacaciones.jsx";
 import { ClockInButton } from "../components/ClockInButton.jsx";
@@ -117,7 +117,7 @@ export const Profile = () => {
 
 
     } catch (err) {
-      console.error("🔥 Error cargando datos:", err);
+      console.error("Error cargando datos:", err);
     } finally {
       setLoading(false);
     }
@@ -142,289 +142,284 @@ export const Profile = () => {
     );
   }
 
-  return (
-    <div>
-      <div className="row g-4 mt-1 d-flex justify-content-center">
-        <div className="col-lg-4">
-          <div className="card bg-dark text-white shadow-sm p-4 text-center border border">
-            <button
-              className="btn btn-sm btn-outline-light position-absolute top-0 start-0 m-2"
-              data-bs-toggle="modal"
-              data-bs-target="#editUserModal"
-              title="Editar usuario">
-              <i className="fas fa-pencil-alt"></i>
-            </button>
-            <EditUserModal />
-            <div className="text-center">
-              <input
-                type="file"
-                accept="image/*"
-                id="profileImageInput"
-                style={{ display: "none" }}
-                onChange={(e) => handleProfileImageUpload(e.target.files[0])}
+ return (
+  <div>
+    <div className="row g-4 mt-1 d-flex justify-content-center">
+      <div className="col-lg-4">
+        <div className="card bg-dark text-white shadow-sm p-4 text-center border border">
+          <button
+            className="btn btn-sm btn-outline-light position-absolute top-0 start-0 m-2"
+            data-bs-toggle="modal"
+            data-bs-target="#editUserModal"
+            title="Editar usuario"
+          >
+            <i className="fas fa-pencil-alt"></i>
+          </button>
+          <EditUserModal />
+          <div className="text-center">
+            <input
+              type="file"
+              accept="image/*"
+              id="profileImageInput"
+              style={{ display: "none" }}
+              onChange={(e) => handleProfileImageUpload(e.target.files[0])}
+            />
+            <label htmlFor="profileImageInput" style={{ cursor: "pointer" }}>
+              <img
+                src={profileUser?.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
+                alt="User"
+                className="rounded-circle mx-auto mb-3"
+                style={{ width: "150px", height: "150px", objectFit: "cover" }}
               />
-
-              <label htmlFor="profileImageInput" style={{ cursor: "pointer" }}>
-                <img
-                  src={profileUser?.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
-                  alt="User"
-                  className="rounded-circle mx-auto mb-3"
-                  style={{ width: "150px", height: "150px", objectFit: "cover" }}
-                />
-              </label>
-            </div>
-
-            <h5 className="mb-1">
-              {profileUser.first_name} {profileUser.surname} {profileUser.last_name}
-            </h5>
-            <p className="mb-1">Rol: {profileUser.rol || "No definido"}</p>
-            <p className="mb-1">DNI: {profileUser.DNI || "N/A"}</p>
-            <p className="mb-1">Adress: {profileUser.address || "N/A"}</p>
-            <p className="mb-3">IBAN: {profileUser.iban || "N/A"}</p>
-            <p className="small">📧 {profileUser.email}</p>
+            </label>
           </div>
-
-          <div className="container my-4 text-center">
-            <div className="card mb-4 p-2 bg-dark text-white border border">
-              <h6 className="fw-bold mb-3">Contracts</h6>
-              {store.userContracts.length ? (
-                store.userContracts.map(c => (
-                  <div key={c.id} className="mb-3 p-3 bg-secondary rounded">
-                    <div className="row">
-                      <div className="col-md-4 mb-2 mb-md-0">
-                        <p className="mb-1">Contract type: <span className="fw-semibold">{c.type || "N/A"}</span></p>
-                      </div>
-                      <div className="col-md-4 mb-2 mb-md-0">
-                        <p className="mb-1">Start date: <span className="fw-semibold">{c.start_date || "N/A"}</span></p>
-                      </div>
-                      <div className="col-md-4">
-                        {c.file_url && (
-                          <a
-                            href={`data:application/pdf;base64,${c.file_url}`}
-                            download={`contract_${c.id}.pdf`}
-                            className="text-info"
-                          >
-                            Read / Download
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p>No contracts</p>
-              )}
-
-              {store.user?.is_admin && (
-                <div className="mt-3">
-                  <div className="row g-2 align-items-center">
-                    <div className="col-md-4">
-                      <input className="form-control" type="file" onChange={e => setContractFile(e.target.files[0])} />
-                    </div>
-                    <div className="col-md-4">
-                      <select
-                        className="form-select"
-                        value={contractType}
-                        onChange={e => setContractType(e.target.value)}
-                      >
-                        <option value="">Select Type</option>
-                        {documentTypes
-                          .filter(t => t.name.toLowerCase() === "contract")
-                          .map(t => (
-                            <option key={t.id} value={t.id}>{t.name}</option>
-                          ))}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <button
-                        className="btn w-100 text-dark"
-                        style={{ backgroundColor: "#FF7B00" }}
-                        onClick={() => handleUpload(contractFile, contractType, true)}
-                      >
-                        <strong>Upload Contract</strong>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="card mb-4 p-4 bg-dark text-white border border">
-              <h6 className="fw-bold mb-3">Payrolls</h6>
-              {store.payrolls.length ? (
-                store.payrolls.map(p => (
-                  <div key={p.id} className="mb-3 p-3 bg-secondary rounded">
-                    <div className="row">
-                      <div className="col-md-4 mb-2 mb-md-0">
-                        <p className="mb-1">Month: <span className="fw-semibold">{p.month}</span></p>
-                      </div>
-                      <div className="col-md-4 mb-2 mb-md-0">
-                        <p className="mb-1">Amount: <span className="fw-semibold">{p.amount}</span></p>
-                      </div>
-                      <div className="col-md-4">
-                        {p.file_url && (
-                          <a
-                            href={`data:application/pdf;base64,${p.file_url}`}
-                            download={`payroll_${p.id}.pdf`}
-                            className="text-info"
-                          >
-                            Read / Download
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p>No payrolls</p>
-              )}
-
-              {store.user?.is_admin && (
-                <div className="mt-3">
-                  <div className="row g-2 align-items-center">
-                    <div className="col-md-4">
-                      <input className="form-control" type="file" onChange={e => setPayrollFile(e.target.files[0])} />
-                    </div>
-                    <div className="col-md-4">
-                      <select
-                        className="form-select"
-                        value={payrollType}
-                        onChange={e => setPayrollType(e.target.value)}
-                      >
-                        <option value="">Select Type</option>
-                        {documentTypes
-                          .filter(t => t.name.toLowerCase() === "payroll")
-                          .map(t => (
-                            <option key={t.id} value={t.id}>{t.name}</option>
-                          ))}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <button
-                        className="btn w-100 text-dark"
-                        style={{ backgroundColor: "#FF7B00" }}
-                        onClick={() => handleUpload(payrollFile, payrollType, false)}
-                      >
-                        <strong>Upload Payroll</strong>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="card mb-4 p-4 bg-dark text-white border border text-center">
-            <h6 className="fw-bold mb-3">Vacation Requests</h6>
-            <button
-              className="btn w-100 text-dark"
-              style={{ backgroundColor: "#FF7B00" }}
-              onClick={() => setShowHolidayForm(true)}
-            >
-              <strong>New Request</strong>
-            </button>
-          </div>
-
-          <SolicitudVacaciones
-            show={showHolidayForm}
-            onClose={() => setShowHolidayForm(false)}
-          />
+          <h5 className="mb-1">{profileUser.first_name} {profileUser.surname} {profileUser.last_name}</h5>
+          <p className="mb-1">Rol: {profileUser.rol || "No definido"}</p>
+          <p className="mb-1">DNI: {profileUser.DNI || "N/A"}</p>
+          <p className="mb-1">Address: {profileUser.address || "N/A"}</p>
+          <p className="mb-3">IBAN: {profileUser.iban || "N/A"}</p>
+          <p className="small">📧 {profileUser.email}</p>
         </div>
 
-        <div className="col-lg-7">
+        <div className="container my-4 text-center">
 
-          <div className="card mb-4 p-4 bg-dark text-white border border">
-            <h6 className="fw-bold">
-              Turn: {profileUser.status_id == 1 ? "Active" : "Unavailable"}
-            </h6>
-            <p className="fw-semibold" style={{ color: "#ff7b00" }}></p>
-            <div className="d-flex justify-content-between my-3">
-              <div>
-                <small>Hours today</small>
-                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursTodayFormatted}</h4>
+          <div className="card mb-4 p-2 bg-dark text-white border border">
+            <h6 className="fw-bold mb-3">Contracts</h6>
+            {store.userContracts.length ? (
+              store.userContracts.map(c => (
+                <div key={c.id} className="mb-3 p-3 bg-secondary rounded">
+                  <div className="row align-items-center">
+                    <div className="col-md-4 mb-2 mb-md-0">
+                      <p className="mb-1">Contract type: <span className="fw-semibold">{c.type || "N/A"}</span></p>
+                    </div>
+                    <div className="col-md-4 mb-2 mb-md-0">
+                      <p className="mb-1">Start date: <span className="fw-semibold">{c.start_date || "N/A"}</span></p>
+                    </div>
+                    <div className="col-md-4 d-flex align-items-center">
+                      {c.file_url && (
+                        <a href={c.file_url} target="_blank" rel="noreferrer" className="text-info me-2">
+                          Read / Download
+                        </a>
+                      )}
+                      {store.user?.is_admin && (
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={async () => {
+                            try {
+                              await deleteDocument(profileUser.id, c.id, token);
+                              dispatch({ type: "DELETE_CONTRACT", payload: c.id });
+                            } catch (err) {
+                              alert(" Error al borrar contrato: " + err.message);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : <p>No contracts</p>}
+
+            {store.user?.is_admin && (
+              <div className="mt-3">
+                <div className="row g-2 align-items-center">
+                  <div className="col-md-4">
+                    <input className="form-control" type="file" onChange={e => setContractFile(e.target.files[0])} />
+                  </div>
+                  <div className="col-md-4">
+                    <select
+                      className="form-select"
+                      value={contractType}
+                      onChange={e => setContractType(e.target.value)}
+                    >
+                      <option value="">Select Type</option>
+                      {documentTypes.filter(t => t.name.toLowerCase() === "contract").map(t => (
+                        <option key={t.id} value={t.id}>{t.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-4">
+                    <button
+                      className="btn w-100 text-dark"
+                      style={{ backgroundColor: "#FF7B00" }}
+                      onClick={() => handleUpload(contractFile, contractType, true)}
+                    >
+                      <strong>Upload Contract</strong>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div>
-                <small>Hours this Month</small>
-                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursMonthFormatted}</h4>
-              </div>
-            </div>
-            <ClockInButton onClockIn={() => fetchData()} />
-          </div>
-
-          <div className="card mb-4 p-4 bg-dark text-white border border">
-            <div className="flex border-b border-secondary mb-3">
-              <button
-                className={`px-4 py-2 bg-dark text-sm ${activeTab === "signings" ? "border-b-2 border-info text-info" : "text-light"
-                  }`}
-                onClick={() => setActiveTab("signings")}
-              >
-                SIGNINGS
-              </button>
-              <button
-                className={`px-4 py-2 bg-dark text-sm ${activeTab === "historic" ? "border-b-2 border-info text-info" : "text-light"
-                  }`}
-                onClick={() => setActiveTab("historic")}
-              >
-                HISTORIC SIGNINGS
-              </button>
-            </div>
-
-            {activeTab === "signings" && (
-              <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                {loading ? (
-                  <p>Cargando signings...</p>
-                ) : store.signings.length ? (
-                  store.signings.map((c) => (
-                    <UserCard
-                      sign_id={c.id}
-                      key={c.id}
-                      latitude={c.lat}
-                      longitude={c["long"]}
-                      date={c.datetime}
-                      type={c.sign_type_name}
-                      user={profileUser}
-                      isHistoric={false}
-                      image={profileUser?.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
-
-                    />
-                  ))
-                ) : (
-                  <p>No signings</p>
-                )}
-              </ul>
-            )}
-
-            {activeTab === "historic" && (
-              <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                {loading ? (
-                  <p>Cargando históricos...</p>
-                ) : store.historicSignings?.length ? (
-                  store.historicSignings.map((o) => (
-                    <UserCard
-                      sign_id={o.id}
-                      key={o.id}
-                      latitude={o.lat}
-                      longitude={o["long"]}
-                      date={o.datetime}
-                      type={o.sign_type_name}
-                      user={profileUser}
-                      isHistoric={true}
-                      image={profileUser?.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
-                    />
-                  ))
-                ) : (
-                  <p>No historic signings</p>
-                )}
-              </ul>
             )}
           </div>
 
+
           <div className="card mb-4 p-4 bg-dark text-white border border">
-            <h2 className="m-2">Schedule</h2>
-            <Calendar />
+            <h6 className="fw-bold mb-3">Payrolls</h6>
+            {store.payrolls.length ? (
+              store.payrolls.map(p => (
+                <div key={p.id} className="mb-3 p-3 bg-secondary rounded">
+                  <div className="row align-items-center">
+                    <div className="col-md-4 mb-2 mb-md-0">
+                      <p className="mb-1">Month: <span className="fw-semibold">{p.month}</span></p>
+                    </div>
+                    <div className="col-md-4 mb-2 mb-md-0">
+                      <p className="mb-1">Amount: <span className="fw-semibold">{p.amount}</span></p>
+                    </div>
+                    <div className="col-md-4 d-flex align-items-center">
+                      {p.file_url && (
+                        <a href={p.file_url} target="_blank" rel="noreferrer" className="text-info me-2">
+                          Read / Download
+                        </a>
+                      )}
+                      {store.user?.is_admin && (
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={async () => {
+                            try {
+                              await deleteDocument(profileUser.id, p.id, token);
+                              dispatch({ type: "DELETE_PAYROLL", payload: p.id });
+                            } catch (err) {
+                              alert("❌ Error al borrar nómina: " + err.message);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : <p>No payrolls</p>}
+
+            {store.user?.is_admin && (
+              <div className="mt-3">
+                <div className="row g-2 align-items-center">
+                  <div className="col-md-4">
+                    <input className="form-control" type="file" onChange={e => setPayrollFile(e.target.files[0])} />
+                  </div>
+                  <div className="col-md-4">
+                    <select
+                      className="form-select"
+                      value={payrollType}
+                      onChange={e => setPayrollType(e.target.value)}
+                    >
+                      <option value="">Select Type</option>
+                      {documentTypes.filter(t => t.name.toLowerCase() === "payroll").map(t => (
+                        <option key={t.id} value={t.id}>{t.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-4">
+                    <button
+                      className="btn w-100 text-dark"
+                      style={{ backgroundColor: "#FF7B00" }}
+                      onClick={() => handleUpload(payrollFile, payrollType, false)}
+                    >
+                      <strong>Upload Payroll</strong>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+        </div>
+
+
+        <div className="card mb-4 p-4 bg-dark text-white border border text-center">
+          <h6 className="fw-bold mb-3">Vacation Requests</h6>
+          <button
+            className="btn w-100 text-dark"
+            style={{ backgroundColor: "#FF7B00" }}
+            onClick={() => setShowHolidayForm(true)}
+          >
+            <strong>New Request</strong>
+          </button>
+        </div>
+        <SolicitudVacaciones show={showHolidayForm} onClose={() => setShowHolidayForm(false)} />
+      </div>
+
+      <div className="col-lg-7">
+ 
+        <div className="card mb-4 p-4 bg-dark text-white border border">
+          <h6 className="fw-bold">Turn: {profileUser.status_id === 1 ? "Active" : "Unavailable"}</h6>
+          <div className="d-flex justify-content-between my-3">
+            <div>
+              <small>Hours today</small>
+              <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursTodayFormatted}</h4>
+            </div>
+            <div>
+              <small>Hours this Month</small>
+              <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursMonthFormatted}</h4>
+            </div>
+          </div>
+          <ClockInButton onClockIn={() => fetchData()} />
+        </div>
+
+        <div className="card mb-4 p-4 bg-dark text-white border border">
+          <div className="flex border-b border-secondary mb-3">
+            <button
+              className={`px-4 py-2 bg-dark text-sm ${activeTab === "signings" ? "border-b-2 border-info text-info" : "text-light"}`}
+              onClick={() => setActiveTab("signings")}
+            >
+              SIGNINGS
+            </button>
+            <button
+              className={`px-4 py-2 bg-dark text-sm ${activeTab === "historic" ? "border-b-2 border-info text-info" : "text-light"}`}
+              onClick={() => setActiveTab("historic")}
+            >
+              HISTORIC SIGNINGS
+            </button>
+          </div>
+          {activeTab === "signings" && (
+            <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
+              {loading ? <p>Cargando signings...</p> :
+                store.signings.length ? store.signings.map((c) => (
+                  <UserCard
+                    key={c.id}
+                    sign_id={c.id}
+                    latitude={c.lat}
+                    longitude={c.long}
+                    date={c.datetime}
+                    type={c.sign_type_name}
+                    user={profileUser}
+                    isHistoric={false}
+                    image={profileUser?.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
+                  />
+                )) : <p>No signings</p>
+              }
+            </ul>
+          )}
+          {activeTab === "historic" && (
+            <ul className="p-2" style={{ maxHeight: "340px", overflowY: "auto" }}>
+              {loading ? <p>Cargando históricos...</p> :
+                store.historicSignings?.length ? store.historicSignings.map((o) => (
+                  <UserCard
+                    key={o.id}
+                    sign_id={o.id}
+                    latitude={o.lat}
+                    longitude={o.long}
+                    date={o.datetime}
+                    type={o.sign_type_name}
+                    user={profileUser}
+                    isHistoric={true}
+                    image={profileUser?.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
+                  />
+                )) : <p>No historic signings</p>
+              }
+            </ul>
+          )}
+        </div>
+
+
+        <div className="card mb-4 p-4 bg-dark text-white border border">
+          <h2 className="m-2">Schedule</h2>
+          <Calendar />
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };

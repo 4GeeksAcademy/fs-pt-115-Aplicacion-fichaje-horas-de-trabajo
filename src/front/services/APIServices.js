@@ -541,6 +541,27 @@ export const uploadDocument = async (userId, token, file, typeId) => {
   }
 };
 
+
+export const deleteDocument = async (userId, docId, token) => {
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/documents/${docId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.msg || "Error al eliminar documento");
+  }
+
+  return await response.json();
+};
+
 export const toggleStatus = async (userId) => {
   const token = localStorage.getItem("token");
   const response = await fetch(
