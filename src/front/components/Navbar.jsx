@@ -13,17 +13,15 @@ export const Navbar = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const token = await localStorage.getItem("token");
-      if (!token /* ||  Añadir aqui condicion isTokenExpired*/) {
+      if (!token) {
         console.log("No hay token, usuario no logueado");
         return;
       }
 
       try {
         const userData = await getUserByToken(token);
-        console.log("Usuario obtenido:", userData);
         setUser(userData);
         dispatch({ type: "SET_USER", payload: userData });
-        // Log user after state update (optional: useEffect can be used for more accurate logging)
       } catch (error) {
         console.error("Error al cargar el usuario:", error);
       }
@@ -61,8 +59,8 @@ export const Navbar = () => {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+        <div className="collapse navbar-collapse justify-content-end text-center" id="navbarSupportedContent">
+          <ul className="navbar-nav mb-2 mb-lg-0">
             {user?.is_admin && (
               <>
                 <li className="nav-item">

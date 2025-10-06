@@ -15,6 +15,7 @@ import base64
 from flask import send_from_directory
 from flask_bcrypt import generate_password_hash
 import cloudinary
+import cloudinary.uploader
 
 
 api = Blueprint("api", __name__)
@@ -573,7 +574,10 @@ def get_documents(user_id):
 @api.route("/users/<int:user_id>/documents", methods=["POST"])
 @jwt_required()
 def add_document_file(user_id):
-    print("Hola")
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"msg": "Usuario no encontrado"}), 404
+
     if "file" not in request.files:
         return jsonify({"msg": "Archivo es requerido"}), 400
 
@@ -599,12 +603,11 @@ def add_document_file(user_id):
         user_id=user_id,
         type_id=int(type_id),
         file_url=upload_result.get("secure_url"),
-        public_id=upload_result.get("public_id")
     )
     db.session.add(doc)
     db.session.commit()
 
-    return jsonify(doc.serialize()), 201
+    return jsonify(doc.serialize()), 200
 
 
 @api.route("/users/<int:user_id>/documents/<int:doc_id>", methods=["PUT"])
@@ -1002,7 +1005,8 @@ def upload_profile_image(user_id):
         file,
         folder="profile_images",
         public_id=f"user_{user_id}_profile",
-        overwrite=True
+        overwrite=True,
+        format="jpg"
     )
 
     user.profile_image = upload_result.get("secure_url")

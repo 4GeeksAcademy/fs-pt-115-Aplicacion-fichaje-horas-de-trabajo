@@ -81,7 +81,7 @@ export const SignUp = () => {
           <div className="row justify-content-center align-content-top min-vh-100 mt-5 bg">
             <div className="col-md-8 col-lg-6 col-sm-10">
               <form
-                className="card p-4 shadow rounded-4 bg-dark text-white"
+                className="card p-4 shadow rounded-4 bg-light text-dark"
                 onSubmit={handleSubmit}
               >
                 <div className="d-flex align-items-center justify-content-center mb-3"></div>

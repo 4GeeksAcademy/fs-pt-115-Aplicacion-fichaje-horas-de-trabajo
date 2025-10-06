@@ -15,7 +15,7 @@ export const Footer = () => (
 				Mili <a href=""><i className="fa-brands fa-github"></i></a> - <a href=""><i className="fa-brands fa-linkedin"></i></a>
 			</div>
 			<div className="col-2">
-				Michael <a href=""><i className="fa-brands fa-github"></i></a> - <a href=""><i class="fa-brands fa-linkedin"></i></a>
+				Michael <a href=""><i className="fa-brands fa-github"></i></a> - <a href=""><i className="fa-brands fa-linkedin"></i></a>
 			</div>
 			<div className="col-2">
 				Danny <a href="https://github.com/OsorioDanny"><i className="fa-brands fa-github"></i></a> - <a href=""><i className="fa-brands fa-linkedin"></i></a>

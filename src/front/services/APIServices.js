@@ -121,7 +121,6 @@ export const getUserByToken = async () => {
     throw new Error(data.msg || "Error al obtener el perfil del usuario");
   }
 
-  console.log("Usuario logueado:", data.user);
   return data.user;
 };
 
@@ -461,13 +460,10 @@ export const getSignings = async (userId, dispatch) => {
     }
   );
   const data = await response.json();
-  console.log("dispatch:", dispatch);
 
   const historicSignings = data.filter((signing) => signing.is_historic);
-  console.log("historicSignings:", historicSignings);
 
   const signings = data.filter((signing) => signing.is_historic == false);
-  console.log("signings:", signings);
 
   dispatch({ type: "GET_HISTORIC_SIGNINGS", payload: historicSignings });
   dispatch({ type: "GET_SIGNINGS", payload: signings });
@@ -524,21 +520,13 @@ export const uploadDocument = async (userId, token, file, typeId) => {
     }
   );
 
-  const text = await response.text();
+  const data = await response.json();
+
   if (!response.ok) {
-    try {
-      const err = JSON.parse(text);
-      throw new Error(err.msg || "Error subiendo documento");
-    } catch {
-      throw new Error(`Error subiendo documento: ${text}`);
-    }
+    throw new Error(data.msg || "Error subiendo documento");
   }
 
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error("Respuesta no es JSON válido");
-  }
+  return data;
 };
 
 
@@ -662,12 +650,13 @@ export const uploadProfileImage = async (userId, token, file) => {
     }
   );
 
+  const data = await response.json();
+
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.msg || "Error subiendo imagen");
+    throw new Error(data.msg || "Error subiendo imagen");
   }
 
-  return response.json();
+  return data;
 };
 
 export const getprofileimage = async (user_id, dispatch) => {
@@ -689,7 +678,6 @@ export const getprofileimage = async (user_id, dispatch) => {
   }
 
   const data = await response.json();
-  console.log("profile_image:", data);
   dispatch({ type: "UPDATE_PROFILE_IMAGE", payload: { profile_image: data } });
 
   return data;

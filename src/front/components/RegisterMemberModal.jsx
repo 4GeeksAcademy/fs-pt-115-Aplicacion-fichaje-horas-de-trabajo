@@ -34,7 +34,6 @@ export const RegisterMemberModal = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación básica
     const requiredFields = [
       "first_name",
       "surname",
@@ -58,20 +57,16 @@ export const RegisterMemberModal = () => {
     try {
       await crearUsuario(newUser);
 
-      // Refresca la lista de usuarios sin tocar el token
       getUsuarios(dispatch);
 
-      // Cerrar modal
       const modalEl = document.getElementById("registerModal");
       const modal = bootstrap.Modal.getInstance(modalEl);
       modal.hide();
 
-      // Mensaje de éxito
       setAlertMsg("User created successfully");
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 3000);
 
-      // Limpiar formulario
       setNewUser({
         first_name: "",
         surname: "",
@@ -102,7 +97,7 @@ export const RegisterMemberModal = () => {
       aria-hidden="true"
     >
       <div className="modal-dialog">
-        <div className="modal-content shadow rounded-4 bg-dark text-white">
+        <div className="modal-content shadow rounded-4 bg-light text-dark">
           <div className="modal-header">
             <h2 className="modal-title">Register User</h2>
             <button
