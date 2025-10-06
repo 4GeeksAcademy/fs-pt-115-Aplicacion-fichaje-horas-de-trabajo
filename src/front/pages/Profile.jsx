@@ -367,7 +367,7 @@ export const Profile = () => {
 
 
           <div className="card mb-4 p-4 bg-dark text-white border border text-center">
-            <h6 className="fw-bold mb-3">Vacation Requests</h6>
+            <h6 className="fw-bold mb-3">User Requests</h6>
             <button
               className="btn w-100 text-dark"
               style={{ backgroundColor: "#FF7B00" }}

@@ -97,12 +97,12 @@ export const RegisterMemberModal = () => {
       aria-hidden="true"
     >
       <div className="modal-dialog">
-        <div className="modal-content shadow rounded-4 bg-light text-dark">
+        <div className="modal-content shadow rounded-4 bg-dark text-light">
           <div className="modal-header">
             <h2 className="modal-title">Register User</h2>
             <button
               type="button"
-              className="btn-close"
+              className="btn-close bg-danger"
               data-bs-dismiss="modal"
               aria-label="Close"
             ></button>
@@ -222,15 +222,15 @@ export const RegisterMemberModal = () => {
                 />
               </div>
 
-              <div className="form-check ms-3 mb-3">
+              <div className="form-check ms-3 mb-3 d-flex justify-content-end">
                 <input
-                  className="form-check-input"
+                  className="form-check-input dark-contrast"
                   type="checkbox"
                   name="is_admin"
                   checked={newUser.is_admin}
                   onChange={handleInputsChange}
                 />
-                <label className="form-check-label">Is Admin</label>
+                <label className="form-check-label d-flex justify-content-start ms-2 text-light">Is Admin</label>
               </div>
 
               <button type="submit" className="btn btn-primary w-100">

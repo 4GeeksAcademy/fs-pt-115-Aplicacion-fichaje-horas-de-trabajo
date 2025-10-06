@@ -47,7 +47,7 @@ export const Request = () => {
 
     return (
       <div
-        className="p-2 mb-4"
+        className="p-2 mb-5 border border border rounded bg-dark"
         style={{ width: "50%", height: "200px", overflowY: "auto" }}
       >
         <h5>{title}</h5>
@@ -75,7 +75,7 @@ export const Request = () => {
 
   return (
     <div className="container mt-5 d-flex flex-column align-items-center text-white border border border rounded bg-dark">
-      <h1 className="my-4 p-5">Vacation Requests</h1>
+      <h1 className="my-4 p-5 ">Vacation Requests</h1>
       {renderSection("Pending", "pendiente")}
       {renderSection("Accepted", "aprobado")}
       {renderSection("Rejected", "rechazado")}

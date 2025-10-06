@@ -18,9 +18,12 @@ export const Calendar = () => {
     end: ''
   });
 
+
+  const profileUser = store.users?.find(u => String(u.id) === String(id));
+  const userName = profileUser ? profileUser.first_name : "Desconocido";
+
   const modalRef = useRef(null);
 
-  // Obtener schedules al cargar
   useEffect(() => {
     const loadSchedules = async () => {
       try {
@@ -29,7 +32,8 @@ export const Calendar = () => {
           id: e.id,
           start: e.start_time.replace(" ", "T"),
           end: e.end_time.replace(" ", "T"),
-          title: "Turno",
+          title: userName || "Turno",
+
         }));
         setEvents(formatted);
       } catch (err) {
@@ -44,7 +48,7 @@ export const Calendar = () => {
     e.preventDefault();
 
     try {
-      const data = await addschedule(store.user.id, newEvent.start, newEvent.end);
+      const data = await addschedule(id, newEvent.start, newEvent.end);
 
       setEvents([
         ...events,
@@ -52,7 +56,7 @@ export const Calendar = () => {
           id: data.id,
           start: data.start_time.replace(" ", "T"),
           end: data.end_time.replace(" ", "T"),
-          title: store.user.first_name
+          title: userName
         }
       ]);
 

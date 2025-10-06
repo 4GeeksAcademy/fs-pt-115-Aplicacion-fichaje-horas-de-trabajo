@@ -85,15 +85,7 @@ export const SignUp = () => {
                 onSubmit={handleSubmit}
               >
                 <div className="d-flex align-items-center justify-content-center mb-3 bg-dark"></div>
-                <h1 className="text-center mb-3">Sign In</h1>
-                {/* <div className="text-center ">
-                     <img
-                      src="https://i.pinimg.com/originals/44/48/2b/44482b0788436b607f176b6ac2c128f3.png"
-                      className="img-fluid mb-3"
-                      style={{ height: "150px" }}
-                      alt="..."
-                    /> 
-                  </div> */}
+                <h1 className="text-center mb-3">Sign Up</h1>
 
                 <div className="text-center d-flex flex-column mb-3">
                   <div className="input-group input-group-sm mb-3">

@@ -98,8 +98,8 @@ export default function SolicitudVacaciones({ show, onClose }) {
       <div className="modal-dialog">
         <div className="modal-content bg-dark text-white">
           <div className="modal-header">
-            <h5 className="modal-title">{editingId ? "Editar Solicitud" : "Nueva Solicitud"}</h5>
-            <button type="button" className="btn-close" onClick={onClose}></button>
+            <h5 className="modal-title">{editingId ? "Edit Request" : "New Request"}</h5>
+            <button type="button" className="btn-close bg-danger" onClick={onClose}></button>
           </div>
 
           <div className="modal-body">
@@ -109,19 +109,19 @@ export default function SolicitudVacaciones({ show, onClose }) {
                   <li key={h.id} className="list-group-item d-flex flex-column justify-content-between align-items-start">
                     <div className="d-flex justify-content-between w-100">
                       <span>
-                        <strong>Desde:</strong> {h.fechaInicio} |{" "}
-                        <strong>Hasta:</strong> {h.fechaFin} |{" "}
-                        <strong>Tipo:</strong> {h.tipo} |{" "}
-                        <strong>Estado:</strong>{" "}
-                        {h.status === "pendiente" ? "⏳ Pendiente" : h.status === "aprobado" ? "✅ Aprobado" : "❌ Rechazado"}
+                        <strong>Since:</strong> {h.fechaInicio} |{" "}
+                        <strong>To:</strong> {h.fechaFin} |{" "}
+                        <strong>Type:</strong> {h.tipo} |{" "}
+                        <strong>State:</strong>{" "}
+                        {h.status === "pendiente" ? "⏳ Pending" : h.status === "aprobado" ? "✅ Aproved" : "❌ Rejected"}
                       </span>
                       <span>
-                        <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(h)}>Editar</button>
-                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(h.id)}>Eliminar</button>
+                        <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(h)}>Edit</button>
+                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(h.id)}>Delete</button>
                       </span>
                     </div>
                     {h.adminMessage && (
-                      <small className="text-info mt-1"><strong>Mensaje del admin:</strong> {h.adminMessage}</small>
+                      <small className="text-info mt-1"><strong>Admin Message:</strong> {h.adminMessage}</small>
                     )}
                   </li>
                 ))}
@@ -129,59 +129,58 @@ export default function SolicitudVacaciones({ show, onClose }) {
             )}
 
             <div className="mb-3">
-              <label className="form-label">Desde</label>
+              <label className="form-label">Since</label>
               <input type="date" name="fechaInicio" className="form-control" value={formData.fechaInicio} onChange={handleChange} />
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Hasta</label>
+              <label className="form-label">To</label>
               <input type="date" name="fechaFin" className="form-control" value={formData.fechaFin} onChange={handleChange} />
             </div>
 
-            <div className="mb-3">
+            {/* <div className="mb-3">
               <label className="form-label">Horas (opcional)</label>
               <input type="time" name="horas" className="form-control" value={formData.horas} onChange={handleChange} />
-            </div>
+            </div> */}
 
             <div className="mb-3">
-              <label className="form-label">Tipo de solicitud</label>
+              <label className="form-label">Request Type</label>
               <select name="tipo" className="form-select" value={formData.tipo} onChange={handleChange}>
-                <option value="">Seleccionar...</option>
-                <option value="vacaciones">Vacaciones</option>
-                <option value="incidencias">Incidencias</option>
-                <option value="permiso_retribuido">Permiso Retribuido</option>
-                <option value="permiso_no_retribuido">Permiso No Retribuido</option>
+                <option value="">Select...</option>
+                <option value="vacaciones">Holidays</option>
+                <option value="incidencias">Incidents</option>
+                <option value="permiso_retribuido">Paid Leave</option>
+                <option value="permiso_no_retribuido">Unpaid Leave</option>
               </select>
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Descripción</label>
-              <textarea name="descripcion" rows="3" className="form-control" value={formData.descripcion} onChange={handleChange} placeholder="Escribe detalles de la solicitud..." />
+              <label className="form-label">Description</label>
+              <textarea name="descripcion" rows="3" className="form-control" value={formData.descripcion} onChange={handleChange} placeholder="Request description..." />
             </div>
 
-            {/* Solo admin puede modificar status y adminMessage */}
             {store.user.is_admin && editingId && (
               <>
                 <div className="mb-3">
                   <label className="form-label">Estado</label>
                   <select name="status" className="form-select" value={formData.status} onChange={handleChange}>
-                    <option value="pendiente">⏳ Pendiente</option>
-                    <option value="aprobado">✅ Aprobado</option>
-                    <option value="rechazado">❌ Rechazado</option>
+                    <option value="pendiente">⏳ Pending</option>
+                    <option value="aprobado">✅ Aproved</option>
+                    <option value="rechazado">❌ Rejected</option>
                   </select>
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Mensaje del admin</label>
-                  <textarea name="adminMessage" rows="2" className="form-control" value={formData.adminMessage} onChange={handleChange} placeholder="Escribe un mensaje para el usuario..." />
+                  <label className="form-label">Admin Message</label>
+                  <textarea name="adminMessage" rows="2" className="form-control" value={formData.adminMessage} onChange={handleChange} placeholder="A message for the user..." />
                 </div>
               </>
             )}
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cerrar</button>
+            <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
             <button type="button" className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
-              {loading ? "Procesando..." : editingId ? "Guardar cambios" : "Enviar solicitud"}
+              {loading ? "Processing..." : editingId ? "Save changes" : "Send Request"}
             </button>
           </div>
         </div>

@@ -150,7 +150,7 @@ export const Home = () => {
                   <thead className="table-dark" style={{ position: "sticky", top: 0, zIndex: 2 }}>
                     <tr>
                       <th>First name</th>
-                      <th className="text-end">Dayli hours</th>
+                      <th className="text-end">Daily hours</th>
                       <th className="text-end">Weekly hours</th>
                       <th className="text-end">Monthly hours</th>
                     </tr>
