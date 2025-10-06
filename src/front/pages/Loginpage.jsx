@@ -21,7 +21,6 @@ export const Loginpage = () => {
       dispatch({ type: "SET_USER", payload: data.user });
       if (data.user.is_admin){
         const allUsers = await getUsuarios(dispatch);
-        console.log("Usuarios obtenidos:", allUsers);
         
       }
     

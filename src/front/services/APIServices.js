@@ -8,7 +8,6 @@ export const getLocation = async () => {
 
   const data = response.json();
 
-  console.log(data);
 
   return data;
 };
@@ -190,7 +189,6 @@ export const borrarUsuario = async (id) => {
 };
 
 export const signUp = async (newUser) => {
-  console.log(newUser);
 
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/api/signup`,
@@ -256,7 +254,6 @@ export const createHoliday = async (data) => {
     body: JSON.stringify(data),
   });
   const respuesta = await res.json();
-  console.log(respuesta);
   return respuesta;
 };
 
@@ -419,7 +416,6 @@ export const getschedule = async (id, dispatch) => {
   );
 
   const data = await response.json();
-  console.log("Respuesta cruda del backend:", data);
   dispatch({ type: "SET_SCHEDULES", payload: data });
   if (!response.ok) {
     throw new Error("Error al obtener fichajes");

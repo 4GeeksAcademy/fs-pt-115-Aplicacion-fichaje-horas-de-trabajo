@@ -48,7 +48,6 @@ export const SignUp = () => {
     }
 
     const birthDateISO = new Date(newUser.birthDate).toISOString();
-    console.log(newUser);
 
     try {
       const created = await signUp({

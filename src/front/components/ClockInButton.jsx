@@ -35,10 +35,8 @@ export const ClockInButton = ({ onClockIn}) => {
       };
 
       const created = await addsigning(targetUserId, signingData);
-      console.log("Fichaje Creado:", created);
 
       const updatedSignings = await getSignings(targetUserId, dispatch);
-      console.log("Fichajes obtenidos:", updatedSignings);
 
       const user= await getUserByToken()
 

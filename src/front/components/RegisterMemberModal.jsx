@@ -224,7 +224,7 @@ export const RegisterMemberModal = () => {
 
               <div className="form-check ms-3 mb-3">
                 <input
-                  className="form-check-input"
+                  className="form-check-input "
                   type="checkbox"
                   name="is_admin"
                   checked={newUser.is_admin}
