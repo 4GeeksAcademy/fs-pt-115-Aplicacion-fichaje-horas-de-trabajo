@@ -70,10 +70,8 @@ export const Profile = () => {
     try {
       const data = await uploadProfileImage(profileUser.id, token, file);
 
-      // actualizar solo el perfil que estamos viendo
       setProfileUser({ ...profileUser, profile_image: data.profile_image });
 
-      // si es el usuario logueado, actualizar store global
       if (profileUser.id === store.user.id) {
         dispatch({ type: "UPDATE_PROFILE_IMAGE", payload: { profile_image: data.profile_image } });
       }
@@ -83,7 +81,6 @@ export const Profile = () => {
     }
   };
 
-  // cargar datos del perfil
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -91,22 +88,19 @@ export const Profile = () => {
       let user = null;
 
       if (id) {
-        console.log("Buscando usuario por id desde la URL:", id);
         user = await getUsuarioById(id, token);
       } else {
-        console.log("Buscando usuario desde token");
         user = await getUserByToken(token);
       }
 
       if (!user || !user.id) {
-        console.error("❌ Usuario no encontrado o sin ID:", user);
+        console.error(" Usuario no encontrado o sin ID:", user);
         return;
       }
 
-      setProfileUser(user); // usuario del perfil
+      setProfileUser(user);
       dispatch({ type: "SET_USER", payload: store.user.id === user.id ? user : store.user });
 
-      // signings, contratos y nóminas
       const signings = await getSignings(user.id, dispatch);
       const contracts = await getContracts(user.id, token);
       const payrolls = await getPayrolls(user.id, token);

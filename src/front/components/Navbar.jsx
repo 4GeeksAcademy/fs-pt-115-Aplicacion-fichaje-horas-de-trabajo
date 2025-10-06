@@ -14,7 +14,6 @@ export const Navbar = () => {
     const fetchUser = async () => {
       const token = await localStorage.getItem("token");
       if (!token) {
-        console.log("No hay token, usuario no logueado");
         return;
       }
 
@@ -29,8 +28,7 @@ export const Navbar = () => {
     fetchUser();
   }, []);
 
-  const onSubmit = () => {
-    console.log(user?.is_admin);
+  const onSubmit = () => {;
     setUser(null);
     localStorage.clear();
     window.location.href = "/";
@@ -59,7 +57,7 @@ export const Navbar = () => {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse justify-content-end text-center" id="navbarSupportedContent">
+        <div className="collapse navbar-collapse justify-content-end text-end" id="navbarSupportedContent">
           <ul className="navbar-nav mb-2 mb-lg-0">
             {user?.is_admin && (
               <>

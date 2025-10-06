@@ -114,7 +114,6 @@ export const Calendar = () => {
         end_time: endDate.toISOString(),
       };
 
-      console.log("Updating schedule:", { id, scheduleId, updates });
 
       const updated = await updateSchedule(Number(id), scheduleId, updates);
 
