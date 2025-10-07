@@ -49,11 +49,12 @@ export const Home = () => {
       if (currentUser) {
         dispatch({ type: "GET_SIGNINGS", payload: currentUser.signings });
 
-        const { hoursToday, hoursMonth } = calculateWorkedHours(currentUser.signings);
+        const { hoursToday, hoursMonth, hoursWeek } = calculateWorkedHours(currentUser.signings);
         dispatch({
           type: "SET_HOURS_DATA",
           payload: {
             hoursToday,
+            hoursWeek,
             hoursMonth,
             lastMonth: {
               year: new Date().getFullYear(),
@@ -76,13 +77,15 @@ export const Home = () => {
   const hours = useMemo(() => workedHours(store.signings || []), [store.signings]);
   const hoursTodayFormatted = hours.hoursToday;
   const hoursMonthFormatted = hours.hoursMonth;
+  const hoursWeekFormatted = hours.hoursWeek;
 
   const usersWithHours = filteredWorkers.map((user) => {
-    const { hoursToday, hoursMonth } = calculateWorkedHours(user.signings || []);
+    const { hoursToday, hoursMonth, hoursWeek } = calculateWorkedHours(user.signings || []);
     return {
       ...user,
       total_hours: hoursMonth,
       regular_hours: hoursToday,
+      week_hours: hoursWeek,
       month_hours: hoursMonth,
     };
   });
@@ -92,201 +95,202 @@ export const Home = () => {
   }, [token, store.user?.id]);
 
   return (
-<div className="container-fluid mt-4">
-    <div className="row g-4">
+    <div className="container-fluid mt-4">
+      <div className="row g-4">
 
-      {/* --- PERFIL --- */}
-      <div className="col-lg-3 d-flex justify-content-center">
-        <div className="card bg-dark text-white shadow-sm p-3 text-center border w-100" style={{ maxHeight: "400px" }}>
-          <img
-            src={profileImage?.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
-            alt="User"
-            className="rounded-circle mx-auto mb-2"
-            style={{ width: "120px", height: "120px", objectFit: "cover" }}
-          />
-          <h5 className="mb-2">
-            {store.user.first_name} {store.user.surname} {store.user.last_name}
-          </h5>
-          <p className="mb-2">Rol: {store.user.rol || "No definido"}</p>
-          <p className="mb-2">DNI: {store.user.DNI || "N/A"}</p>
-          <p className="mb-2">Address: {store.user.address || "N/A"}</p>
-          <p className="small">📧 {store.user.email}</p>
+        {/* --- PERFIL --- */}
+        <div className="col-lg-3 d-flex justify-content-center">
+          <div className="card bg-dark text-white shadow-sm p-3 text-center border w-100" style={{ maxHeight: "400px" }}>
+            <img
+              src={profileImage?.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
+              alt="User"
+              className="rounded-circle mx-auto mb-2"
+              style={{ width: "120px", height: "120px", objectFit: "cover" }}
+            />
+            <h5 className="mb-2">
+              {store.user.first_name} {store.user.surname} {store.user.last_name}
+            </h5>
+            <p className="mb-2">Rol: {store.user.rol || "No definido"}</p>
+            <p className="mb-2">DNI: {store.user.DNI || "N/A"}</p>
+            <p className="mb-2">Address: {store.user.address || "N/A"}</p>
+            <p className="small">📧 {store.user.email}</p>
+          </div>
         </div>
-      </div>
 
-      {/* --- CONTENIDO PRINCIPAL --- */}
-      <div className="col-12 col-lg-9">
-        <div className="border rounded shadow-sm p-4 bg-dark h-100">
+        <div className="col-12 col-lg-9">
+          <div className="border rounded shadow-sm p-4 bg-dark h-100">
 
-          {/* --- TARJETA: CLOCK IN --- */}
-          <div className="card mb-4 p-4 bg-dark text-white border shadow-sm">
-            <h6 className="fw-bold">
-              Turn: {store.user.status_id == 1 ? "Active" : "Unavailable"}
-            </h6>
-            <div className="d-flex justify-content-between my-3">
-              <div>
-                <small>Hours today</small>
-                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursTodayFormatted}</h4>
+            <div className="card mb-4 p-4 bg-dark text-white border shadow-sm">
+              <h6 className="fw-bold">
+                Turn: {store.user.status_id == 1 ? "Active" : "Unavailable"}
+              </h6>
+              <div className="d-flex justify-content-between my-3">
+                <div>
+                  <small>Hours today</small>
+                  <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursTodayFormatted}</h4>
+                </div>
+                <div>
+                  <small>Hours this Week</small>
+                  <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursWeekFormatted}</h4>
+                </div>
+                <div>
+                  <small>Hours this Month</small>
+                  <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursMonthFormatted}</h4>
+                </div>
               </div>
-              <div>
-                <small>Hours this Month</small>
-                <h4 className="fw-bold" style={{ color: "#ff7b00" }}>{hoursMonthFormatted}</h4>
+              <ClockInButton onClockIn={() => fetchUsersWithSignings()} />
+            </div>
+
+            <div className="card mb-4 p-4 bg-dark text-white border shadow-sm">
+              <div className="input-group input-group-sm mb-3">
+                <span className="input-group-text bg-secondary text-white">Search Worker</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Type a name..."
+                />
+              </div>
+
+              <div className="table-responsive" style={{ maxHeight: "250px", overflowY: "auto" }}>
+                <table className="table align-middle mb-0">
+                  <thead className="table-dark" style={{ position: "sticky", top: 0, zIndex: 2 }}>
+                    <tr>
+                      <th>First name</th>
+                      <th className="text-end">Daily hours</th>
+                      <th className="text-end">Weekly hours</th>
+                      <th className="text-end">Monthly hours</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <UsersTable users={usersWithHours} isAdmin={store.user?.is_admin ?? false} />
+                  </tbody>
+                </table>
               </div>
             </div>
-            <ClockInButton onClockIn={() => fetchUsersWithSignings()} />
+
+
+            <div className="row">
+              <div className="col-12 col-md-6 mb-4">
+                <div className="card bg-dark text-white border shadow-sm h-100">
+                  <div className="card-header border-bottom">
+                    <h5 className="mb-0">WORKING</h5>
+                  </div>
+                  <div className="card-body">
+                    <ul className="p-2 bg-B0B0B0 rounded" style={{ maxHeight: "340px", overflowY: "auto" }}>
+                      {store.users.length ? (
+                        store.users
+                          .filter((c) => c.status_id === 1)
+                          .map((c) => (
+                            <ButtonCard
+                              id={c.id}
+                              key={c.id}
+                              name={c.first_name}
+                              rol={c.rol}
+                              state={"Active"}
+                              image={c.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
+                            />
+                          ))
+                      ) : (
+                        <p>No users in this state.</p>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-6 mb-4">
+                <div className="card bg-dark text-white border shadow-sm h-100">
+                  <div className="card-header border-bottom">
+                    <h5 className="mb-0">NOT WORKING</h5>
+                  </div>
+                  <div className="card-body">
+                    <ul className="p-2 bg-B0B0B0 rounded" style={{ maxHeight: "340px", overflowY: "auto" }}>
+                      {store.users.length ? (
+                        store.users
+                          .filter((c) => c.status_id === 2)
+                          .map((c) => (
+                            <ButtonCard
+                              id={c.id}
+                              key={c.id}
+                              name={c.first_name}
+                              rol={c.rol}
+                              state={"Unavailable"}
+                              image={c.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
+                            />
+                          ))
+                      ) : (
+                        <p>No users in this state.</p>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div className="row mt-4">
+              <div className="col-12 col-md-6 mb-4">
+                <div className="card bg-dark text-white border shadow-sm h-100">
+                  <div className="card-header border-bottom">
+                    <h5 className="mb-0">ADMINS</h5>
+                  </div>
+                  <div className="card-body">
+                    <ul className="p-2 bg-B0B0B0 rounded" style={{ maxHeight: "340px", overflowY: "auto" }}>
+                      {store.users.length ? (
+                        store.users
+                          .filter((c) => c.is_admin)
+                          .map((c) => (
+                            <ButtonCard
+                              id={c.id}
+                              key={c.id}
+                              name={c.first_name}
+                              rol={c.rol}
+                              state={"Admin"}
+                              image={c.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
+                            />
+                          ))
+                      ) : (
+                        <p>No admin users.</p>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-md-6 mb-4">
+                <div className="card bg-dark text-white border shadow-sm h-100">
+                  <div className="card-header border-bottom">
+                    <h5 className="mb-0">REGULAR USERS</h5>
+                  </div>
+                  <div className="card-body">
+                    <ul className="p-2 bg-B0B0B0 rounded" style={{ maxHeight: "340px", overflowY: "auto" }}>
+                      {store.users.length ? (
+                        store.users
+                          .filter((c) => !c.is_admin)
+                          .map((c) => (
+                            <ButtonCard
+                              id={c.id}
+                              key={c.id}
+                              name={c.first_name}
+                              rol={c.rol}
+                              state={"Employee"}
+                              image={c.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
+                            />
+                          ))
+                      ) : (
+                        <p>No non-admin users.</p>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
-
-          {/* --- TARJETA: TABLA DE HORAS --- */}
-          <div className="card mb-4 p-4 bg-dark text-white border shadow-sm">
-            <div className="input-group input-group-sm mb-3">
-              <span className="input-group-text bg-secondary text-white">Search Worker</span>
-              <input
-                type="text"
-                className="form-control"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Type a name..."
-              />
-            </div>
-
-            <div className="table-responsive" style={{ maxHeight: "250px", overflowY: "auto" }}>
-              <table className="table align-middle mb-0">
-                <thead className="table-dark" style={{ position: "sticky", top: 0, zIndex: 2 }}>
-                  <tr>
-                    <th>First name</th>
-                    <th className="text-end">Daily hours</th>
-                    <th className="text-end">Weekly hours</th>
-                    <th className="text-end">Monthly hours</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <UsersTable users={usersWithHours} isAdmin={store.user?.is_admin ?? false} />
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* --- FILA: WORKING / NOT WORKING --- */}
-          <div className="row">
-            <div className="col-12 col-md-6 mb-4">
-              <div className="card bg-dark text-white border shadow-sm h-100">
-                <div className="card-header border-bottom">
-                  <h5 className="mb-0">WORKING</h5>
-                </div>
-                <div className="card-body">
-                  <ul className="p-2 bg-B0B0B0 rounded" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                    {store.users.length ? (
-                      store.users
-                        .filter((c) => c.status_id === 1)
-                        .map((c) => (
-                          <ButtonCard
-                            id={c.id}
-                            key={c.id}
-                            name={c.first_name}
-                            rol={c.rol}
-                            state={"Active"}
-                            image={c.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
-                          />
-                        ))
-                    ) : (
-                      <p>No users in this state.</p>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-6 mb-4">
-              <div className="card bg-dark text-white border shadow-sm h-100">
-                <div className="card-header border-bottom">
-                  <h5 className="mb-0">NOT WORKING</h5>
-                </div>
-                <div className="card-body">
-                  <ul className="p-2 bg-B0B0B0 rounded" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                    {store.users.length ? (
-                      store.users
-                        .filter((c) => c.status_id === 2)
-                        .map((c) => (
-                          <ButtonCard
-                            id={c.id}
-                            key={c.id}
-                            name={c.first_name}
-                            rol={c.rol}
-                            state={"Unavailable"}
-                            image={c.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
-                          />
-                        ))
-                    ) : (
-                      <p>No users in this state.</p>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* --- FILA: ADMINS / NO ADMINS --- */}
-          <div className="row mt-4">
-            <div className="col-12 col-md-6 mb-4">
-              <div className="card bg-dark text-white border shadow-sm h-100">
-                <div className="card-header border-bottom">
-                  <h5 className="mb-0">ADMINS</h5>
-                </div>
-                <div className="card-body">
-                  <ul className="p-2 bg-B0B0B0 rounded" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                    {store.users.length ? (
-                      store.users
-                        .filter((c) => c.is_admin)
-                        .map((c) => (
-                          <ButtonCard
-                            id={c.id}
-                            key={c.id}
-                            name={c.first_name}
-                            rol={c.rol}
-                            state={"Admin"}
-                            image={c.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
-                          />
-                        ))
-                    ) : (
-                      <p>No admin users.</p>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 col-md-6 mb-4">
-              <div className="card bg-dark text-white border shadow-sm h-100">
-                <div className="card-header border-bottom">
-                  <h5 className="mb-0">REGULAR USERS</h5>
-                </div>
-                <div className="card-body">
-                  <ul className="p-2 bg-B0B0B0 rounded" style={{ maxHeight: "340px", overflowY: "auto" }}>
-                    {store.users.length ? (
-                      store.users
-                        .filter((c) => !c.is_admin)
-                        .map((c) => (
-                          <ButtonCard
-                            id={c.id}
-                            key={c.id}
-                            name={c.first_name}
-                            rol={c.rol}
-                            state={"Employee"}
-                            image={c.profile_image || "https://static.thenounproject.com/png/881504-200.png"}
-                          />
-                        ))
-                    ) : (
-                      <p>No non-admin users.</p>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
-  </div>
   );
 };

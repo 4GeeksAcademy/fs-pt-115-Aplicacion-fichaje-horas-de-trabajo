@@ -14,8 +14,10 @@ export const calculateWorkedHours = (
     return {
       hoursTodayDecimal: 0,
       hoursMonthDecimal: 0,
+      hoursWeekDecimal: 0,
       hoursToday: formatHours(0),
       hoursMonth: formatHours(0),
+      hoursWeek: formatHours(0),
     };
   }
 
@@ -28,12 +30,22 @@ export const calculateWorkedHours = (
   let lastClockIn = null;
   let hoursTodayDecimal = 0;
   let hoursMonthDecimal = 0;
+  let hoursWeekDecimal = 0;
 
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
   const todayY = now.getFullYear();
   const todayM = now.getMonth();
   const todayD = now.getDate();
+
+  
+  const firstDayOfWeek = new Date(now);
+  firstDayOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7)); // lunes
+  firstDayOfWeek.setHours(0, 0, 0, 0);
+
+  const lastDayOfWeek = new Date(firstDayOfWeek);
+  lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+  lastDayOfWeek.setHours(23, 59, 59, 999);
 
   sorted.forEach((sign) => {
     const dt = new Date(sign.datetime.replace(" ", "T"));
@@ -56,6 +68,10 @@ export const calculateWorkedHours = (
         }
       }
 
+      if (lastClockIn >= firstDayOfWeek && dt <= lastDayOfWeek) {
+        hoursWeekDecimal += duration;
+      }
+
       lastClockIn = null;
     }
   });
@@ -72,6 +88,10 @@ export const calculateWorkedHours = (
         hoursTodayDecimal += duration;
       }
     }
+
+    if (lastClockIn >= firstDayOfWeek && now <= lastDayOfWeek) {
+      hoursWeekDecimal += duration;
+    }
   }
 
   const round2 = (n) => Math.round(n * 100) / 100;
@@ -79,8 +99,10 @@ export const calculateWorkedHours = (
   return {
     hoursTodayDecimal: round2(hoursTodayDecimal),
     hoursMonthDecimal: round2(hoursMonthDecimal),
+    hoursWeekDecimal: round2(hoursWeekDecimal),
     hoursToday: formatHours(round2(hoursTodayDecimal)),
     hoursMonth: formatHours(round2(hoursMonthDecimal)),
+    hoursWeek: formatHours(round2(hoursWeekDecimal)),
   };
 };
 

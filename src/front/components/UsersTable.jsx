@@ -24,8 +24,8 @@ export const UsersTable = ({ users, isAdmin }) => {
               <span>{user.first_name}</span>
             )}
           </td>
-          <td className="text-end">{user.total_hours ?? 0}</td>
           <td className="text-end">{user.regular_hours ?? 0}</td>
+          <td className="text-end">{user.week_hours ?? 0}</td>
           <td className="text-end">{user.month_hours ?? 0}</td>
         </tr>
       ))}

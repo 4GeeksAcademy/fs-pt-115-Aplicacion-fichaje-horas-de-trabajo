@@ -9,6 +9,7 @@ export const initialStore = () => {
     payrolls: [],
     signtypes: [],
     hoursToday: 0,
+    hoursWeek: 0, 
     hoursMonth: 0,
     lastMonth: null,
     history: [],
@@ -36,6 +37,7 @@ export default function storeReducer(store, action = {}) {
       return {
         ...store,
         hoursToday: action.payload.hoursToday,
+        hoursWeek: action.payload.hoursWeek,
         hoursMonth: action.payload.hoursMonth,
         lastMonth: action.payload.lastMonth,
         history: action.payload.history,
