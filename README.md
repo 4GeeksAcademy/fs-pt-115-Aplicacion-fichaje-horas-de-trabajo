@@ -1,81 +1,81 @@
-# WebApp boilerplate with React JS and Flask API
+Sistema de Fichajes y Gestión Laboral
 
-Build web applications using React.js for the front end and python/flask for your backend API.
+Aplicación para la gestión de fichajes y recursos laborales en una empresa. Permite a los trabajadores registrar su jornada, consultar información laboral personal y solicitar permisos. Los administradores pueden gestionar usuarios, horarios, contratos, nóminas y solicitudes de empleados.
 
-- Documentation can be found here: https://4geeks.com/docs/start/react-flask-template
-- Here is a video on [how to use this template](https://www.loom.com/share/f37c6838b3f1496c95111e515e83dd9b)
-- Integrated with Pipenv for package managing.
-- Fast deployment to Render [in just a few steps here](https://4geeks.com/docs/start/deploy-to-render-com).
-- Use of .env file.
-- SQLAlchemy integration for database abstraction.
+🚀 Funcionalidades Principales
+✅ Parte del Usuario (Empleado)
 
-### 1) Installation:
+El empleado cuenta con un panel donde puede:
 
-> If you use Github Codespaces (recommended) or Gitpod this template will already come with Python, Node and the Posgres Database installed. If you are working locally make sure to install Python 3.10, Node 
+Registrar inicio y fin de la jornada laboral con un único botón de fichaje.
 
-It is recomended to install the backend first, make sure you have Python 3.10, Pipenv and a database engine (Posgress recomended)
+Visualizar sus horas trabajadas:
 
-1. Install the python packages: `$ pipenv install`
-2. Create a .env file based on the .env.example: `$ cp .env.example .env`
-3. Install your database engine and create your database, depending on your database you have to create a DATABASE_URL variable with one of the possible values, make sure you replace the valudes with your database information:
+Diarias
 
-| Engine    | DATABASE_URL                                        |
-| --------- | --------------------------------------------------- |
-| SQLite    | sqlite:////test.db                                  |
-| MySQL     | mysql://username:password@localhost:port/example    |
-| Postgress | postgres://username:password@localhost:5432/example |
+Semanales
 
-4. Migrate the migrations: `$ pipenv run migrate` (skip if you have not made changes to the models on the `./src/api/models.py`)
-5. Run the migrations: `$ pipenv run upgrade`
-6. Run the application: `$ pipenv run start`
+Mensuales
 
-> Note: Codespaces users can connect to psql by typing: `psql -h localhost -U gitpod example`
+Acceder a una tabla con buscador que muestra todos los trabajadores.
 
-### Undo a migration
+Filtrar empleados por:
 
-You are also able to undo a migration by running
+Activos / Inactivos
 
-```sh
-$ pipenv run downgrade
-```
+Administradores / No administradores
 
-### Backend Populate Table Users
+Apartado de Perfil Personal con:
 
-To insert test users in the database execute the following command:
+Información personal del empleado
 
-```sh
-$ flask insert-test-users 5
-```
+Contratos laborales
 
-And you will see the following message:
+Nóminas disponibles para descarga
 
-```
-  Creating test users
-  test_user1@test.com created.
-  test_user2@test.com created.
-  test_user3@test.com created.
-  test_user4@test.com created.
-  test_user5@test.com created.
-  Users created successfully!
-```
+Calendario laboral
 
-### **Important note for the database and the data inside it**
+Resumen de horas trabajadas
 
-Every Github codespace environment will have **its own database**, so if you're working with more people eveyone will have a different database and different records inside it. This data **will be lost**, so don't spend too much time manually creating records for testing, instead, you can automate adding records to your database by editing ```commands.py``` file inside ```/src/api``` folder. Edit line 32 function ```insert_test_data``` to insert the data according to your model (use the function ```insert_test_users``` above as an example). Then, all you need to do is run ```pipenv run insert-test-data```.
+Botón para solicitar permisos, vacaciones u otros trámites
 
-### Front-End Manual Installation:
+🛠️ Parte del Administrador
 
--   Make sure you are using node version 20 and that you have already successfully installed and runned the backend.
+El administrador dispone de todas las funcionalidades del usuario y además:
 
-1. Install the packages: `$ npm install`
-2. Start coding! start the webpack dev server `$ npm run start`
+Acceso a todos los perfiles de los empleados
 
-## Publish your website!
+Puede subir contratos y nóminas
 
-This boilerplate it's 100% read to deploy with Render.com and Heroku in a matter of minutes. Please read the [official documentation about it](https://4geeks.com/docs/start/deploy-to-render-com).
+Botón para añadir nuevos trabajadores
 
-### Contributors
+Gestión de horarios laborales
 
-This template was built as part of the 4Geeks Academy [Coding Bootcamp](https://4geeksacademy.com/us/coding-bootcamp) by [Alejandro Sanchez](https://twitter.com/alesanchezr) and many other contributors. Find out more about our [Full Stack Developer Course](https://4geeksacademy.com/us/coding-bootcamps/part-time-full-stack-developer), and [Data Science Bootcamp](https://4geeksacademy.com/us/coding-bootcamps/datascience-machine-learning).
+Sección exclusiva donde puede revisar, aceptar o rechazar:
 
-You can find other templates and resources like this at the [school github page](https://github.com/4geeksacademy/).
+Solicitudes de permiso
+
+Vacaciones u otras peticiones del personal
+
+🧩 Tecnologías Utilizadas
+
+Frontend: React / JavaScript 
+Backend: Phyton / Flask 
+Base de datos: SQLAlchemy / PostgreSQL
+Autenticación: JWT 
+
+🔐 Roles y Seguridad
+
+Usuarios autenticados mediante sistema de login
+
+Roles diferenciados:
+
+Empleado: acceso restringido a su propia información
+
+Administrador: control total de usuarios y documentación laboral
+
+Control de permisos y visibilidad de funciones según perfil
+
+🌱 Objetivo del Proyecto
+
+Facilitar la gestión del tiempo y la documentación laboral, centralizando todo en una plataforma intuitiva que mejora la comunicación entre empresa y trabajador.
